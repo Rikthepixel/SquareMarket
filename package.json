@@ -1,0 +1,15 @@
+{
+  "name": "square-market",
+  "description": "A marketplace app with federation",
+  "scripts": {
+    "setup": "npm i -ws",
+    "build:frontend": "npm run build -w apps/frontend",
+    "lint:frontend": "npm run lint -w apps/frontend"
+  },
+  "workspaces": [
+    "./apps/*"
+  ],
+  "devDependencies": {
+    "lerna": "^7.4.1"
+  }
+}
