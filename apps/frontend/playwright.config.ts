@@ -8,7 +8,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 const WEBSERVER_PORT = 4400
 const WEBSERVER_URL = `http://localhost:${WEBSERVER_PORT}`;
-
+throw Error(process.env.CI)
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -74,7 +74,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: `npm run dev -- --port ${WEBSERVER_PORT}`,
+    command: `npm run dev -- --port ${WEBSERVER_PORT} --open false`,
     port: WEBSERVER_PORT,
     reuseExistingServer: !process.env.CI,
   },
