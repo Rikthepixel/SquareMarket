@@ -12,7 +12,7 @@ const CONVERT_TO_WEBPATH_REGEX = new RegExp(
     "g",
 );
 
-let routes: RouteElement[] = [];
+const routes: RouteElement[] = [];
 
 for (const [path, getModule] of Object.entries(
     import.meta.glob("@/pages/**/(index|404).page.tsx"),
