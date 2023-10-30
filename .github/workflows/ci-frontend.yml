@@ -36,7 +36,7 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci -w apps/frontend
       - name: Run Playwright tests
-        run: npm run test:frontend
+        run: xvfb-run npm run test:frontend
       - uses: actions/upload-artifact@v3
         if: always()
         with:
