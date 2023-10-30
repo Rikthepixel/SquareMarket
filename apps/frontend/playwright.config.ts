@@ -8,7 +8,7 @@ import { defineConfig, devices } from '@playwright/test';
 
 const WEBSERVER_PORT = 4400
 const WEBSERVER_URL = `http://localhost:${WEBSERVER_PORT}`;
-throw Error(process.env.CI)
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -31,6 +31,7 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+
     headless: Boolean(process.env.CI)
     },
 
@@ -38,17 +39,26 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        headless: Boolean(process.env.CI),
+        ...devices['Desktop Chrome']
+      },
     },
 
     {
       name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
+      use: {
+        headless: Boolean(process.env.CI),
+        ...devices['Desktop Firefox']
+      },
     },
 
     {
       name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      use: {
+        headless: Boolean(process.env.CI),
+        ...devices['Desktop Safari']
+      },
     },
 
     /* Test against mobile viewports. */
