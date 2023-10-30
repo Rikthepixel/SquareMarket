@@ -3,6 +3,7 @@
   "description": "A marketplace app with federation",
   "scripts": {
     "setup": "npm i -ws",
+    "test:frontend": "npx -w apps/frontend playwright test",
     "build:frontend": "npm run build -w apps/frontend",
     "lint:frontend": "npm run lint -w apps/frontend"
   },
@@ -10,6 +11,7 @@
     "./apps/*"
   ],
   "devDependencies": {
+    "@vitejs/plugin-react": "^4.1.0",
     "lerna": "^7.4.1"
   }
 }

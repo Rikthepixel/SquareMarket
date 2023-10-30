@@ -1,5 +1,5 @@
 [*.{js,ts,jsx,tsx}]
-end_of_line = lf
+end_of_line = crlf
 indent_style = space
 indent_size = 2
 tab_width = 2
