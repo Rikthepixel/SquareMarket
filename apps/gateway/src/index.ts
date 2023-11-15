@@ -1,41 +1,33 @@
-import Koa from 'koa';
-import router from './routes';
+import gateway from 'fast-gateway';
+import { config as loadEnv } from 'dotenv';
+
+import { wrapWithCircuitBreaker } from './middleware/circuit-breaker';
+import rateLimiter from './middleware/rate-limiter';
 import cors from './middleware/cors';
-import { bodyParser } from '@koa/bodyparser';
 
-const PORT: number = parseInt(process.env.SERVER_PORT ?? '3000');
+loadEnv();
+const PORT: number = parseInt(process.env.SERVER_PORT ?? '8080');
 
-const app = new Koa();
-
-app.use(cors);
-app.use(
-  bodyParser({
-    encoding: 'utf-8',
-    onError: (_err, ctx) => ctx.throw(422, 'body parse error'),
-  }),
-);
-
-app.use(router.routes());
-
-app
-  .on('error', (err: Error, ctx: Koa.Context) => {
-    //TODO: add logger instead of console.error
-    console.error(
-      `${new Date().toUTCString()} Server error on path ${ctx.method}:${
-        ctx.path
-      }`,
-      err,
-    );
-  })
-  .listen(PORT, '0.0.0.0', () => {
-    const routes = router.stack
-      .filter((r) => r.methods.length > 0)
-      .map((r) => r.methods.join(', ') + ' @ ' + r.path);
-
-    //TODO: change to logger
-    console.log(
-      `${new Date().toUTCString()} Server started with routes:\n\t- ${routes.join(
-        '\n\t- ',
-      )}`,
-    );
-  });
+gateway({
+  middlewares: [
+    cors({
+      credentials: true,
+      origin: ['http://localhost:5200', 'http://127.0.0.1:5200', "http://localhost:8080", "http://127.0.0.1:8080"]
+    }),
+    rateLimiter({ max: 90 }),
+  ],
+  routes: wrapWithCircuitBreaker(
+    [
+      {
+        prefix: '/v1/accounts',
+        prefixRewrite: '/v1',
+        target: 'http://localhost:8001',
+      },
+    ],
+    {
+      errorThresholdPercentage: 50,
+      timeout: 3 * 1000,
+      resetTimeout: 30 * 1000,
+    },
+  ),
+}).start(PORT, '0.0.0.0');

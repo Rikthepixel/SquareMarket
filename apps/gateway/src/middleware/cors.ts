@@ -1,18 +1,27 @@
-import corsMake from '@koa/cors';
+import makeCors, { CorsOptions as MakeCorsOptions } from 'cors';
 
-const cors = corsMake({
-  origin(ctx) {
-    const allowedOrigins = [];
+export interface CorsOptions extends Omit<MakeCorsOptions, 'origin'> {
+  origin?: string | string[];
+}
 
-    if (process.env.ALLOWED_ORIGIN)
-      allowedOrigins.push(process.env.ALLOWED_ORIGIN);
-    if (process.env.NODE_ENV === 'development')
-      allowedOrigins.push('http://localhost:5200');
+const cors = ({ origin, ...opts }: CorsOptions = {}) => {
+  const whitelistedOrigins = Array.isArray(origin)
+    ? origin
+    : typeof origin === 'string'
+      ? [origin]
+      : undefined;
 
-    if (!allowedOrigins.includes(ctx.origin)) return '';
+  return makeCors({
+    origin(reqOrigin, callback) {
+      const verdict =
+        whitelistedOrigins &&
+        reqOrigin &&
+        whitelistedOrigins.includes(reqOrigin);
 
-    return ctx.origin;
-  },
-});
+      callback(null, verdict);
+    },
+    ...opts,
+  });
+};
 
 export default cors;

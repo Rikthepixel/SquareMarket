@@ -1,13 +1,11 @@
 import Koa from 'koa';
 import router from './routes';
-import cors from './middleware/cors';
 import { bodyParser } from '@koa/bodyparser';
 
 const PORT: number = parseInt(process.env.SERVER_PORT ?? '3000');
 
 const app = new Koa();
 
-app.use(cors);
 app.use(
   bodyParser({
     encoding: 'utf-8',
