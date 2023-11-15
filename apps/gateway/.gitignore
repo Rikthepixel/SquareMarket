@@ -8,7 +8,4 @@ dist
 /.env
 /.env.local
 /.env.test
-/db/.env
-/db/.env.local
-/db/.env.test
 

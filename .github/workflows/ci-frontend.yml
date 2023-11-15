@@ -22,7 +22,7 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci -w apps/frontend
       - name: Run linters
-        run: npm run lint:frontend
+        run: npm run lint -w apps/frontend
   tests:
     runs-on: ubuntu-latest
     container:
@@ -36,7 +36,7 @@ jobs:
       - name: Install Node.js dependencies
         run: npm ci -w apps/frontend
       - name: Run Playwright tests
-        run: HOME=/root npm run test:frontend
+        run: HOME=/root npm run test -w apps/frontend
       - uses: actions/upload-artifact@v3
         if: always()
         with:

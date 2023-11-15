@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  database:
+    image: mysql:latest
+    command:
+    volumes:
+      - ./db/data:/var/lib/mysql:delegated
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 3
+
+    env_file:
+      - ./db/.env
+
+  server:
+    build:
+      context: .
+      dockerfile: dockerfile.dev
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    depends_on:
+      database:
+        condition: service_healthy

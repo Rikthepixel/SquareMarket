@@ -1,5 +1,5 @@
 {
-  "name": "service",
+  "name": "accounts",
   "version": "1.0.0",
   "description": "",
   "author": "RikThePixel",
@@ -10,9 +10,7 @@
     "test:ci": "npm run test -- --ci",
     "dev": "concurrently -c \"blue,red\" \"tsc --watch\" \"node --watch ./dist/index.js\"",
     "build": "tsc --b ./tsconfig.json",
-    "start": "node ./dist/index.js",
-    "docker:dev:build": "",
-    "docker:dev": ""
+    "start": "node ./dist/index.js"
   },
   "devDependencies": {
     "@types/jest": "^29.5.8",
