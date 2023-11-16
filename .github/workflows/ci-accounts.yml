@@ -1,0 +1,25 @@
+name: CI accounts
+
+on:
+  pull_request:
+    branches: [main, development]
+    paths:
+      - "apps/accounts/**/*"
+  push:
+    branches: [main, development]
+    paths:
+      - "apps/accounts/**/*"
+
+jobs:
+  linters:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install Node.js dependencies
+        run: npm ci -w apps/accounts
+      - name: Run linters
+        run: npm run lint -w apps/accounts

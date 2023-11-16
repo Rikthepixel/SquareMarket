@@ -3,9 +3,11 @@
   "description": "A marketplace app with federation",
   "scripts": {
     "setup": "npm i -ws",
-    "test:frontend": "npx -w apps/frontend playwright test",
+    "test:frontend": "npm run test -w apps/frontend",
+    "test:accounts": "npm run test -w apps/accounts",
     "build:frontend": "npm run build -w apps/frontend",
-    "lint:frontend": "npm run lint -w apps/frontend"
+    "build:accounts": "npm run build -w apps/accounts",
+    "build:gateway": "npm run build -w apps/gateway"
   },
   "workspaces": [
     "./apps/*"
@@ -13,5 +15,9 @@
   "devDependencies": {
     "@vitejs/plugin-react": "^4.1.0",
     "lerna": "^7.4.1"
+  },
+  "volta": {
+    "node": "20.9.0",
+    "npm": "10.2.3"
   }
 }

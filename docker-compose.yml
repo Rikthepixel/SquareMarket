@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  accounts:
+    build:
+      context: ./apps/accounts
+      dockerfile: Dockerfile
+    expose:
+      - 8001
+    env_file:
+      - ./apps/accounts/.env
+
+  gateway:
+    build:
+      context: ./apps/gateway
+      dockerfile: Dockerfile
+    expose:
+      - 8080
+    ports:
+      - 8080:8080
+    env_file:
+      - ./apps/gateway/.env
