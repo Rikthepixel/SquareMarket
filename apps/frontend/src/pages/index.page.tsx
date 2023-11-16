@@ -1,13 +1,18 @@
+import backend from "@/adapters/backend";
+import useAuth from "@/lib/auth/stores/useAuth";
+
 export default function FrontPage() {
-  const sendReq = () => {
-    fetch("http://localhost:8080/v1/accounts/health", {
-      method: "GET",
-      mode: "cors",
-      credentials: "include"
-    }).then((res) => console.log(res))
+  const auth = useAuth();
+
+  const sendReq = async () => {
+    const res = await backend.get("v1/accounts/health");
+    console.log(res);
   }
-  return <>
-    Frontpage
-    <button onClick={sendReq}>Send</button>
-  </>;
+  return <div>
+    <button onClick={auth.login}>Login</button>
+    <button onClick={auth.logout}>Logout</button>
+    <button onClick={sendReq}>Send request</button>
+
+    {JSON.stringify(auth.user)}
+  </div>;
 }

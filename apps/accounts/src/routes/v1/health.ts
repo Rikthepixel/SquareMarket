@@ -14,6 +14,7 @@ healthRouter.get(
     }),
   }),
   async (ctx) => {
+    console.log("Test")
     ctx.body = {
       online: true,
       status: 'available',

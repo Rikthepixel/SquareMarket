@@ -16,7 +16,6 @@ const circuitBreaker = (opts?: CircuitBreaker.Options): Handler => {
   }, opts);
 
   breaker.fallback(([res]: [Response], err: unknown) => {
-    console.log(err, res);
     if (
       !err ||
       typeof err !== 'object' ||

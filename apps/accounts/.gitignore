@@ -4,6 +4,10 @@ node_modules
 # Build
 dist
 
+# Database
+/db/data
+/db/.env
+
 # ENV
 /.env
 /.env.local

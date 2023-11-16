@@ -2,10 +2,13 @@ FROM node:20-alpine as build
 
 WORKDIR /app
 
-COPY package.json package.json
-COPY package-lock.json package-lock.json
+COPY ./package.json package.json
 
-RUN npm ci && npm run build
+RUN npm i
+
+COPY ./src ./src
+
+RUN npm run build
 
 FROM node:20-alpine as runner
 

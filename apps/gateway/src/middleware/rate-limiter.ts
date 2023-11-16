@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { Request as RestanaRequest, Protocol } from 'restana';
 import requestIp from 'request-ip';
 import rateLimit, { Options } from 'express-rate-limit';
 
@@ -14,18 +15,19 @@ export interface RateLimiterOptions extends Options {
 
 const rateLimiter = (opts?: Partial<RateLimiterOptions>) => {
   const limiter = rateLimit(opts);
-  return (req: Request, res: Response, next: NextFunction) => {
-    req.ip = requestIp.getClientIp(req) as string | undefined;
+  return (req: RestanaRequest<Protocol.HTTP>, res: Response, next: NextFunction) => {
+    const strappedRequest = req as unknown as Request;
+    strappedRequest.ip = requestIp.getClientIp(req) as string | undefined;
 
-    req.app = {} as typeof req.app;
-    req.app.get = ((key: string): any => {
+    strappedRequest.app = {} as Request["app"];
+    strappedRequest.app.get = ((key: string): any => {
       if (key === "trust proxy") {
         return Boolean(opts?.trustProxy)
       }
       return "unimplemented";
-    }) as unknown as typeof req.app.get;
+    }) as unknown as Request["app"]["get"];
 
-    limiter(req, res, next);
+    limiter(strappedRequest, res, next);
     return next();
   };
 };
