@@ -1,6 +1,6 @@
 import { User as Auth0User } from '@auth0/auth0-spa-js';
 
-export default class AuthenticatedUser<TParent extends Object> {
+export default class AuthenticatedUser<TParent extends object> {
   constructor(
     public parent: TParent,
     public displayName: string,

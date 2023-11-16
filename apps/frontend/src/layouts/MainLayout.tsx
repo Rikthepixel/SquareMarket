@@ -5,7 +5,6 @@ import {
   AppShell,
   Burger,
   ActionIcon,
-  Flex,
   Button,
   Stack,
   Group,
@@ -53,20 +52,20 @@ const NavButton = ({ action, icon: Icon, text }: MenuItem) => {
         onClick: isLink ? undefined : action,
         component: isLink ? 'a' : undefined,
       }) as const,
-    [action, text, isActive],
+    [isLink, action, text, isActive],
   );
 
   const Wrapper = isLink ? Link : React.Fragment;
-  const wrapperProps: any = isLink ? { href: action } : {};
+  const wrapperProps = isLink ? { href: action } : {};
 
   return (
     <>
-      <Wrapper {...wrapperProps}>
+      <Wrapper {...wrapperProps as object}>
         <ActionIcon {...commonProps} fz="1.5rem" size="xl" visibleFrom="sm">
           <Icon />
         </ActionIcon>
       </Wrapper>
-      <Wrapper {...wrapperProps}>
+      <Wrapper {...wrapperProps as object}>
         <Button
           {...commonProps}
           fz="1.25rem"
@@ -98,7 +97,7 @@ export default function MainLayout({ children }: React.PropsWithChildren) {
         icon: MdMap,
         text: 'Map',
       },
-      ...(Boolean(auth.user)
+      ...(auth.user
         ? [
             {
               action: '/messages',
@@ -129,7 +128,7 @@ export default function MainLayout({ children }: React.PropsWithChildren) {
             },
           ]),
     ],
-    [Boolean(auth.user), auth.login, auth.logout],
+    [auth.user, auth.login, auth.logout],
   );
 
   return (
