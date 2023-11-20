@@ -55,17 +55,17 @@ const NavButton = ({ action, icon: Icon, text }: MenuItem) => {
     [isLink, action, text, isActive],
   );
 
-  const Wrapper = isLink ? Link : React.Fragment;
+  const Wrapper = (isLink ? Link : React.Fragment) as unknown as React.ComponentType<React.ComponentProps<"div">>;
   const wrapperProps = isLink ? { href: action } : {};
 
   return (
     <>
-      <Wrapper {...wrapperProps as object}>
+      <Wrapper {...(wrapperProps as object)}>
         <ActionIcon {...commonProps} fz="1.5rem" size="xl" visibleFrom="sm">
           <Icon />
         </ActionIcon>
       </Wrapper>
-      <Wrapper {...wrapperProps as object}>
+      <Wrapper {...(wrapperProps as object)}>
         <Button
           {...commonProps}
           fz="1.25rem"
@@ -160,7 +160,7 @@ export default function MainLayout({ children }: React.PropsWithChildren) {
               radius="sm"
               aria-hidden
             />
-            <Text fz="3rem">SquareMarket</Text>
+            <Text fz="2rem">SquareMarket</Text>
           </Group>
           <Button
             variant="light"
