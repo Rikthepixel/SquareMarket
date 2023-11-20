@@ -1,9 +1,7 @@
 import {
-  AspectRatio,
   Badge,
   Button,
   Container,
-  Flex,
   Group,
   Image,
   Paper,
