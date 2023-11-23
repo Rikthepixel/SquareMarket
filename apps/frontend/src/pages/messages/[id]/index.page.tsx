@@ -1,5 +1,7 @@
+import PageContainer from "@/components/page/Container";
 
 
-export default function MessagesPage() {
-  return <></>;
+export default function MessagePage() {
+return <PageContainer>
+</PageContainer>
 }

@@ -1,8 +1,6 @@
 import PageContainer from '@/components/page/Container';
 import {
-  Button,
   Center,
-  Container,
   Group,
   Paper,
   Stack,
@@ -69,9 +67,9 @@ export default function MessagesPage() {
           rightSection={<MdSearch />}
         />
         <Stack>
-          {conversations.map((convo, idx) => {
-            return <ConversationRow key={idx} conversation={convo} />;
-          })}
+          {conversations.map((convo, idx) => (
+            <ConversationRow key={idx} conversation={convo} />
+          ))}
         </Stack>
       </Stack>
     </PageContainer>

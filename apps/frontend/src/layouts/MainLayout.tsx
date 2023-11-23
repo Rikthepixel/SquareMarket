@@ -13,7 +13,6 @@ import {
   MdClose,
   MdPerson,
   MdHome,
-  MdMap,
   MdMessage,
   MdLogin,
   MdLogout,
@@ -101,7 +100,7 @@ export default function MainLayout({ children }: React.PropsWithChildren) {
       //   icon: MdMap,
       //   text: 'Map',
       // },
-      ...(true// ...(auth.user
+      ...(auth.user
         ? [
             {
               action: '/messages',

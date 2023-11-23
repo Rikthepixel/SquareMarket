@@ -1,7 +1,6 @@
 import {
   Badge,
   Button,
-  Container,
   Group,
   Image,
   Paper,
