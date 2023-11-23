@@ -5,8 +5,6 @@ import {
   Group,
   Stack,
   Divider,
-  Box,
-  Button,
   ActionIcon,
   Textarea,
 } from '@mantine/core';
