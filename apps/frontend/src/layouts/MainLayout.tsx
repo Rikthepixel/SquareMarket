@@ -13,7 +13,6 @@ import {
   MdClose,
   MdPerson,
   MdHome,
-  MdMap,
   MdMessage,
   MdLogin,
   MdLogout,
@@ -55,7 +54,11 @@ const NavButton = ({ action, icon: Icon, text }: MenuItem) => {
     [isLink, action, text, isActive],
   );
 
-  const Wrapper = (isLink ? Link : React.Fragment) as unknown as React.ComponentType<React.ComponentProps<"div">>;
+  const Wrapper = (isLink
+    ? Link
+    : React.Fragment) as unknown as React.ComponentType<
+    React.ComponentProps<'div'>
+  >;
   const wrapperProps = isLink ? { href: action } : {};
 
   return (
@@ -92,11 +95,11 @@ export default function MainLayout({ children }: React.PropsWithChildren) {
         icon: MdHome,
         text: 'Home',
       },
-      {
-        action: '/map',
-        icon: MdMap,
-        text: 'Map',
-      },
+      // {
+      //   action: '/map',
+      //   icon: MdMap,
+      //   text: 'Map',
+      // },
       ...(auth.user
         ? [
             {
