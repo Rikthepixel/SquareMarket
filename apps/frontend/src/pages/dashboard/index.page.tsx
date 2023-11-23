@@ -20,6 +20,8 @@ import {
   MdStar,
 } from 'react-icons/md';
 import { IoMdCalendar, IoMdCash, IoMdEye } from 'react-icons/io';
+import PageContainer from '@/components/page/Container';
+
 interface Advertisement {
   uid: string;
   title: string;
@@ -76,7 +78,7 @@ function AdvertisementCard({ ad }: { ad: Advertisement }) {
             <Text fz="lg">{ad.title}</Text>
           </Group>
           <Text fz="sm">{ad.location}</Text>
-          <Group gap="xs" fz="sm" opacity={0.5}>
+          <Group gap="xs" fz="sm" opacity={0.75}>
             <Group gap="0.25rem">
               {ad.publishedAt.toLocaleDateString()}
               <IoMdCalendar />
@@ -120,7 +122,7 @@ export default function Dashboard() {
     });
 
   return (
-    <Container maw="1280px">
+    <PageContainer>
       <Stack gap="md">
         <Text component="h1" size="2rem">
           Seller dashboard
@@ -159,6 +161,6 @@ export default function Dashboard() {
           </Stack>
         </Tabs>
       </Stack>
-    </Container>
+    </PageContainer>
   );
 }

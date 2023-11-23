@@ -3,7 +3,6 @@ import {
   Badge,
   Button,
   Card,
-  Container,
   Grid,
   Group,
   Image,
@@ -13,6 +12,7 @@ import {
 } from '@mantine/core';
 import { useMemo } from 'react';
 import { MdFilterAlt, MdLocationOn, MdSearch } from 'react-icons/md';
+import PageContainer from '@/components/page/Container';
 
 interface Advertisement {
   uid: string;
@@ -74,7 +74,7 @@ export default function FrontPage() {
     });
 
   return (
-    <Container maw="1280px">
+    <PageContainer>
       <Group justify="center">
         <TextInput
           size="md"
@@ -98,6 +98,6 @@ export default function FrontPage() {
           </Grid.Col>
         ))}
       </Grid>
-    </Container>
+    </PageContainer>
   );
 }
