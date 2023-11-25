@@ -11,7 +11,7 @@ on:
 
 jobs:
   build-and-push:
-    uses: ./.github/workflows/build-to-azure.yml
+    uses: ./.github/workflows/build-to-azure.yml@${{ env.GITHUB_REF#refs/heads/ }}
     with:
       app: accounts
       project_name: ${{ env.AZURE_PROJECT_NAME }}
