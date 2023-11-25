@@ -20,7 +20,7 @@ const rateLimiter = (opts?: Partial<RateLimiterOptions>) => {
     strappedRequest.ip = requestIp.getClientIp(req) as string | undefined;
 
     strappedRequest.app = {} as Request["app"];
-    strappedRequest.app.get = ((key: string): any => {
+    strappedRequest.app.get = ((key: string) => {
       if (key === "trust proxy") {
         return Boolean(opts?.trustProxy)
       }
