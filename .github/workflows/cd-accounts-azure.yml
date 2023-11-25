@@ -11,15 +11,9 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Push to Azure
-        uses: ./.github/workflows/build-to-azure.yml
-        with:
-          app: accounts
-          project_name: ${{ env.AZURE_PROJECT_NAME }}
-          registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-
+    uses: ./.github/workflows/build-to-azure.yml
+    with:
+      app: accounts
+      project_name: ${{ env.AZURE_PROJECT_NAME }}
+      registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
+      creds: ${{ secrets.AZURE_CREDENTIALS }}
