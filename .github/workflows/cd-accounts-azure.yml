@@ -11,9 +11,10 @@ on:
 
 jobs:
   build-and-push:
-    uses: ./.github/workflows/build-to-azure.yml@${{ env.GITHUB_REF#refs/heads/ }}
+    uses: ./.github/workflows/build-to-azure.yml
+    secrets:
+      creds: ${{ secrets.AZURE_CREDENTIALS }}
     with:
       app: accounts
       project_name: ${{ env.AZURE_PROJECT_NAME }}
       registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
-      creds: ${{ secrets.AZURE_CREDENTIALS }}
