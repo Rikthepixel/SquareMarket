@@ -15,7 +15,8 @@ jobs:
   deploy-kubernetes:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-#     steps:
+    steps:
+    - uses: actions/checkout@v4
 #     - name: Azure Login
 #       uses: azure/login
 #       with:
