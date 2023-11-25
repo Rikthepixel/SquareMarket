@@ -21,7 +21,6 @@ on:
         type: string
 jobs:
     steps:
-    - uses: actions/checkout@v4
 
     - name: Azure Login
       uses: azure/login
