@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Push to Azure
-        uses: ./.github/workflows/reusable/build-to-azure.yml
+        uses: ./.github/workflows/build-to-azure.yml
         with:
           app: accounts
           project_name: ${{ env.AZURE_PROJECT_NAME }}
