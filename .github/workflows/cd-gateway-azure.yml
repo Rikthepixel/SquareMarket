@@ -16,6 +16,8 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
+      - name: Test
+        run: echo ${{ env.AZURE_PROJECT_NAME }}
       - name: Azure Login
         uses: azure/login@v1
         with:
