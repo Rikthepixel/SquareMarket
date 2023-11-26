@@ -85,12 +85,9 @@ jobs:
       - name: Build image on ACR
         uses: azure/CLI@v1
         with:
-          azcliversion: 2.29.1
           inlineScript: |
-            az account show
-            cd ./apps/${{ matrix.app }}
             az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
-            az acr build -r="${{ env.AZURE_CONTAINER_REGISTRY }}" ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.AZURE_PROJECT_NAME }}-${{ matrix.app }}:latest
+            az acr build -r="${{ env.AZURE_CONTAINER_REGISTRY }}" ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.AZURE_PROJECT_NAME }}-${{ matrix.app }}:latest ./apps/${{ matrix.app }}
 
   deploy:
     needs: build
