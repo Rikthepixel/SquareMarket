@@ -70,7 +70,6 @@ jobs:
     strategy:
       matrix:
         app: ${{ fromJSON(needs.changes.outputs.apps) }}
-        test: ${{ env.AZURE_CONTAINER_REGISTRY }}
     environment:
       name: "Production"
     steps:
