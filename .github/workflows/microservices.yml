@@ -93,9 +93,9 @@ jobs:
     # if: github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
     environment: production
-    strategy:
-      matrix:
-        app: [gateway, accounts]
+    # strategy:
+    #   matrix:
+    #     app: [gateway, accounts]
         # app: ${{ fromJSON(needs.changes.outputs.apps) }}
     steps:
       - name: Checkout code
