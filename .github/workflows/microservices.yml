@@ -83,8 +83,8 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
-            az acr build -t ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.AZURE_PROJECT_NAME }}-accounts:latest -r ${{ env.AZURE_CONTAINER_REGISTRY }} ./apps/accounts/
+            az configure --defaults acr=${{ vars.AZURE_CONTAINER_REGISTRY }}
+            az acr build -t ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.AZURE_PROJECT_NAME }}-accounts:latest -r ${{ env.AZURE_CONTAINER_REGISTRY }} ./apps/accounts/
 
   deploy:
     needs: build
