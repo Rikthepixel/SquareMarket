@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name:  accounts
+  name: accounts
   labels:
     app: accounts
 spec:
@@ -16,30 +16,30 @@ spec:
         app: accounts
     spec:
       containers:
-      - name:  accounts
-        image:  squaremarketacr.azurecr.io/square-market-accounts
-        resources:
-          requests:
-            cpu: 100m
-            memory: 256Mi
-          limits:
-            cpu: 100m
-            memory: 256Mi
-        readinessProbe:
-          httpGet:
-            path: /v1/health
-            port: 80
-          initialDelaySeconds: 5
-          timeoutSeconds: 2
-          successThreshold: 1
-          failureThreshold: 3
-          periodSeconds: 10
-        env:
-        - name: SERVER_PORT
-          value: "80"
-        ports:
-        - containerPort:  80
-          name:  accounts-deployment
+        - name: accounts
+          image: squaremarketacr.azurecr.io/square-market-accounts
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /v1/health
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+          env:
+            - name: SERVER_PORT
+              value: "80"
+          ports:
+            - containerPort: 80
+              name: accounts
       restartPolicy: Always
 ---
 # https://kubernetes.io/docs/concepts/services-networking/service/
@@ -52,7 +52,7 @@ spec:
     app: accounts
   type: ClusterIP
   ports:
-  - name: http
-    protocol: TCP
-    port: 80
-    targetPort: 8001
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 8001
