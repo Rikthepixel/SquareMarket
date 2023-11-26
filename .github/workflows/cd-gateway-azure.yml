@@ -17,12 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Azure Login
-        uses: azure/login
+        uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Build image on ACR
-        uses: azure/CLI
+        uses: azure/CLI@v1
         with:
           azcliversion: 2.29.1
           inlineScript: |
