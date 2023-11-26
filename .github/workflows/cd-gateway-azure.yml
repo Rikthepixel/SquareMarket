@@ -9,9 +9,13 @@ on:
     # paths:
     #   - "apps/gateway/**/*"
 
+env:
+  APP: accounts
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    environment: Production
     steps:
       - name: "check if secrets are loaded"
         if: ${{ env.AZURE_CREDENTIALS == '' }}
@@ -26,6 +30,6 @@ jobs:
         with:
           azcliversion: 2.29.1
           inlineScript: |
-            cd ./apps/gateway
+            cd ./apps/${{ env.APP }}
             az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
-            az acr build ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.AZURE_PROJECT_NAME }}-gateway:latest
+            az acr build ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.AZURE_PROJECT_NAME }}-${{ env.APP }}:latest
