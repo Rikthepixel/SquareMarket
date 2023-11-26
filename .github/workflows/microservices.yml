@@ -67,14 +67,18 @@ jobs:
     needs: [changes, lint, test]
     # if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    environment: Production
     strategy:
       matrix:
         app: ${{ fromJSON(needs.changes.outputs.apps) }}
+        test: ${{ env.AZURE_CONTAINER_REGISTRY }}
+    environment:
+      name: "Production"
     steps:
       - uses: actions/checkout@v4
       - name: Test
         run: printenv
+      - name: Test existance ${{ matrix.test }}
+        run: echo ""
       - name: Azure Login
         uses: azure/login@v1
         with:
@@ -92,11 +96,12 @@ jobs:
   deploy:
     needs: [changes, build]
     # if: github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
-    environment: Production
     runs-on: ubuntu-latest
     strategy:
       matrix:
         app: ${{ fromJSON(needs.changes.outputs.apps) }}
+    environment:
+      name: "Production"
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -111,9 +116,9 @@ jobs:
         id: context
         uses: azure/aks-set-context@3
         with:
-            creds: ${{ secrets.AZURE_CREDENTIALS }}
-            resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-            cluster-name: ${{ env.AZURE_CLUSTER_NAME }}
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
+          cluster-name: ${{ env.AZURE_CLUSTER_NAME }}
 
       - name: Deploys application
         uses: Azure/k8s-deploy@v4
