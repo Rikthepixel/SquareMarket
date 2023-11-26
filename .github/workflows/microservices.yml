@@ -67,9 +67,9 @@ jobs:
     # needs: [changes, lint, test]
     # if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: [gateway, accounts]
+    # strategy:
+    #   matrix:
+    #     app: [gateway, accounts]
         # app: ${{ fromJSON(needs.changes.outputs.apps) }}
     steps:
       - uses: actions/checkout@v4
@@ -83,8 +83,8 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            az configure --defaults acr=$AZURE_CONTAINER_REGISTRY
-            az acr build -t $AZURE_CONTAINER_REGISTRY.azurecr.io/$AZURE_PROJECT_NAME-${{ matrix.app }}:latest -r $AZURE_CONTAINER_REGISTRY ./apps/${{ matrix.app }}/
+            az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
+            az acr build -t ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.AZURE_PROJECT_NAME }}-accounts:latest -r ${{ env.AZURE_CONTAINER_REGISTRY }} ./apps/accounts/
 
   deploy:
     needs: build
