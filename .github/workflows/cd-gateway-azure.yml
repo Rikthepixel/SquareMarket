@@ -13,8 +13,9 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - name: Test
-        run: echo ${{ env.AZURE_PROJECT_NAME }}
+      - name: "check if secrets are loaded"
+        if: ${{ env.AZURE_CREDENTIALS == '' }}
+        run: Azure credentials have not been set to this CI job
       - name: Azure Login
         uses: azure/login@v1
         with:
