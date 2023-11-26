@@ -74,7 +74,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Test
-        if: ${{ env.AZURE_CREDENTIALS == '' }}
+        if: ${{ secrets.AZURE_CREDENTIALS == '' }}
         run: echo Env not loaded
       - name: Azure Login
         uses: azure/login@v1
