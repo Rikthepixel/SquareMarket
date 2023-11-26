@@ -73,10 +73,7 @@ jobs:
         # app: ${{ fromJSON(needs.changes.outputs.apps) }}
     steps:
       - uses: actions/checkout@v4
-      - name: Test
-        run: printenv
-      - name: Test existance ${{ matrix.test }}
-        run: echo ""
+
       - name: Azure Login
         uses: azure/login@v1
         with:
@@ -86,8 +83,8 @@ jobs:
         uses: azure/CLI@v1
         with:
           inlineScript: |
-            az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
-            az acr build -t ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.AZURE_PROJECT_NAME }}-${{ matrix.app }}:latest -r ${{ env.AZURE_CONTAINER_REGISTRY }} ./apps/${{ matrix.app }}/
+            az configure --defaults acr=$AZURE_CONTAINER_REGISTRY
+            az acr build -t $AZURE_CONTAINER_REGISTRY.azurecr.io/$AZURE_PROJECT_NAME-${{ matrix.app }}:latest -r $AZURE_CONTAINER_REGISTRY ./apps/${{ matrix.app }}/
 
   deploy:
     needs: build
