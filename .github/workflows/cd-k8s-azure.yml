@@ -1,15 +1,13 @@
 name: CD Azure
 
 on:
-  workflow_dispatch:
-
-#   workflow_run:
-#     workflows:
-#       - "CD Gateway Azure"
-#       - "CD Accounts Azure"
-#     types:
-#       - "completed"
-#     branches: [main]
+  workflow_run:
+    workflows:
+      - "Gateway"
+      - "Accounts"
+    types:
+      - "completed"
+    branches: [main]
 
 jobs:
   deploy-kubernetes:
@@ -21,33 +19,25 @@ jobs:
 #       uses: azure/login
 #       with:
 #         creds: ${{ secrets.AZURE_CREDENTIALS }}
-#
-#     - name: Build image on ACR
-#       uses: azure/CLI
-#       with:
-#         azcliversion: 2.29.1
-#         inlineScript: |
-#           az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
-#           az acr build ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.PROJECT_NAME }}:latest
-#
+# #
 #     - name: Gets K8s context
+#       id: login
 #       uses: azure/aks-set-context
 #       with:
 #           creds: ${{ secrets.AZURE_CREDENTIALS }}
 #           resource-group: ${{ env.RESOURCE_GROUP }}
 #           cluster-name: ${{ env.CLUSTER_NAME }}
-#       id: login
 #
-#     - name: Configure deployment
-#       uses: azure/k8s-bake
-#       with:
-#         renderEngine: 'helm'
-#         helmChart: ${{ env.CHART_PATH }}
-#         overrideFiles: ${{ env.CHART_OVERRIDE_PATH }}
-#         overrides: |
-#           replicas:2
-#         helm-version: 'latest'
-#       id: bake
+#     # - name: Configure deployment
+#     #   id: bake
+#     #   uses: azure/k8s-bake
+#     #   with:
+#     #     renderEngine: 'helm'
+#     #     helmChart: ${{ env.CHART_PATH }}
+#     #     overrideFiles: ${{ env.CHART_OVERRIDE_PATH }}
+#     #     overrides: |
+#     #       replicas:2
+#     #     helm-version: 'latest'
 #
 #     - name: Deploys application
 #       uses: Azure/k8s-deploy
