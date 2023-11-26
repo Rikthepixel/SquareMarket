@@ -63,15 +63,6 @@ jobs:
   #     - name: Run Tests ${{ matrix.app }}
   #       run: npm run test -w apps/${{ matrix.app }} --if-present
 
-  test-env:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Test
-        run: printenv
-      - name: test env ${{ env.AZURE_CONTAINER_REGISTRY }}
-        run: printenv
-
   build:
     # needs: [changes, lint, test]
     # if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
@@ -96,6 +87,7 @@ jobs:
         with:
           azcliversion: 2.29.1
           inlineScript: |
+            az account show
             cd ./apps/${{ matrix.app }}
             az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
             az acr build -r="${{ env.AZURE_CONTAINER_REGISTRY }}" ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.AZURE_PROJECT_NAME }}-${{ matrix.app }}:latest
