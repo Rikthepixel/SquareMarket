@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name:  gateway
-        image:  square-market-gateway:latest
+        image:  squaremarketacr.azurecr.io/square-market-gateway
         resources:
           requests:
             cpu: 100m

@@ -107,8 +107,9 @@ jobs:
 
   build-services:
     needs: [changed-services, lint, test-services]
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    # if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    environment: Production
     strategy:
       matrix:
         app: ${{ fromJSON(needs.changed-services.outputs.apps) }}
@@ -129,7 +130,8 @@ jobs:
 
   deploy-services:
     needs: [changed-services, build-services]
-    if: github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    # if: github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    environment: Production
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -138,9 +140,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Service ${{ matrix.app }} changes
-        run: echo Hi
-      # - name: Deploy ${{ matrix.microservice }} to Kubernetes
-      #   run: |
-      #     cd ${{ matrix.microservice }}
-      #     kubectl apply -f deployment.yaml
+      - name: Azure Login
+        uses: azure/login
+        id: login
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Gets K8s context
+        id: context
+        uses: azure/aks-set-context
+        with:
+            creds: ${{ secrets.AZURE_CREDENTIALS }}
+            resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
+            cluster-name: ${{ env.AZURE_CLUSTER_NAME }}
+
+      - name: Deploys application
+        uses: Azure/k8s-deploy
+        with:
+          namespace: ${{ env.PROJECT_NAME }}
+          manifests: |
+            k8s/gateway-ingress.yml
+            k8s/gateway-deployment.yml
+            k8s/account-deployment.yml
+          images: |
+            ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.PROJECT_NAME }}-gateway:latest
+            ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.PROJECT_NAME }}-accounts:latest
+          imagepullsecrets: |
+            ${{ env.PROJECT_NAME }}
