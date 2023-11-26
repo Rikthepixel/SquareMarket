@@ -67,9 +67,10 @@ jobs:
     # needs: [changes, lint, test]
     # if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-    # strategy:
-    #   matrix:
-    #     app: [gateway, accounts]
+    environment: production
+    strategy:
+      matrix:
+        app: [gateway, accounts]
         # app: ${{ fromJSON(needs.changes.outputs.apps) }}
     steps:
       - uses: actions/checkout@v4
@@ -84,13 +85,14 @@ jobs:
         with:
           inlineScript: |
             az configure --defaults acr=${{ vars.AZURE_CONTAINER_REGISTRY }}
-            az acr build -t ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.AZURE_PROJECT_NAME }}-accounts:latest -r ${{ env.AZURE_CONTAINER_REGISTRY }} ./apps/accounts/
+            az acr build -t ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-accounts:latest -r ${{ vars.AZURE_CONTAINER_REGISTRY }} ./apps/accounts/
 
   deploy:
     needs: build
     # needs: [changes, build]
     # if: github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
+    environment: production
     strategy:
       matrix:
         app: [gateway, accounts]
@@ -110,19 +112,19 @@ jobs:
         uses: azure/aks-set-context@3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-          resource-group: ${{ env.AZURE_RESOURCE_GROUP }}
-          cluster-name: ${{ env.AZURE_CLUSTER_NAME }}
+          resource-group: ${{ vars.AZURE_RESOURCE_GROUP }}
+          cluster-name: ${{ vars.AZURE_CLUSTER_NAME }}
 
       - name: Deploys application
         uses: Azure/k8s-deploy@v4
         with:
-          namespace: ${{ env.PROJECT_NAME }}
+          namespace: ${{ vars.PROJECT_NAME }}
           manifests: |
             k8s/gateway-ingress.yml
             k8s/gateway-deployment.yml
             k8s/account-deployment.yml
           images: |
-            ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.PROJECT_NAME }}-gateway:latest
-            ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.PROJECT_NAME }}-accounts:latest
+            ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.PROJECT_NAME }}-gateway:latest
+            ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.PROJECT_NAME }}-accounts:latest
           imagepullsecrets: |
-            ${{ env.PROJECT_NAME }}
+            ${{ vars.PROJECT_NAME }}
