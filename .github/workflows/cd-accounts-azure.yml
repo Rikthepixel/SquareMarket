@@ -9,12 +9,23 @@ on:
     # paths:
     #   - "apps/accounts/**/*"
 
+env:
+  APP: accounts
+
 jobs:
   build-and-push:
-    uses: ./.github/workflows/build-to-azure.yml
-    secrets:
-      creds: ${{ secrets.AZURE_CREDENTIALS }}
-    with:
-      app: accounts
-      project_name: ${{ env.AZURE_PROJECT_NAME }}
-      registry: ${{ env.AZURE_CONTAINER_REGISTRY }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Azure Login
+        uses: azure/login
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build image on ACR
+        uses: azure/CLI
+        with:
+          azcliversion: 2.29.1
+          inlineScript: |
+            cd ./apps/${{ env.APP }}
+            az configure --defaults acr=${{ env.AZURE_CONTAINER_REGISTRY }}
+            az acr build ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.AZURE_PROJECT_NAME }}-${{ env.APP }}:latest
