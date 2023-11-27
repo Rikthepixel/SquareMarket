@@ -45,8 +45,6 @@ resource "azurerm_kubernetes_cluster" "aks" {
     name                = "system"
     node_count          = 1
     vm_size             = "Standard_DS2_v2"
-    type                = "VirtualMachineScaleSets"
-    enable_auto_scaling = false
   }
 
   identity {
@@ -63,6 +61,12 @@ resource "azurerm_kubernetes_cluster" "aks" {
     "environment" = "production"
     "source"      = "terraform"
   }
+}
+
+resource "azurerm_role_assignment" "aks_pull_acr" {
+  scope                = azurerm_container_registry.acr.id
+  role_definition_name = "AcrPull"
+  principal_id         = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
 }
 
 resource "azurerm_storage_account" "storage-account" {

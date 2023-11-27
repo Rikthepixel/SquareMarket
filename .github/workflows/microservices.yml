@@ -85,7 +85,7 @@ jobs:
         with:
           inlineScript: |
             az configure --defaults acr=${{ vars.AZURE_CONTAINER_REGISTRY }}
-            az acr build -t ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-accounts:latest -r ${{ vars.AZURE_CONTAINER_REGISTRY }} ./apps/accounts/
+            az acr build -t ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-${{ matrix.app }}:latest -r ${{ vars.AZURE_CONTAINER_REGISTRY }} ./apps/${{ matrix.app }}/
 
   deploy:
     needs: build
