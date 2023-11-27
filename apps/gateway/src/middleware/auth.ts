@@ -2,6 +2,7 @@ import { AuthOptions, auth as makeAuth } from 'express-oauth2-jwt-bearer';
 import { Request, Response, NextFunction } from 'express';
 import { Request as RestanaRequest, Protocol } from "restana";
 import typeIs from 'type-is';
+import { Route, WebSocketRoute } from 'fast-gateway';
 
 export { AuthOptions } from 'express-oauth2-jwt-bearer';
 
@@ -21,7 +22,7 @@ const auth = (opts?: AuthOptions) => {
 
 export const wrapWithAuth = (
   routes: Array<Route | WebSocketRoute>,
-  opts?: CircuitBreaker.Options,
+  opts?: AuthOptions,
 ): Array<Route | WebSocketRoute> => {
   return routes.map((route) => {
     if (route.proxyType !== 'websocket') {
