@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: accounts
-          image: squaremarketacr.azurecr.io/square-market-accounts
+          image: squaremarketacr.azurecr.io/squaremarket-accounts
           imagePullPolicy: Always
           resources:
             requests:
