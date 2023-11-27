@@ -122,7 +122,7 @@ jobs:
             k8s/gateway-deployment.yml
             k8s/account-deployment.yml
           images: |
-            ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.PROJECT_NAME }}-gateway:latest
-            ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.PROJECT_NAME }}-accounts:latest
+            ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-gateway:latest
+            ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-accounts:latest
           imagepullsecrets: |
             ${{ vars.PROJECT_NAME }}
