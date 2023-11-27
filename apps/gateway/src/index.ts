@@ -1,10 +1,11 @@
 import gateway from 'fast-gateway';
 import { config as loadEnv } from 'dotenv';
-import { wrapWithCircuitBreaker } from './middleware/circuit-breaker';
+
 import rateLimiter from './middleware/rate-limiter';
 import cors from './middleware/cors';
-import auth, { wrapWithAuth } from './middleware/auth';
-import { AuthOptions } from 'express-oauth2-jwt-bearer';
+import { wrapWithCircuitBreaker } from './middleware/circuit-breaker';
+import { wrapWithAuth, AuthOptions } from './middleware/auth';
+
 
 loadEnv();
 const PORT: number = parseInt(process.env.SERVER_PORT ?? '8080');

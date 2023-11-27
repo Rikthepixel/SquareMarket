@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import { Request as RestanaRequest, Protocol } from "restana";
 import typeIs from 'type-is';
 
-export AuthOptions;
+export { AuthOptions } from 'express-oauth2-jwt-bearer';
 
 const auth = (opts?: AuthOptions) => {
   const middleware = makeAuth(opts);
