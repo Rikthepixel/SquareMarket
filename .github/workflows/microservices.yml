@@ -93,10 +93,6 @@ jobs:
     # if: github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
     environment: production
-    # strategy:
-    #   matrix:
-    #     app: [gateway, accounts]
-        # app: ${{ fromJSON(needs.changes.outputs.apps) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -111,14 +107,12 @@ jobs:
         id: context
         uses: azure/aks-set-context@v3
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
           resource-group: ${{ vars.AZURE_RESOURCE_GROUP }}
           cluster-name: ${{ vars.AZURE_CLUSTER_NAME }}
 
       - name: Deploys application
         uses: Azure/k8s-deploy@v4
         with:
-          namespace: ${{ vars.PROJECT_NAME }}
           manifests: |
             k8s/gateway-ingress.yml
             k8s/gateway-deployment.yml
