@@ -16,6 +16,8 @@ export interface RateLimiterOptions extends Options {
 const rateLimiter = (opts?: Partial<RateLimiterOptions>) => {
   const limiter = rateLimit(opts);
   return (req: RestanaRequest<Protocol.HTTP>, res: Response, next: NextFunction) => {
+    if (req.complete) return next();
+
     const strappedRequest = req as unknown as Request;
     strappedRequest.ip = requestIp.getClientIp(req) as string | undefined;
 
