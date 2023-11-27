@@ -18,6 +18,7 @@ spec:
       containers:
         - name: accounts
           image: squaremarketacr.azurecr.io/square-market-accounts
+          imagePullPolicy: Always
           resources:
             requests:
               cpu: 100m
