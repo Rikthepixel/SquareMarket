@@ -28,7 +28,7 @@ spec:
               memory: 256Mi
           readinessProbe:
             httpGet:
-              path: /v1/health
+              path: /services.json
               port: 80
             initialDelaySeconds: 5
             timeoutSeconds: 2
