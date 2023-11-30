@@ -1,8 +1,8 @@
-import validate from '../../middleware/validate';
-import KoaRouter from '@koa/router';
 import { z } from 'zod';
+import validate from '../../middleware/validate';
+import makeRouter from '../../helpers/router';
 
-const healthRouter = new KoaRouter();
+const healthRouter = makeRouter();
 
 healthRouter.get(
   'Health',
@@ -14,7 +14,6 @@ healthRouter.get(
     }),
   }),
   async (ctx) => {
-    console.log("Test")
     ctx.body = {
       online: true,
       status: 'available',
