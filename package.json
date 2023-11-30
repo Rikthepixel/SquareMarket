@@ -5,6 +5,7 @@
     "setup": "npm i -ws",
     "test:frontend": "npm run test -w apps/frontend",
     "test:accounts": "npm run test -w apps/accounts",
+    "dev:services": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up",
     "build:frontend": "npm run build -w apps/frontend",
     "build:accounts": "npm run build -w apps/accounts",
     "build:gateway": "npm run build -w apps/gateway"

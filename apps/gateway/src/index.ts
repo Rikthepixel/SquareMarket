@@ -35,6 +35,11 @@ gateway({
           prefix: '/v1/accounts',
           prefixRewrite: '/v1',
           target: process.env.ACCOUNTS_SERVICE_URL ?? 'http://localhost:8001',
+        },
+        {
+          prefix: '/v1/ads',
+          prefixRewrite: '/v1',
+          target: process.env.ACCOUNTS_SERVICE_URL ?? 'http://localhost:8001',
         }
       ], AUTH_CONFIG)
     ],

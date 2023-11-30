@@ -1,5 +1,4 @@
-import type { Knex } from 'knex';
-
+const path = require("node:path");
 // Update with your config settings.
 
 const connection = {
@@ -9,27 +8,33 @@ const connection = {
   password: process.env.DATABASE_PASSWORD,
 };
 
-const config: { [key: string]: Knex.Config } = {
+/**
+ * @type {Knex.MigratorConfig}
+ */
+const migrations = {
+  extension: 'ts',
+  tableName: 'knex_migrations',
+  directory: path.join(__dirname, './migrations'),
+};
+
+/**
+ * @type {Record<string, Knex.Config>}
+ */
+const config = {
   development: {
-    client: 'mysql',
+    client: 'mysql2',
     connection,
-    migrations: {
-      extension: 'ts',
-      tableName: 'knex_migrations',
-    },
+    migrations,
   },
 
   production: {
-    client: 'mysql',
+    client: 'mysql2',
     connection,
     pool: {
       min: 2,
       max: 10,
     },
-    migrations: {
-      extension: 'ts',
-      tableName: 'knex_migrations',
-    },
+    migrations
   },
 };
 

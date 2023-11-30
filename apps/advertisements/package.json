@@ -1,5 +1,5 @@
 {
-  "name": "accounts",
+  "name": "advertisements",
   "version": "1.0.0",
   "description": "",
   "author": "RikThePixel",
@@ -38,7 +38,10 @@
     "dotenv": "^16.3.1",
     "knex": "^3.0.1",
     "koa": "^2.14.2",
+    "koa-tioc": "^0.1.0",
     "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.6.5",
+    "tioc": "^0.2.0",
     "zod": "^3.22.4"
   }
 }

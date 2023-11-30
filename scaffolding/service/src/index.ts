@@ -1,39 +1,35 @@
 import Koa from 'koa';
-import router from './routes';
+import { config as loadEnv } from 'dotenv';
+
 import { bodyParser } from '@koa/bodyparser';
+import injector from 'koa-tioc';
+import router from './routes';
 
-const PORT: number = parseInt(process.env.SERVER_PORT ?? '3000');
+import depenencyProvider from './providers/di';
 
-const app = new Koa();
+loadEnv();
 
-app.use(
-  bodyParser({
-    encoding: 'utf-8',
-    onError: (_err, ctx) => ctx.throw(422, 'body parse error'),
-  }),
-);
+const PORT: number = parseInt(process.env.SERVER_PORT ?? '8001');
 
-app.use(router.routes());
+const app = new Koa()
+  .use(
+    bodyParser({
+      encoding: 'utf-8',
+      onError: (_err, ctx) => ctx.throw(422, 'body parse error'),
+    }),
+  )
+  .use(injector(depenencyProvider));
+
+export type AppContext = (typeof app)['context'];
 
 app
-  .on('error', (err: Error, ctx: Koa.Context) => {
-    //TODO: add logger instead of console.error
-    console.error(
-      `${new Date().toUTCString()} Server error on path ${ctx.method}:${
-        ctx.path
-      }`,
-      err,
-    );
+  .use(router.routes())
+  .on('error', (err: Error, ctx: AppContext) => {
+    const logger = ctx.container.resolve('logger');
+    logger.error(`Server error on path ${ctx.method}:${ctx.path}`, err);
   })
-  .listen(PORT, '0.0.0.0', () => {
-    const routes = router.stack
-      .filter((r) => r.methods.length > 0)
-      .map((r) => r.methods.join(', ') + ' @ ' + r.path);
+  .listen(PORT, '0.0.0.0', () =>
+    console.log(`Server "${process.env.SERVER_NAME}" started`),
+  );
 
-    //TODO: change to logger
-    console.log(
-      `${new Date().toUTCString()} Server started with routes:\n\t- ${routes.join(
-        '\n\t- ',
-      )}`,
-    );
-  });
+export default app;
