@@ -10,6 +10,6 @@ export default function requestLogger() {
   ) {
     const logger = ctx.container.resolve('logger');
     logger.info(`Request to '${ctx.url}' from ${ctx.origin}`);
-    next();
+    await next();
   };
 }
