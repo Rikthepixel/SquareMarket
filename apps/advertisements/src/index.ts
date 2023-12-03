@@ -8,7 +8,7 @@ import depenencyProvider from './providers/di';
 
 import router from './routes';
 import errorHandling from './middleware/errorHandling';
-// import requestLogger from './middleware/requestLogger';
+import requestLogger from './middleware/requestLogger';
 
 loadEnv();
 
@@ -17,12 +17,7 @@ const PORT: number = parseInt(process.env.SERVER_PORT ?? '8001');
 const app = new Koa()
   .use(injector(depenencyProvider))
   .use(errorHandling())
-  .use(async function (ctx, next: Koa.Next) {
-    // const logger = ctx.container.resolve('logger');
-    // logger.info(`Request to '${ctx.url}' from ${ctx.origin}`);
-    await next();
-    console.log(ctx);
-  })
+  .use(requestLogger())
   .use(
     bodyParser({
       encoding: 'utf-8',
