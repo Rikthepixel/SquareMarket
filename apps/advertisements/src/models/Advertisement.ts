@@ -1,4 +1,3 @@
-
 export interface Advertisement {
   id: number;
   uid: string;
@@ -10,5 +9,5 @@ export interface Advertisement {
   price: number;
   currency: string;
   draft: boolean;
-  published_at:
+  published_at: Date | null;
 }

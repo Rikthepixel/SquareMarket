@@ -1,7 +1,13 @@
-import { Knex } from 'knex';
-
-export async function up(knex: Knex): Promise<void> {
-  function addIds(table: Knex.AlterTableBuilder) {
+/**
+ * @param { import("knex").Knex } knex
+ * @returns { Promise<void> }
+ */
+exports.up = async function (knex) {
+  await exports.down(knex);
+  /**
+   * @param {import("knex").Knex.AlterTableBuilder} table
+   */
+  function addIds(table) {
     table.increments('id');
     table
       .uuid('uid', {
@@ -12,16 +18,16 @@ export async function up(knex: Knex): Promise<void> {
   }
 
   await knex.schema
-    .table('users', function (table) {
+    .createTable('users', function (table) {
       addIds(table);
       table.string('username', 255);
       table.string('default_currency', 3);
     })
-    .table('categories', function (table) {
+    .createTable('categories', function (table) {
       addIds(table);
       table.string('name', 255);
     })
-    .table('category_properties', function (table) {
+    .createTable('category_properties', function (table) {
       addIds(table);
       table.string('name', 255);
       table
@@ -30,7 +36,7 @@ export async function up(knex: Knex): Promise<void> {
         .references('categories.id')
         .onDelete('cascade');
     })
-    .table('category_property_options', function (table) {
+    .createTable('category_property_options', function (table) {
       addIds(table);
       table
         .integer('category_property_id')
@@ -39,7 +45,7 @@ export async function up(knex: Knex): Promise<void> {
         .onDelete('cascade');
       table.string('name', 255);
     })
-    .table('advertisements', function (table) {
+    .createTable('advertisements', function (table) {
       addIds(table);
       table
         .integer('user_id')
@@ -58,7 +64,7 @@ export async function up(knex: Knex): Promise<void> {
       table.boolean('draft').defaultTo(true);
       table.datetime('published_at', { useTz: true }).nullable();
     })
-    .table('category_property_option_values', function (table) {
+    .createTable('category_property_option_values', function (table) {
       addIds(table);
       table
         .integer('advertisement_id')
@@ -70,9 +76,10 @@ export async function up(knex: Knex): Promise<void> {
         .integer('category_property_option_id')
         .unsigned()
         .references('category_property_options.id')
+        .withKeyName('cat_prop_opt_value_to_cat_prop_opt')
         .onDelete('cascade');
     })
-    .table('category_property_values', function (table) {
+    .createTable('category_property_values', function (table) {
       addIds(table);
       table
         .integer('advertisement_id')
@@ -86,23 +93,27 @@ export async function up(knex: Knex): Promise<void> {
         .onDelete('cascade');
       table.string('value', 255);
     })
-    .table('images', function (table) {
+    .createTable('images', function (table) {
       addIds(table);
       table.integer('advertisement_id').unsigned();
       table.foreign('advertisement_id').references('advertisements.id');
       table.string('path', 255);
       table.string('ext', 10);
     });
-}
+};
 
-export async function down(knex: Knex): Promise<void> {
+/**
+ * @param { import("knex").Knex } knex
+ * @returns { Promise<void> }
+ */
+exports.down = async function (knex) {
   await knex.schema
-    .dropTable('images')
-    .dropTable('category_property_values')
-    .dropTable('category_property_option_values')
-    .dropTable('advertisements')
-    .dropTable('category_property_options')
-    .dropTable('category_properties')
-    .dropTable('categories')
-    .dropTable('users');
-}
+    .dropTableIfExists('images')
+    .dropTableIfExists('category_property_values')
+    .dropTableIfExists('category_property_option_values')
+    .dropTableIfExists('advertisements')
+    .dropTableIfExists('category_property_options')
+    .dropTableIfExists('category_properties')
+    .dropTableIfExists('categories')
+    .dropTableIfExists('users');
+};

@@ -37,7 +37,8 @@
     "tests",
     "coverage",
     "node_modules",
-    "dist"
+    "dist",
+    "migrations"
   ],
   "include": [
     "src"

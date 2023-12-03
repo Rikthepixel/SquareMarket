@@ -8,6 +8,7 @@ import { Route, WebSocketRoute } from 'fast-gateway';
  */
 const circuitBreaker = (opts?: CircuitBreaker.Options): Handler => {
   const breaker = new CircuitBreaker<[Response]>((res): Promise<void> => {
+
     return new Promise((resolve) => {
       res.on('close', () => {
         resolve();
@@ -15,7 +16,9 @@ const circuitBreaker = (opts?: CircuitBreaker.Options): Handler => {
     });
   }, opts);
 
-  breaker.fallback(([res]: [Response], err: unknown) => {
+  breaker.fallback((res: Response, err: unknown) => {
+    console.log("fallback", Array.isArray(res));
+
     if (
       !err ||
       typeof err !== 'object' ||
@@ -31,7 +34,7 @@ const circuitBreaker = (opts?: CircuitBreaker.Options): Handler => {
     res.end();
   });
 
-  return (_req, res, next) => {
+  return async (_req, res, next) => {
     breaker.fire(res);
     next();
   };

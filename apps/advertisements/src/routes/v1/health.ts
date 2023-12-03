@@ -14,6 +14,14 @@ healthRouter.get(
     }),
   }),
   async (ctx) => {
+    const service = ctx.container.resolve('AdvertisementService');
+    const logger = ctx.container.resolve('logger');
+
+
+    console.log('Run');
+    const ads = await service.getPublicAdvertisements();
+    logger.info('ads', ads);
+    ctx.status = 200;
     ctx.body = {
       online: true,
       status: 'available',

@@ -8,6 +8,8 @@ if (typeof backendUrl !== 'string')
 
 const backend = ky
   .extend(authExtension())
-  .extend({ prefixUrl: backendUrl, mode: 'cors', credentials: 'include' });
+  .extend({ prefixUrl: backendUrl, mode: 'cors', credentials: 'include' })
+  .extend({
+}).get("/").json()
 
 export default backend;

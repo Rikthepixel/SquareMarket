@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  accounts_db:
+    image: mysql:latest
+    volumes:
+      - ./apps/accounts/db/data:/var/lib/mysql:delegated
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 3
+    ports:
+      - 3401:3306
+    env_file:
+      - ./apps/accounts/db/.env
+
+  advertisements_db:
+    image: mysql:latest
+    volumes:
+      - ./apps/advertisements/db/data:/var/lib/mysql:delegated
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 3
+    ports:
+      - 3402:3306
+    env_file:
+      - ./apps/advertisements/db/.env
