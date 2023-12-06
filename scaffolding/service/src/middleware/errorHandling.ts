@@ -1,4 +1,4 @@
-import Koa from 'koa';
+import Koa, { HttpError } from 'koa';
 import { InjectorContext } from 'koa-tioc';
 import IoCContainer from 'tioc';
 import BaseLogger from '../loggers/BaseLogger';
@@ -11,8 +11,16 @@ export default function errorHandling() {
     try {
       await next();
     } catch (error) {
-      const logger = ctx.container.resolve('logger');
-      logger.error(`Server error on path ${ctx.method}:${ctx.path}`, error);
+      if (!(error instanceof HttpError)) {
+        const logger = ctx.container.resolve('logger');
+        logger.error(`Server error on path ${ctx.method}:${ctx.path}`, error);
+
+        ctx.status = 500;
+        ctx.message = 'Internal server error';
+        return ctx;
+      }
+      ctx.status = error.status;
+      ctx.body = error.message;
     }
   };
 }

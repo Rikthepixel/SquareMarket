@@ -19,7 +19,8 @@ exports.up = async function (knex) {
 
   await knex.schema
     .createTable('users', function (table) {
-      addIds(table);
+      table.increments('id');
+      table.string('provider_id', 500).unique().index();
       table.string('username', 255);
       table.string('default_currency', 3);
     })

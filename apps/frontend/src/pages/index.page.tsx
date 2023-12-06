@@ -10,9 +10,10 @@ import {
   Text,
   TextInput,
 } from '@mantine/core';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { MdFilterAlt, MdLocationOn, MdSearch } from 'react-icons/md';
 import PageContainer from '@/components/page/Container';
+import backend from '@/adapters/backend';
 
 interface Advertisement {
   uid: string;

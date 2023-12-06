@@ -1,6 +1,15 @@
 version: "3.8"
 
 services:
+  mq:
+    image: rabbitmq:3.12-alpine
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ./docker/mq/data/:/var/lib/rabbitmq/
+      - ./docker/mq/log/:/var/log/rabbitmq
+
   accounts_db:
     image: mysql:latest
     volumes:

@@ -3,7 +3,11 @@ import { RouterParamContext } from '@koa/router';
 import z from 'zod';
 
 type InferSchema<TSchema extends z.ZodType | undefined | unknown> =
-  TSchema extends z.ZodType ? z.infer<TSchema> : TSchema extends unknown ? undefined : undefined;
+  TSchema extends z.ZodType
+    ? z.infer<TSchema>
+    : TSchema extends unknown
+      ? undefined
+      : undefined;
 
 type ZodMiddleware<TSchemas extends PropSchemas> = Koa.Middleware<
   Koa.DefaultState,
@@ -53,7 +57,7 @@ const validate =
       schemas.response.parse(ctx.body);
     } catch (err) {
       if (!(err instanceof z.ZodError)) throw err;
-      return ctx.throw(422, err);
+      return ctx.throw(422, err.toString());
     }
   };
 

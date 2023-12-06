@@ -1,6 +1,6 @@
 export interface User {
   id: number;
-  uid: string;
+  provider_id: string;
   username: string;
   default_currency: string;
 }

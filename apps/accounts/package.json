@@ -18,6 +18,7 @@
     "@types/koa__multer": "^2.0.7",
     "@types/koa__router": "^12.0.4",
     "@types/node": "^20.9.0",
+    "@types/rascal": "^10.0.9",
     "@typescript-eslint/eslint-plugin": "^6.10.0",
     "@typescript-eslint/parser": "^6.10.0",
     "concurrently": "^8.2.2",
@@ -37,11 +38,15 @@
     "@koa/multer": "^3.0.2",
     "@koa/router": "^12.0.1",
     "dotenv": "^16.3.1",
+    "isomorphic-dompurify": "^1.11.0",
+    "jwks-rsa": "^3.1.0",
     "knex": "^3.0.1",
     "koa": "^2.14.2",
+    "koa-jwt": "^4.0.4",
     "koa-tioc": "^0.4.0",
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.6.5",
+    "rascal": "^17.0.1",
     "tioc": "^0.3.0",
     "zod": "^3.22.4"
   }

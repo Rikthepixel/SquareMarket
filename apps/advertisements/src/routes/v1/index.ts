@@ -1,5 +1,5 @@
-import healthRouter from './health';
 import makeRouter from '../../helpers/router';
+import healthRouter from './health';
 
 const v1Router = makeRouter();
 

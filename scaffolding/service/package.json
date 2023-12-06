@@ -41,6 +41,7 @@
     "knex": "^3.0.1",
     "koa": "^2.14.2",
     "multer": "^1.4.5-lts.1",
+    "isomorphic-dompurify": "^1.11.0",
     "mysql2": "^3.6.5",
     "koa-tioc": "^0.4.0",
     "tioc": "^0.3.0",

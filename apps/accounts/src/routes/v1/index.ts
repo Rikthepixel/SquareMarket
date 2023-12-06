@@ -1,8 +1,10 @@
+import makeAppRouter from '../../helpers/router';
 import healthRouter from './health';
-import makeRouter from '../../helpers/router';
+import selfRouter from './self';
 
-const v1Router = makeRouter();
+const v1Router = makeAppRouter();
 
-v1Router.use(healthRouter.prefix('/health').routes());
+v1Router.use(selfRouter.prefix("/self").routes());
+v1Router.use(healthRouter.prefix("/health").routes());
 
 export default v1Router;

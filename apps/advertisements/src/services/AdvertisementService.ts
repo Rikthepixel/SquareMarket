@@ -1,22 +1,17 @@
-import Knex from 'knex';
-import { Advertisement } from '../models/Advertisement';
-import { User } from '../models/User';
+import AdvertisementRepository from '../repositories/advertisement/AdvertisementRepository';
 
 export default class AdvertisementService {
-  constructor(private db: Knex.Knex) {}
+  constructor(private adRepository: AdvertisementRepository) {}
 
-  async getPublicAdvertisements() {
-    return await this.db
-      .table<Advertisement, Advertisement>('advertisements as ads')
-      .whereNotNull('ads.published_at')
-      .join<Pick<User, 'username'>>('users', 'ads.user_id', '=', 'users.id')
-      .select(
-        'users.username',
-        'ads.uid',
-        'ads.title',
-        'ads.description',
-        'ads.price',
-        'ads.currency',
-      );
+  async getPublished() {
+    return this.adRepository.getPublished();
+  }
+
+  async getByUser(userId: number) {
+    return this.adRepository.getByUser(userId);
+  }
+
+  async getDraftsByUser(userId: number) {
+    return this.adRepository.getDraftsByUser(userId);
   }
 }

@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import validate from '../../middleware/validate';
-import makeRouter from '../../helpers/router';
+import makeRouter from "../../helpers/router";
+import validate from "../../middleware/validate";
+import { healthResponseSchema } from "../../responses/health/HealthResponse";
 
 const healthRouter = makeRouter();
 
@@ -8,19 +8,9 @@ healthRouter.get(
   'Health',
   '/',
   validate({
-    response: z.object({
-      online: z.boolean(),
-      status: z.string(),
-    }),
+    response: healthResponseSchema,
   }),
   async (ctx) => {
-    const service = ctx.container.resolve('AdvertisementService');
-    const logger = ctx.container.resolve('logger');
-
-
-    console.log('Run');
-    const ads = await service.getPublicAdvertisements();
-    logger.info('ads', ads);
     ctx.status = 200;
     ctx.body = {
       online: true,
