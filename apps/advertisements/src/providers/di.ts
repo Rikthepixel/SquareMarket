@@ -1,25 +1,23 @@
-import IoCContainer from 'tioc';
-
 import Knex from 'knex';
 import ConsoleLogger from '../loggers/ConsoleLogger';
-import AdvertisementService from '../services/AdvertisementService';
+import IoCContainer from 'tioc';
+import { createBrokerAsPromised } from 'rascal';
+import dbConfig from '../configs/db';
+import authConfig from '../configs/auth';
+import brokerConfig from '../configs/broker';
 import KnexAdvertisementRepository from '../repositories/advertisement/KnexAdvertisementRepository';
+import AdvertisementService from '../services/AdvertisementService';
+import auth from '../middleware/auth';
 
 const depenencyProvider = (c: IoCContainer) =>
   c
-    .addSingleton('db', () =>
-      Knex({
-        client: 'mysql2',
-        connection: {
-          host: process.env.DATABASE_HOST,
-          port: parseInt(process.env.DATABASE_PORT ?? '0'),
-          database: process.env.DATABASE_NAME,
-          user: process.env.DATABASE_USER,
-          password: process.env.DATABASE_PASSWORD,
-        },
-      }),
+    .addSingleton('db', () => Knex(dbConfig))
+    .addSingleton(
+      'broker',
+      async () => await createBrokerAsPromised(brokerConfig),
     )
     .addSingleton('logger', () => new ConsoleLogger())
+    .addScoped('authMiddleware', () => auth(authConfig))
     .addScoped(
       'AdvertisementRepository',
       (c) => new KnexAdvertisementRepository(c.resolve('db')),
