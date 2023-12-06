@@ -52,9 +52,6 @@ const validate =
       };
 
       await next();
-
-      if (!schemas.response) return;
-      schemas.response.parse(ctx.body);
     } catch (err) {
       if (!(err instanceof z.ZodError)) throw err;
       return ctx.throw(422, err.toString());

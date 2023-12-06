@@ -15,9 +15,8 @@ selfRouter
     '/status',
     validate({ response: profileStatusResponseSchema }),
     async (ctx) => {
-      const status = await ctx.container
-        .resolve('UserService')
-        .getProfileStatus(ctx.state.user.sub);
+      const userService = await ctx.container.resolve('UserService');
+      const status = await userService.getProfileStatus(ctx.state.user.sub);
 
       ctx.status = 200;
       ctx.body = {
@@ -30,8 +29,8 @@ selfRouter
     '/setup',
     validate({ body: finishProfileRequestSchema }),
     async (ctx) => {
-      await ctx.container
-        .resolve('UserService')
+      const userService = await ctx.container.resolve('UserService');
+      await userService
         .finishProfileSetup(ctx.state.user.sub, ctx.validated.body)
         .catch(
           catchType(ProfileAlreadyCompleteException, (e) => {
@@ -39,7 +38,7 @@ selfRouter
           }),
         );
 
-      ctx.status = 200
+      ctx.status = 200;
     },
   );
 

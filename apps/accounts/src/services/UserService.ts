@@ -1,13 +1,16 @@
-import { BrokerAsPromised } from 'rascal';
 import { User } from '../entities/User';
 import ProfileAlreadyCompleteException from '../exceptions/self/ProfileAlreadyComplete';
 import UserRepository from '../repositories/user/UserRepository';
+import CreateUserMessage from '../messages/user/CreateUserMessage';
 
 export interface FinishProfileProps
   extends Pick<User, 'username' | 'default_currency'> {}
 
 export default class UserService {
-  constructor(private userRepository: UserRepository, private mq: BrokerAsPromised) {}
+  constructor(
+    private userRepository: UserRepository,
+    private createUserMessage: CreateUserMessage,
+  ) {}
 
   async getProfileStatus(providerId: string) {
     const user = await this.userRepository.get(providerId);
@@ -21,10 +24,13 @@ export default class UserService {
       throw new ProfileAlreadyCompleteException();
     }
 
-    await this.userRepository.create({
+    const userToInsert = {
       provider_id: providerId,
       username: props.username,
-      default_currency: props.default_currency
-    })
+      default_currency: props.default_currency,
+    } as const;
+
+    await this.createUserMessage.publish(userToInsert);
+    // await this.userRepository.create(userToInsert);
   }
 }

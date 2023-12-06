@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   Image,
   Text,
@@ -20,12 +20,13 @@ import {
 import { IoMdPricetag } from 'react-icons/io';
 import { IconType } from 'react-icons/lib';
 import { useDisclosure } from '@mantine/hooks';
-import { Link, useRoute } from 'wouter';
+import { Link, useLocation, useRoute } from 'wouter';
 
 import iconSrc from '@/assets/images/icon.png';
 
 import { MaybePromise } from '@/helpers/MaybePromise';
 import useAuth from '@/lib/auth/stores/useAuth';
+import useProfile from '@/stores/useProfile';
 
 interface MenuItem {
   /**
@@ -87,6 +88,19 @@ const NavButton = ({ action, icon: Icon, text }: MenuItem) => {
 export default function MainLayout({ children }: React.PropsWithChildren) {
   const [opened, { open, close }] = useDisclosure();
   const auth = useAuth();
+  const { status, getStatus, clearStatus } = useProfile();
+  const [location, setLocation] = useLocation();
+
+  useEffect(() => {
+    clearStatus();
+    if (!auth.user) return;
+    getStatus();
+  }, [auth.user, getStatus, clearStatus]);
+
+  useEffect(() => {
+    if (status !== 'setup-required' && location !== '/profile/finish') return;
+    setLocation('/profile/finish');
+  }, [status, location]);
 
   const menuItems = useMemo<MenuItem[]>(
     () => [
@@ -180,7 +194,7 @@ export default function MainLayout({ children }: React.PropsWithChildren) {
           ))}
         </Stack>
       </AppShell.Navbar>
-      <AppShell.Main>{children}</AppShell.Main>
+      <AppShell.Main styles={{ main: { display: "flex", flexDirection: "column" }}}>{children}</AppShell.Main>
     </AppShell>
   );
 }

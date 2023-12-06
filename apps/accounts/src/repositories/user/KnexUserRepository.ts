@@ -21,6 +21,6 @@ export default class KnexUserRepository implements UserRepository {
   }
 
   async create(user: CreateUser) {
-    await this.db.insert(user);
+    await this.db.insert(user).into('users');
   }
 }
