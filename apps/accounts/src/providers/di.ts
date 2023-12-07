@@ -32,7 +32,7 @@ const depenencyProvider = (c: IoCContainer) =>
       async (c) =>
         new UserService(
           c.resolve('UserRepository'),
-          await c.resolve('CreateUserMessage'),
+          await c.resolve('SyncUserMessage'),
         ),
     );
 
