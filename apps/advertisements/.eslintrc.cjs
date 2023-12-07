@@ -5,5 +5,7 @@ module.exports = {
   ignorePatterns: ["dist", ".eslintrc.cjs", "db"],
   parser: "@typescript-eslint/parser",
   plugins: [],
-  rules: {},
+  rules: {
+    '@typescript-eslint/no-explicit-any': 'off',
+  },
 };

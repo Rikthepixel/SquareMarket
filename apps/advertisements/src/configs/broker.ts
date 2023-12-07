@@ -8,24 +8,23 @@ const brokerConfig = withDefaultConfig({
       },
       exchanges: {
         accounts_ex: {
+          assert: true,
           type: 'topic',
         },
       },
-      queues: ['accounts_q'],
-      bindings: ['accounts_ex[users.*] -> accounts_q'],
-      publications: {
-        user_created_pub: {
-          exchange: 'accounts_ex',
-          routingKey: 'users.created',
-        },
-        user_name_change_pub: {
-          exchange: 'accounts_ex',
-          routingKey: 'users.name_change',
+      queues: ['ads_user_queue'],
+      bindings: {
+        'accounts_ex-accounts_queue': {
+          source: 'accounts_ex',
+          destination: 'ads_user_queue',
+          destinationType: 'queue',
+          bindingKey: 'users.*',
         },
       },
+      publications: {},
       subscriptions: {
         users_sub: {
-          queue: 'accounts_q',
+          queue: 'ads_user_queue',
         },
       },
     },

@@ -10,6 +10,5 @@ export function finishProfile(request: FinishProfileRequest) {
   return backend
     .post('v1/accounts/self/setup', {
       json: request,
-    })
-    .json();
+    });
 }

@@ -29,7 +29,7 @@ const app = new Koa()
 export type AppContext = (typeof app)['context'];
 
 const initContainer = depenencyProvider(new IoCContainer());
-initContainer.resolve('broker').then((broker) => {
+initContainer.resolve('broker').then(() => {
   console.log('Broker started');
 });
 

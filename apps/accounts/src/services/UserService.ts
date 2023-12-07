@@ -30,7 +30,7 @@ export default class UserService {
       default_currency: props.default_currency,
     } as const;
 
-    await this.createUserMessage.publish(userToInsert);
-    // await this.userRepository.create(userToInsert);
+    this.createUserMessage.publish(userToInsert);
+    await this.userRepository.create(userToInsert);
   }
 }

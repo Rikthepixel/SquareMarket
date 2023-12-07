@@ -12,15 +12,8 @@ const brokerConfig = withDefaultConfig({
           type: 'topic',
         },
       },
-      queues: ['accounts_queue'],
-      bindings: {
-        'accounts_ex-accounts_queue': {
-          source: 'accounts_ex',
-          destination: 'accounts_queue',
-          destinationType: 'queue',
-          bindingKey: 'users.*',
-        },
-      },
+      queues: [],
+      bindings: {},
       publications: {
         user_create: {
           exchange: 'accounts_ex',

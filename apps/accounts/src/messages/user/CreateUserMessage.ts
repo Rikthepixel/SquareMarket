@@ -1,5 +1,3 @@
-import { Message } from 'amqplib';
-import { AckOrNack } from 'rascal';
 import { z } from 'zod';
 import BaseMessage from '../BaseMessage';
 
@@ -12,13 +10,4 @@ const schema = z.object({
 export default class CreateUserMessage extends BaseMessage<typeof schema> {
   name = 'user_create';
   schema = schema;
-
-  onMessage(
-    msg: Message,
-    content: z.infer<typeof this.schema>,
-    ackOrNack: AckOrNack,
-  ) {
-    console.log(msg, content);
-    ackOrNack();
-  }
 }

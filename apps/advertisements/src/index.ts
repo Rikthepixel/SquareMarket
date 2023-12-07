@@ -1,5 +1,7 @@
-import Koa from 'koa';
 import { config as loadEnv } from 'dotenv';
+loadEnv();
+
+import Koa from 'koa';
 
 import injector from 'koa-tioc';
 import { bodyParser } from '@koa/bodyparser';
@@ -9,8 +11,8 @@ import depenencyProvider from './providers/di';
 import router from './routes';
 import errorHandling from './middleware/errorHandling';
 import requestLogger from './middleware/requestLogger';
+import IoCContainer from 'tioc';
 
-loadEnv();
 
 const PORT: number = parseInt(process.env.SERVER_PORT ?? '8001');
 
@@ -26,6 +28,12 @@ const app = new Koa()
   );
 
 export type AppContext = (typeof app)['context'];
+
+const initContainer = depenencyProvider(new IoCContainer());
+initContainer.resolve('broker').then(async () => {
+  console.log('Broker started');
+  initContainer.resolve('UsersSubscription').then((s) => s.listen());
+});
 
 app
   .use(router.routes())

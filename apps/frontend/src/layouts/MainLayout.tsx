@@ -4,7 +4,6 @@ import {
   Text,
   AppShell,
   Burger,
-  ActionIcon,
   Button,
   Stack,
   Group,
@@ -18,72 +17,15 @@ import {
   MdLogout,
 } from 'react-icons/md';
 import { IoMdPricetag } from 'react-icons/io';
-import { IconType } from 'react-icons/lib';
 import { useDisclosure } from '@mantine/hooks';
-import { Link, useLocation, useRoute } from 'wouter';
+import { useLocation } from 'wouter';
 
 import iconSrc from '@/assets/images/icon.png';
 
-import { MaybePromise } from '@/helpers/MaybePromise';
 import useAuth from '@/lib/auth/stores/useAuth';
 import useProfile from '@/stores/useProfile';
+import NavButton, { NavButtonProps } from '@/components/nav/NavButton';
 
-interface MenuItem {
-  /**
-   * - Strings will be interpreted as urls for anchors
-   * - Functions will be interpreted as onClicks for buttons
-   */
-  action: string | (() => MaybePromise<void>);
-  text: string;
-  icon: IconType;
-}
-
-const NavButton = ({ action, icon: Icon, text }: MenuItem) => {
-  const [isActive] = useRoute(
-    typeof action === 'string' ? action : '/somerandomstringurl',
-  );
-  const isLink = typeof action === 'string';
-  const commonProps = useMemo(
-    () =>
-      ({
-        variant: isActive ? 'filled' : 'light',
-        title: text,
-        'aria-label': text,
-        onClick: isLink ? undefined : action,
-        component: isLink ? 'a' : undefined,
-      }) as const,
-    [isLink, action, text, isActive],
-  );
-
-  const Wrapper = (isLink
-    ? Link
-    : React.Fragment) as unknown as React.ComponentType<
-    React.ComponentProps<'div'>
-  >;
-  const wrapperProps = isLink ? { href: action } : {};
-
-  return (
-    <>
-      <Wrapper {...(wrapperProps as object)}>
-        <ActionIcon {...commonProps} fz="1.5rem" size="xl" visibleFrom="sm">
-          <Icon />
-        </ActionIcon>
-      </Wrapper>
-      <Wrapper {...(wrapperProps as object)}>
-        <Button
-          {...commonProps}
-          fz="1.25rem"
-          size="lg"
-          hiddenFrom="sm"
-          fullWidth
-          rightSection={<Icon />}
-        >
-          {text}
-        </Button>
-      </Wrapper>
-    </>
-  );
-};
 
 export default function MainLayout({ children }: React.PropsWithChildren) {
   const [opened, { open, close }] = useDisclosure();
@@ -99,10 +41,10 @@ export default function MainLayout({ children }: React.PropsWithChildren) {
 
   useEffect(() => {
     if (status !== 'setup-required' && location !== '/profile/finish') return;
-    setLocation('/profile/finish');
-  }, [status, location]);
+    setLocation('/profile/finish', { replace: true });
+  }, [status, location, setLocation]);
 
-  const menuItems = useMemo<MenuItem[]>(
+  const menuItems = useMemo<NavButtonProps[]>(
     () => [
       {
         action: '/',
@@ -194,7 +136,11 @@ export default function MainLayout({ children }: React.PropsWithChildren) {
           ))}
         </Stack>
       </AppShell.Navbar>
-      <AppShell.Main styles={{ main: { display: "flex", flexDirection: "column" }}}>{children}</AppShell.Main>
+      <AppShell.Main
+        styles={{ main: { display: 'flex', flexDirection: 'column' } }}
+      >
+        {children}
+      </AppShell.Main>
     </AppShell>
   );
 }

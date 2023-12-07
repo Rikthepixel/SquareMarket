@@ -13,14 +13,23 @@ import {
   Divider,
 } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
+import { useEffect } from 'react';
 import { MdSave } from 'react-icons/md';
+import { useLocation } from 'wouter';
 
-export default function finishProfile() {
-  const { finish } = useProfile();
+export default function FinishProfilePage() {
+  const { status, finish, getStatus } = useProfile();
+  const [, setLocation] = useLocation();
+
   const { getInputProps, onSubmit } = useForm<FinishProfileRequest>({
     validate: zodResolver(finishProfileRequestSchema),
     validateInputOnChange: true,
   });
+
+  useEffect(() => {
+    if (status !== 'complete') return;
+    setLocation('/', { replace: true });
+  }, [status, setLocation]);
 
   return (
     <Card
@@ -30,7 +39,12 @@ export default function finishProfile() {
       p="md"
       maw="100%"
       component="form"
-      onSubmit={onSubmit((req) => finish(req))}
+      onSubmit={onSubmit((req) =>
+        finish(req).then(async () => {
+          console.log('Done');
+          await getStatus();
+        }),
+      )}
     >
       <Card.Section p="md" bg="red">
         <Text component="h1" fz="2rem" ta="center" c="white">
