@@ -77,5 +77,6 @@ export default class BaseSubscription {
       schema,
       handler: handler as MessageHandler<z.ZodSchema>,
     });
+    return this
   }
 }

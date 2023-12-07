@@ -25,7 +25,7 @@ export interface UserAdvertisement
 export interface UserDraftAdvertisement
   extends Omit<UserAdvertisement, 'published_at'> {}
 
-export interface CreateAdvertisement extends Omit<Advertisement, 'id'> {}
+export interface InsertableAdvertisement extends Omit<Advertisement, 'id'> {}
 
 export default interface AdvertisementRepository {
   getPublished: () => Promise<PublicAdvertisement[]>;
@@ -37,5 +37,5 @@ export default interface AdvertisementRepository {
     newDraftStatus: boolean,
     publishedAt: Date | null,
   ) => Promise<void>;
-  create: (ad: CreateAdvertisement) => Promise<void>;
+  create: (ad: InsertableAdvertisement) => Promise<void>;
 }
