@@ -1,6 +1,6 @@
 import Knex from 'knex';
 import AdvertisementRepository, {
-  CreateAdvertisement,
+  InsertableAdvertisement,
   PublicAdvertisement,
   UserAdvertisement,
   UserDraftAdvertisement,
@@ -134,7 +134,7 @@ export default class KnexAdvertisementRepository
       .update({ draft: newDraftStatus, published_at: publishedAt });
   }
 
-  async create(ad: CreateAdvertisement) {
+  async create(ad: InsertableAdvertisement) {
     await this.db.insert(ad);
   }
 }

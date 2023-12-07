@@ -35,7 +35,7 @@ const depenencyProvider = (c: IoCContainer) =>
     )
     .addScoped(
       'AdvertisementService',
-      (c) => new AdvertisementService(c.resolve('AdvertisementRepository')),
+      (c) => new AdvertisementService(c.resolve('AdvertisementRepository'), c.resolve("UserRespository")),
     )
     .addSingleton(
       'UsersSubscription',

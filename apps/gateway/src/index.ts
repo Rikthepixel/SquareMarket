@@ -15,6 +15,11 @@ const AUTH_CONFIG: AuthOptions = {
   tokenSigningAlg: 'RS256',
 };
 
+const SERVICES = {
+  accounts: process.env.ACCOUNTS_SERVICE_URL ?? 'http://localhost:8001',
+  ads: process.env.ADVERTISEMENTS_SERVICE_URL ?? 'http://localhost:8002',
+} as const;
+
 gateway({
   middlewares: [
     cors({
@@ -40,7 +45,12 @@ gateway({
           {
             prefix: '/v1/accounts/self',
             prefixRewrite: '/v1/self',
-            target: process.env.ACCOUNTS_SERVICE_URL ?? 'http://localhost:8001',
+            target: SERVICES.accounts,
+          },
+          {
+            prefix: '/v1/ads/manage',
+            prefixRewrite: '/v1/manage',
+            target: SERVICES.ads,
           },
         ],
         AUTH_CONFIG,
@@ -48,13 +58,12 @@ gateway({
       {
         prefix: '/v1/ads',
         prefixRewrite: '/v1',
-        target:
-          process.env.ADVERTISEMENTS_SERVICE_URL ?? 'http://localhost:8002',
+        target: SERVICES.ads,
       },
       {
         prefix: '/v1/accounts',
         prefixRewrite: '/v1',
-        target: process.env.ACCOUNTS_SERVICE_URL ?? 'http://localhost:8001',
+        target: SERVICES.accounts,
       },
     ],
     {},

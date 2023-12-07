@@ -27,6 +27,6 @@ export default class UsersSubscription extends BaseSubscription {
         });
         ack()
       },
-    );
+    )
   }
 }
