@@ -24,7 +24,7 @@ export default class BaseSubscription {
 
   async listen() {
     const session = (await this.broker.subscribe('users_sub'))
-      .on('message', (msg, content, ackOrNack) => {
+      .on('message', async (msg, content, ackOrNack) => {
         const listener = this.listeners.find((l) => {
           return (
             (typeof l.key === 'string' && l.key === msg.fields.routingKey) ||
@@ -50,7 +50,7 @@ export default class BaseSubscription {
         }
 
         try {
-          listener.handler(result.data, ackOrNack, msg);
+          await listener.handler(result.data, ackOrNack, msg);
           ackOrNack();
         } catch (err) {
           if (err instanceof Error) {

@@ -15,13 +15,9 @@ const brokerConfig = withDefaultConfig({
       queues: [],
       bindings: {},
       publications: {
-        user_create: {
+        user_sync: {
           exchange: 'accounts_ex',
-          routingKey: 'users.create',
-        },
-        user_name_change: {
-          exchange: 'accounts_ex',
-          routingKey: 'users.name_change',
+          routingKey: 'users.sync',
         },
       },
       subscriptions: {},

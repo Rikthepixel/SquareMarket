@@ -7,7 +7,7 @@ const schema = z.object({
   default_currency: z.string(),
 });
 
-export default class CreateUserMessage extends BaseMessage<typeof schema> {
-  name = 'user_create';
+export default class SyncUserMessage extends BaseMessage<typeof schema> {
+  name = 'user_sync';
   schema = schema;
 }

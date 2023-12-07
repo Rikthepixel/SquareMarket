@@ -1,5 +1,5 @@
 import Knex from 'knex';
-import UserRepository, { CreateUser } from './UserRepository';
+import UserRepository, { InsertableUser } from './UserRepository';
 import { User } from '../../entities/User';
 
 export default class KnexUserRepository implements UserRepository {
@@ -20,7 +20,11 @@ export default class KnexUserRepository implements UserRepository {
       );
   }
 
-  async create(user: CreateUser) {
-    await this.db.insert(user).into('users');
+  async createOrUpdate(user: InsertableUser) {
+    await this.db
+      .insert(user)
+      .into('users')
+      .onConflict(['provider_id'])
+      .merge(['username', 'default_currency']);
   }
 }

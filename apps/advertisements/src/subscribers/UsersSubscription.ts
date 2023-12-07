@@ -13,14 +13,14 @@ export default class UsersSubscription extends BaseSubscription {
     super(broker, logger);
 
     this.register(
-      (key) => key.endsWith('create'),
+      (key) => key.endsWith('sync'),
       z.object({
         provider_id: z.string(),
         username: z.string(),
         default_currency: z.string(),
       }),
-      (content, ack) => {
-        userService.create({
+      async (content, ack) => {
+        await userService.createOrUpdate({
           provider_id: content.provider_id,
           username: content.username,
           default_currency: content.default_currency,

@@ -1,7 +1,7 @@
 import { User } from '../entities/User';
 import ProfileAlreadyCompleteException from '../exceptions/self/ProfileAlreadyComplete';
+import SyncUserMessage from '../messages/user/SyncUserMessage';
 import UserRepository from '../repositories/user/UserRepository';
-import CreateUserMessage from '../messages/user/CreateUserMessage';
 
 export interface FinishProfileProps
   extends Pick<User, 'username' | 'default_currency'> {}
@@ -9,7 +9,7 @@ export interface FinishProfileProps
 export default class UserService {
   constructor(
     private userRepository: UserRepository,
-    private createUserMessage: CreateUserMessage,
+    private syncUserMessage: SyncUserMessage,
   ) {}
 
   async getProfileStatus(providerId: string) {
@@ -30,7 +30,7 @@ export default class UserService {
       default_currency: props.default_currency,
     } as const;
 
-    this.createUserMessage.publish(userToInsert);
+    this.syncUserMessage.publish(userToInsert);
     await this.userRepository.create(userToInsert);
   }
 }

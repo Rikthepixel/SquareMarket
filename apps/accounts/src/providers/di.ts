@@ -8,7 +8,7 @@ import { createBrokerAsPromised } from 'rascal';
 import dbConfig from '../configs/db';
 import authConfig from '../configs/auth';
 import brokerConfig from '../configs/broker';
-import CreateUserMessage from '../messages/user/CreateUserMessage';
+import SyncUserMessage from '../messages/user/SyncUserMessage';
 
 const depenencyProvider = (c: IoCContainer) =>
   c
@@ -23,9 +23,9 @@ const depenencyProvider = (c: IoCContainer) =>
     .addScoped('authMiddleware', () => auth(authConfig))
     .addScoped('UserRepository', (c) => new KnexUserRepository(c.resolve('db')))
     .addSingleton(
-      'CreateUserMessage',
+      'SyncUserMessage',
       async (c) =>
-        new CreateUserMessage(await c.resolve('broker'), c.resolve('logger')),
+        new SyncUserMessage(await c.resolve('broker'), c.resolve('logger')),
     )
     .addScoped(
       'UserService',
