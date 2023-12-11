@@ -3,9 +3,13 @@ import { UidOrId } from '../../helpers/identifiers';
 
 export default interface CategoryPropertyOptionRepository {
   getMultipleByUid(uids: string[]): Promise<CategoryPropertyOption[]>;
-  getIdsByUids(uids: string[]): Promise<number[]>
-  isValidForCategory(
+  /**
+   * Returns the options if it is valid, if it isn't it returns null
+   */
+  getValidForCategory(
     categoryUidOrId: UidOrId,
     options: UidOrId[],
-  ): Promise<boolean>;
+  ): Promise<
+    Pick<CategoryPropertyOption, 'id' | 'uid' | 'category_property_id'>[] | null
+  >;
 }

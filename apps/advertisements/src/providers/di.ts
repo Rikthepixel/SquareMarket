@@ -12,7 +12,6 @@ import KnexUserRepository from '../repositories/user/KnexUserRepository';
 import UserService from '../services/UserService';
 import UsersSubscription from '../subscribers/UsersSubscription';
 import KnexCategoryRepository from '../repositories/category/KnexCategoryRepository';
-import KnexCategoryPropertyRepository from '../repositories/category-property/KnexCategoryPropertyRepository';
 import KnexCategoryPropertyOptionRepository from '../repositories/category-property-option/KnexCategoryPropertyOptionRepository';
 import KnexCategoryPropertyOptionValueRepository from '../repositories/category-property-option-value/KnexCategoryPropertyOptionValueRepository';
 
@@ -38,10 +37,6 @@ const depenencyProvider = (c: IoCContainer) =>
       (c) => new KnexCategoryRepository(c.resolve('db')),
     )
     .addScoped(
-      'CategoryPropertyRepository',
-      (c) => new KnexCategoryPropertyRepository(c.resolve('db')),
-    )
-    .addScoped(
       'CategoryPropertyOptionRepository',
       (c) => new KnexCategoryPropertyOptionRepository(c.resolve('db')),
     )
@@ -60,7 +55,6 @@ const depenencyProvider = (c: IoCContainer) =>
           c.resolve('AdvertisementRepository'),
           c.resolve('UserRespository'),
           c.resolve('CategoryRepository'),
-          c.resolve('CategoryPropertyRepository'),
           c.resolve('CategoryPropertyOptionRepository'),
           c.resolve('CategoryPropertyOptionValueRepository'),
         ),

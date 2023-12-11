@@ -1,19 +1,14 @@
 import { Knex } from 'knex';
 import CategoryPropertyOptionRepository from './CategoryPropertyOptionRepository';
 import CategoryPropertyOption from '../../entities/CategoryPropertyOption';
-import {
-  UidOrId,
-  castUidOrId,
-  getType,
-  isId,
-} from '../../helpers/identifiers';
+import { UidOrId, castUidOrId, getType, isId } from '../../helpers/identifiers';
 
 export default class KnexCategoryPropertyOptionRepository
   implements CategoryPropertyOptionRepository
 {
   constructor(private db: Knex) {}
 
-  getMultipleByUid(uids: string[]): Promise<CategoryPropertyOption[]> {
+  getMultipleByUid(uids: string[]) {
     return this.db
       .table('category_property_options as opts')
       .whereIn(
@@ -23,10 +18,7 @@ export default class KnexCategoryPropertyOptionRepository
       .select();
   }
 
-  async isValidForCategory(
-    categoryUidOrId: UidOrId,
-    options: UidOrId[],
-  ): Promise<boolean> {
+  async getValidForCategory(categoryUidOrId: UidOrId, options: UidOrId[]) {
     const optionIds: number[] = [];
     const optionUids: string[] = [];
 
@@ -61,18 +53,18 @@ export default class KnexCategoryPropertyOptionRepository
       )
       .select<
         Pick<CategoryPropertyOption, 'id' | 'uid' | 'category_property_id'>[]
-      >('id', 'uid', 'category_property_option_id');
+      >('opts.id', 'opts.uid', 'opts.category_property_option_id');
 
-    if (result.length !== options.length) return false;
+    if (result.length !== options.length) return null;
 
     const occurredPropertyIds: number[] = [];
     for (const resultOption of result) {
       if (occurredPropertyIds.includes(resultOption.category_property_id)) {
-        return false;
+        return null;
       }
       occurredPropertyIds.push(resultOption.category_property_id);
     }
 
-    return true;
+    return result;
   }
 }

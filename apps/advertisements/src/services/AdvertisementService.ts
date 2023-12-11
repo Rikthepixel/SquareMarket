@@ -4,7 +4,6 @@ import AdvertisementRepository from '../repositories/advertisement/Advertisement
 import UserRepository from '../repositories/user/UserRepository';
 import NotFoundException from '../exceptions/common/NotFound';
 import CategoryRepository from '../repositories/category/CategoryRepository';
-import CategoryPropertyRepository from '../repositories/category-property/CategoryPropertyRepository';
 import CategoryPropertyOptionRepository from '../repositories/category-property-option/CategoryPropertyOptionRepository';
 import CategoryPropertyOptionValueRepository, {
   InsertableOptionValue,
@@ -27,7 +26,6 @@ export default class AdvertisementService {
     private adRepository: AdvertisementRepository,
     private userRepository: UserRepository,
     private categoryRepository: CategoryRepository,
-    private propRepository: CategoryPropertyRepository,
     private optRepository: CategoryPropertyOptionRepository,
     private optValueRepository: CategoryPropertyOptionValueRepository,
   ) {}
@@ -56,12 +54,12 @@ export default class AdvertisementService {
       throw new NotFoundException(!user ? 'User' : 'Category');
     }
 
-    const validProps = await this.optRepository.isValidForCategory(
+    const validOptions = await this.optRepository.getValidForCategory(
       category.id,
       props.property_option_uids,
     );
 
-    if (!validProps) {
+    if (!validOptions) {
       throw new BadRequestException(
         'property_option_uids',
         'they are not valid for the given category',
@@ -81,15 +79,14 @@ export default class AdvertisementService {
     } as const;
 
     const insertedAd = await this.adRepository.create(adToInsert);
-    const optionValuesToInsert = await this.optRepository
-      .getIdsByUids(props.property_option_uids)
-      .then((ids) =>
-        ids.map<InsertableOptionValue>((option_id) => ({
-          uid: randomUUID(),
-          advertisement_id: insertedAd.id,
-          category_property_option_id: option_id,
-        })),
-      );
+
+    const optionValuesToInsert = validOptions.map<InsertableOptionValue>(
+      (option) => ({
+        uid: randomUUID(),
+        advertisement_id: insertedAd.id,
+        category_property_option_id: option.id,
+      }),
+    );
 
     await this.optValueRepository.createMultiple(optionValuesToInsert);
   }

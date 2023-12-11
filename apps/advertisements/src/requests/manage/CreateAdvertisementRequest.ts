@@ -9,19 +9,7 @@ export const createAdvertisementRequestSchema = z.object({
   currency: z.string().length(3),
   draft: z.boolean(),
 
-  properties: z.array(
-    z
-      .object({
-        property_uid: z.string(),
-        option_uid: z.string(),
-      })
-      .or(
-        z.object({
-          property_uid: z.string(),
-          value: z.string(),
-        }),
-      ),
-  ),
+  property_option_uids: z.array(z.string()),
 });
 
 export type CreateAdvertisementRequest = z.infer<
