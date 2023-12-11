@@ -1,0 +1,78 @@
+import { Knex } from 'knex';
+import CategoryPropertyOptionRepository from './CategoryPropertyOptionRepository';
+import CategoryPropertyOption from '../../entities/CategoryPropertyOption';
+import {
+  UidOrId,
+  castUidOrId,
+  getType,
+  isId,
+} from '../../helpers/identifiers';
+
+export default class KnexCategoryPropertyOptionRepository
+  implements CategoryPropertyOptionRepository
+{
+  constructor(private db: Knex) {}
+
+  getMultipleByUid(uids: string[]): Promise<CategoryPropertyOption[]> {
+    return this.db
+      .table('category_property_options as opts')
+      .whereIn(
+        'opts.uid',
+        uids.map((u) => this.db.fn.uuidToBin(u)),
+      )
+      .select();
+  }
+
+  async isValidForCategory(
+    categoryUidOrId: UidOrId,
+    options: UidOrId[],
+  ): Promise<boolean> {
+    const optionIds: number[] = [];
+    const optionUids: string[] = [];
+
+    for (const opt of options) {
+      if (isId(opt)) {
+        optionIds.push(opt);
+        continue;
+      }
+      optionUids.push(opt);
+    }
+
+    const result = await this.db
+      .table('category_property_options as opts')
+      .distinct('opts.id')
+      .whereIn('opts.id', optionIds)
+      .orWhereIn('opts.uid', optionUids)
+      .innerJoin(
+        'category_properties as props',
+        'props.id',
+        '=',
+        'opts.category_property_id',
+      )
+      .innerJoin(
+        'categories as cats',
+        'cats.id',
+        '=',
+        'category_properties.category_id',
+      )
+      .where(
+        `cats.${getType(categoryUidOrId)}`,
+        castUidOrId(categoryUidOrId, this.db.fn.uuidToBin),
+      )
+      .select<
+        Pick<CategoryPropertyOption, 'id' | 'uid' | 'category_property_id'>[]
+      >('id', 'uid', 'category_property_option_id');
+
+    if (result.length !== options.length) return false;
+
+    const occurredPropertyIds: number[] = [];
+    for (const resultOption of result) {
+      if (occurredPropertyIds.includes(resultOption.category_property_id)) {
+        return false;
+      }
+      occurredPropertyIds.push(resultOption.category_property_id);
+    }
+
+    return true;
+  }
+}

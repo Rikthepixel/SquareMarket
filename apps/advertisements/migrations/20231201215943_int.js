@@ -67,6 +67,7 @@ exports.up = async function (knex) {
     })
     .createTable('category_property_option_values', function (table) {
       addIds(table);
+
       table
         .integer('advertisement_id')
         .unsigned()
@@ -79,20 +80,6 @@ exports.up = async function (knex) {
         .references('category_property_options.id')
         .withKeyName('cat_prop_opt_value_to_cat_prop_opt')
         .onDelete('cascade');
-    })
-    .createTable('category_property_values', function (table) {
-      addIds(table);
-      table
-        .integer('advertisement_id')
-        .unsigned()
-        .references('advertisements.id')
-        .onDelete('cascade');
-      table
-        .integer('category_property_id')
-        .unsigned()
-        .references('category_properties.id')
-        .onDelete('cascade');
-      table.string('value', 255);
     })
     .createTable('images', function (table) {
       addIds(table);
@@ -110,7 +97,6 @@ exports.up = async function (knex) {
 exports.down = async function (knex) {
   await knex.schema
     .dropTableIfExists('images')
-    .dropTableIfExists('category_property_values')
     .dropTableIfExists('category_property_option_values')
     .dropTableIfExists('advertisements')
     .dropTableIfExists('category_property_options')

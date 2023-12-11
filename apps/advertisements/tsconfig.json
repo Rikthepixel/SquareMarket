@@ -34,7 +34,6 @@
     "excludeDirectories": ["**/node_modules", "dist"]
   },
   "exclude": [
-    "tests",
     "coverage",
     "node_modules",
     "dist",

@@ -37,5 +37,5 @@ export default interface AdvertisementRepository {
     newDraftStatus: boolean,
     publishedAt: Date | null,
   ) => Promise<void>;
-  create: (ad: InsertableAdvertisement) => Promise<void>;
+  create: (ad: InsertableAdvertisement) => Promise<Advertisement>;
 }

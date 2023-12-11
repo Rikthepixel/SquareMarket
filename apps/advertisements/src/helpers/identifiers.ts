@@ -1,11 +1,18 @@
-export type UidOrId = number | Buffer;
+export type UidOrId = number | string;
 
-export function isUid(uid_or_id: UidOrId): uid_or_id is Buffer {
-  return uid_or_id instanceof Buffer;
+export function isUid(uidOrId: UidOrId): uidOrId is String {
+  return typeof uidOrId === 'string';
 }
 
-export function isId(uid_or_id: UidOrId): uid_or_id is number {
-  return uid_or_id instanceof Number;
+export function isId(uidOrId: UidOrId): uidOrId is number {
+  return typeof uidOrId === 'number';
+}
+
+export function castUidOrId(
+  uidOrId: UidOrId,
+  cast: (uid: string) => Buffer,
+): Buffer | number {
+  return isUid(uidOrId) ? cast(uidOrId) : uidOrId;
 }
 
 export function getType<TUidOrId extends UidOrId>(

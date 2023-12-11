@@ -6,6 +6,7 @@ import AdvertisementRepository, {
   UserDraftAdvertisement,
 } from './AdvertisementRepository';
 import { UidOrId, getType } from '../../helpers/identifiers';
+import { Advertisement } from '../../entities/Advertisement';
 
 export default class KnexAdvertisementRepository
   implements AdvertisementRepository
@@ -134,7 +135,17 @@ export default class KnexAdvertisementRepository
       .update({ draft: newDraftStatus, published_at: publishedAt });
   }
 
-  async create(ad: InsertableAdvertisement) {
-    await this.db.insert(ad);
+  async create(ad: InsertableAdvertisement): Promise<Advertisement> {
+    return await this.db.transaction(async (trx) => {
+      const [id] = await trx.table('advertisements').insert({
+        ...ad,
+        uid: this.db.fn.uuidToBin(ad.uid),
+      });
+      return await trx
+        .table('advertisements')
+        .select('*')
+        .where('id', id)
+        .first<Advertisement>();
+    });
   }
 }

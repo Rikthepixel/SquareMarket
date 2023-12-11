@@ -11,6 +11,10 @@ import auth from '../middleware/auth';
 import KnexUserRepository from '../repositories/user/KnexUserRepository';
 import UserService from '../services/UserService';
 import UsersSubscription from '../subscribers/UsersSubscription';
+import KnexCategoryRepository from '../repositories/category/KnexCategoryRepository';
+import KnexCategoryPropertyRepository from '../repositories/category-property/KnexCategoryPropertyRepository';
+import KnexCategoryPropertyOptionRepository from '../repositories/category-property-option/KnexCategoryPropertyOptionRepository';
+import KnexCategoryPropertyOptionValueRepository from '../repositories/category-property-option-value/KnexCategoryPropertyOptionValueRepository';
 
 const depenencyProvider = (c: IoCContainer) =>
   c
@@ -26,16 +30,40 @@ const depenencyProvider = (c: IoCContainer) =>
       (c) => new KnexUserRepository(c.resolve('db')),
     )
     .addScoped(
-      'UserService',
-      (c) => new UserService(c.resolve('UserRespository')),
-    )
-    .addScoped(
       'AdvertisementRepository',
       (c) => new KnexAdvertisementRepository(c.resolve('db')),
     )
     .addScoped(
+      'CategoryRepository',
+      (c) => new KnexCategoryRepository(c.resolve('db')),
+    )
+    .addScoped(
+      'CategoryPropertyRepository',
+      (c) => new KnexCategoryPropertyRepository(c.resolve('db')),
+    )
+    .addScoped(
+      'CategoryPropertyOptionRepository',
+      (c) => new KnexCategoryPropertyOptionRepository(c.resolve('db')),
+    )
+    .addScoped(
+      'CategoryPropertyOptionValueRepository',
+      (c) => new KnexCategoryPropertyOptionValueRepository(c.resolve('db')),
+    )
+    .addScoped(
+      'UserService',
+      (c) => new UserService(c.resolve('UserRespository')),
+    )
+    .addScoped(
       'AdvertisementService',
-      (c) => new AdvertisementService(c.resolve('AdvertisementRepository'), c.resolve("UserRespository")),
+      (c) =>
+        new AdvertisementService(
+          c.resolve('AdvertisementRepository'),
+          c.resolve('UserRespository'),
+          c.resolve('CategoryRepository'),
+          c.resolve('CategoryPropertyRepository'),
+          c.resolve('CategoryPropertyOptionRepository'),
+          c.resolve('CategoryPropertyOptionValueRepository'),
+        ),
     )
     .addSingleton(
       'UsersSubscription',
