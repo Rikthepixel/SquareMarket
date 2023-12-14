@@ -140,9 +140,9 @@ exports.seed = async function (knex) {
     const optValues = adIds
       .map(({ id, uid }) => {
         const ad = ads.find((ad) => ad.uid.compare(uid) === 0);
-        return ad.propValues.map(({ propId, optId }) => ({
+        return ad.propValues.map(({ optId }) => ({
           uid: trx.fn.uuidToBin(randomUUID()),
-          category_property_id: propId,
+          // category_property_id: propId,
           category_property_option_id: optId,
           advertisement_id: id,
         }));

@@ -1,7 +1,13 @@
 import { Knex } from 'knex';
 import CategoryPropertyOptionRepository from './CategoryPropertyOptionRepository';
 import CategoryPropertyOption from '../../entities/CategoryPropertyOption';
-import { UidOrId, castUidOrId, getType, isId } from '../../helpers/identifiers';
+import {
+  UidOrId,
+  UidsToBuffers,
+  castUidOrId,
+  getType,
+  isId,
+} from '../../helpers/identifiers';
 
 export default class KnexCategoryPropertyOptionRepository
   implements CategoryPropertyOptionRepository
@@ -52,7 +58,9 @@ export default class KnexCategoryPropertyOptionRepository
         castUidOrId(categoryUidOrId, this.db.fn.uuidToBin),
       )
       .select<
-        Pick<CategoryPropertyOption, 'id' | 'uid' | 'category_property_id'>[]
+        UidsToBuffers<
+          Pick<CategoryPropertyOption, 'id' | 'uid' | 'category_property_id'>
+        >[]
       >('opts.id', 'opts.uid', 'opts.category_property_option_id');
 
     if (result.length !== options.length) return null;
@@ -65,6 +73,6 @@ export default class KnexCategoryPropertyOptionRepository
       occurredPropertyIds.push(resultOption.category_property_id);
     }
 
-    return result;
+    return result.map((o) => ({ ...o, uid: this.db.fn.binToUuid(o.uid) }));
   }
 }

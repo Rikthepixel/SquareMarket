@@ -26,7 +26,6 @@ import useAuth from '@/lib/auth/stores/useAuth';
 import useProfile from '@/stores/useProfile';
 import NavButton, { NavButtonProps } from '@/components/nav/NavButton';
 
-
 export default function MainLayout({ children }: React.PropsWithChildren) {
   const [opened, { open, close }] = useDisclosure();
   const auth = useAuth();
@@ -56,36 +55,36 @@ export default function MainLayout({ children }: React.PropsWithChildren) {
       //   icon: MdMap,
       //   text: 'Map',
       // },
-      ...(auth.user
-        ? [
-            {
-              action: '/messages',
-              icon: MdMessage,
-              text: 'Messages',
-            },
-            {
-              action: '/dashboard',
-              icon: IoMdPricetag,
-              text: `Dashboard`,
-            },
-            {
-              action: '/profile',
-              icon: MdPerson,
-              text: 'Profile',
-            },
-            {
-              action: auth.logout,
-              icon: MdLogout,
-              text: 'Log out',
-            },
-          ]
-        : [
-            {
-              action: auth.login,
-              icon: MdLogin,
-              text: 'Log in',
-            },
-          ]),
+      // ...(auth.user
+      // ? [
+      {
+        action: '/messages',
+        icon: MdMessage,
+        text: 'Messages',
+      },
+      {
+        action: '/dashboard',
+        icon: IoMdPricetag,
+        text: `Dashboard`,
+      },
+      {
+        action: '/profile',
+        icon: MdPerson,
+        text: 'Profile',
+      },
+      {
+        action: auth.logout,
+        icon: MdLogout,
+        text: 'Log out',
+      },
+      // ]
+      // : [
+      {
+        action: auth.login,
+        icon: MdLogin,
+        text: 'Log in',
+      },
+      // ]),
     ],
     [auth.user, auth.login, auth.logout],
   );
@@ -139,7 +138,7 @@ export default function MainLayout({ children }: React.PropsWithChildren) {
       <AppShell.Main
         styles={{ main: { display: 'flex', flexDirection: 'column' } }}
       >
-        {children}
+        {auth.loaded ? children : null}
       </AppShell.Main>
     </AppShell>
   );

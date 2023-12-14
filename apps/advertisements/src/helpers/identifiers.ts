@@ -1,6 +1,6 @@
 export type UidOrId = number | string;
 
-export function isUid(uidOrId: UidOrId): uidOrId is String {
+export function isUid(uidOrId: UidOrId): uidOrId is string {
   return typeof uidOrId === 'string';
 }
 
@@ -22,3 +22,15 @@ export function getType<TUidOrId extends UidOrId>(
     ? 'uid'
     : 'id';
 }
+
+export type UidsToBuffers<T extends object> = {
+  [TKey in keyof T]: TKey extends string
+    ? TKey extends `${infer _TPrefix}uid`
+      ? T[TKey] extends string
+        ? Buffer
+        : T[TKey]
+      : T[TKey]
+    : T[TKey] extends object
+      ? UidsToBuffers<T[TKey]>
+      : T[TKey];
+};

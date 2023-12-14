@@ -56,12 +56,13 @@ exports.up = async function (knex) {
       table
         .integer('category_id')
         .unsigned()
+        .nullable()
         .references('categories.id')
         .onDelete('cascade');
-      table.string('title', 255);
-      table.text('description');
-      table.decimal('price', 10, 2);
-      table.string('currency', 3);
+      table.string('title', 255).nullable();
+      table.text('description').nullable();
+      table.decimal('price', 10, 2).nullable();
+      table.string('currency', 3).nullable();
       table.boolean('draft').defaultTo(true);
       table.datetime('published_at', { useTz: true }).nullable();
     })

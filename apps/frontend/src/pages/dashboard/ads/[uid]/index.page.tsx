@@ -1,0 +1,225 @@
+import PageContainer from '@/components/page/Container';
+import {
+  Button,
+  Divider,
+  Group,
+  NumberInput,
+  Select,
+  Stack,
+  Switch,
+  TextInput,
+  Textarea,
+  Text,
+  rem,
+  Image,
+  Paper,
+  AspectRatio,
+  ActionIcon,
+  CloseIcon,
+  ComboboxItem,
+} from '@mantine/core';
+import { Dropzone, FileWithPath, IMAGE_MIME_TYPE } from '@mantine/dropzone';
+import { Carousel } from '@mantine/carousel';
+import { MdAttachMoney, MdEuro, MdPhoto, MdSave } from 'react-icons/md';
+import { useEffect, useMemo, useState } from 'react';
+import useAdvertisementEditor from '@/stores/useAdvertisementEditor';
+import useTypedParams from '@/hooks/useTypedParams';
+import { z } from 'zod';
+import { useForm, zodResolver } from '@mantine/form';
+import { IoMdCash } from 'react-icons/io';
+
+const VALID_CURRENCIES = ['EUR', 'USD'] as const;
+
+const CURRENCY_ICON_MAP = {
+  EUR: <MdEuro />,
+  USD: <MdAttachMoney />,
+} satisfies Record<(typeof VALID_CURRENCIES)[number], JSX.Element>;
+
+const PARAMS_SCHEMA = z.object({
+  uid: z.string(),
+});
+
+const FORM_SCHEMA = z.union([
+  z.object({
+    title: z.string(),
+    description: z.string(),
+    price: z.number(),
+    currency: z.enum(VALID_CURRENCIES),
+    category: z.string()
+    published: z.literal(true),
+  }),
+  z.object({
+    title: z.string().optional(),
+    description: z.string().optional(),
+    price: z.number().optional(),
+    currency: z.enum(VALID_CURRENCIES).optional(),
+    category: z.string().optional(),
+    published: z.literal(false),
+  }),
+]);
+
+type FormSchema = z.infer<typeof FORM_SCHEMA>;
+
+export default function EditAdPage() {
+  const [images, setImages] = useState<FileWithPath[]>([]);
+  const { uid } = useTypedParams(PARAMS_SCHEMA) ?? {};
+  const { load, advertisement } = useAdvertisementEditor();
+
+  useEffect(() => {
+    if (!uid) return;
+    load(uid);
+  }, [load]);
+
+  const {
+    getInputProps,
+    values: { published, currency },
+  } = useForm<FormSchema>({
+    validate: zodResolver(FORM_SCHEMA),
+    validateInputOnChange: true,
+  });
+
+  const currencyOptions = useMemo<ComboboxItem[]>(() => {
+    return [
+      {
+        label: 'Select a currency',
+        value: 'none',
+        disabled: true,
+      },
+      ...VALID_CURRENCIES.map((c) => ({ label: c, value: c })),
+    ];
+  }, []);
+
+  return (
+    <PageContainer>
+      <Stack gap="md">
+        <Carousel
+          w="100%"
+          slideSize={{ base: '100%', sm: '50%', md: 'calc(100% / 3)' }}
+          slideGap={{ base: 0, sm: 'md' }}
+          align="start"
+          withControls
+          withIndicators
+        >
+          <Carousel.Slide>
+            <Paper h="100%" withBorder>
+              <AspectRatio ratio={4 / 3}>
+                <Dropzone
+                  onDrop={(newImages) =>
+                    setImages((current) => [...newImages, ...current])
+                  }
+                  onReject={(files) => console.log('rejected files', files)}
+                  maxSize={3 * 1024 ** 2}
+                  accept={IMAGE_MIME_TYPE}
+                  p="md"
+                  multiple
+                >
+                  <Group
+                    justify="center"
+                    gap="md"
+                    style={{ pointerEvents: 'none' }}
+                  >
+                    <MdPhoto
+                      style={{
+                        width: rem(52),
+                        height: rem(52),
+                      }}
+                      stroke={1.5}
+                    />
+                    <Stack gap="md">
+                      <Text size="xl" inline>
+                        Drag images here or click to select files
+                      </Text>
+                      <Text size="sm" c="dimmed" inline>
+                        Attach as many files as you like, each file should not
+                        exceed 5mb
+                      </Text>
+                    </Stack>
+                  </Group>
+                </Dropzone>
+              </AspectRatio>
+            </Paper>
+          </Carousel.Slide>
+          {images.map((image, idx) => {
+            const imageUrl = URL.createObjectURL(image);
+
+            return (
+              <Carousel.Slide key={idx}>
+                <Paper h="100%" pos="relative" withBorder>
+                  <AspectRatio ratio={4 / 3}>
+                    <Image
+                      key={idx}
+                      src={imageUrl}
+                      radius="lg"
+                      onLoad={() => URL.revokeObjectURL(imageUrl)}
+                    />
+                  </AspectRatio>
+                  <ActionIcon
+                    pos="absolute"
+                    top={4}
+                    right={4}
+                    onClick={() =>
+                      setImages((current) => {
+                        const newImages = [...current];
+                        const imageIdx = newImages.findIndex(
+                          (_image) => _image === image,
+                        );
+                        if (imageIdx === -1) return current;
+                        newImages.splice(imageIdx, 1);
+                        return newImages;
+                      })
+                    }
+                  >
+                    <CloseIcon />
+                  </ActionIcon>
+                </Paper>
+              </Carousel.Slide>
+            );
+          })}
+        </Carousel>
+        <TextInput
+          {...getInputProps('title')}
+          placeholder="Title of your advertisement..."
+          label="Title"
+          withAsterisk={published}
+        />
+        <Textarea
+          {...getInputProps('description')}
+          placeholder="Describe the item(s) you are selling"
+          label="Description"
+          minRows={4}
+          autosize
+          withAsterisk={published}
+        />
+        <Select
+          {...getInputProps('currency')}
+          label="Currency"
+          value="none"
+          data={currencyOptions}
+          withAsterisk={published}
+        />
+        <NumberInput
+          {...getInputProps('price')}
+          label="Price"
+          placeholder="The price you want to sell the item(s) at"
+          value={10.0}
+          fixedDecimalScale
+          decimalScale={2}
+          leftSection={CURRENCY_ICON_MAP[currency] ?? <IoMdCash />}
+          withAsterisk={published}
+        />
+        <Divider />
+        <Select
+          label="Category"
+          data={['Phones', 'Computers']}
+          withAsterisk={published}
+        />
+
+        <Divider />
+        <Switch {...getInputProps('published')} label="Published" />
+        <Button w="fit-content" rightSection={<MdSave />}>
+          Save
+        </Button>
+      </Stack>
+    </PageContainer>
+  );
+}

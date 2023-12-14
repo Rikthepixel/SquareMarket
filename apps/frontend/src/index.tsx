@@ -9,6 +9,7 @@ import '@/lib/auth/init';
 
 import '@mantine/core/styles.css';
 import '@/styles/index.css';
+import '@mantine/carousel/styles.css';
 import MainLayout from './layouts/MainLayout';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

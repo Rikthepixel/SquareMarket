@@ -1,93 +1,64 @@
 import { randomUUID } from 'crypto';
-import { Advertisement } from '../entities/Advertisement';
-import AdvertisementRepository from '../repositories/advertisement/AdvertisementRepository';
+import AdvertisementRepository, {
+  InsertableAdvertisement,
+} from '../repositories/advertisement/AdvertisementRepository';
 import UserRepository from '../repositories/user/UserRepository';
 import NotFoundException from '../exceptions/common/NotFound';
-import CategoryRepository from '../repositories/category/CategoryRepository';
-import CategoryPropertyOptionRepository from '../repositories/category-property-option/CategoryPropertyOptionRepository';
-import CategoryPropertyOptionValueRepository, {
-  InsertableOptionValue,
-} from '../repositories/category-property-option-value/CategoryPropertyOptionValueRepository';
-import BadRequestException from '../exceptions/common/BadRequest';
-
-interface CreateAdvertisementProps
-  extends Omit<
-    Advertisement,
-    'id' | 'uid' | 'user_id' | 'category_id' | 'published_at'
-  > {
-  user_uid: string;
-  category_uid: string;
-
-  property_option_uids: string[];
-}
+import { UidOrId, isUid } from '../helpers/identifiers';
 
 export default class AdvertisementService {
   constructor(
     private adRepository: AdvertisementRepository,
     private userRepository: UserRepository,
-    private categoryRepository: CategoryRepository,
-    private optRepository: CategoryPropertyOptionRepository,
-    private optValueRepository: CategoryPropertyOptionValueRepository,
   ) {}
 
   async getPublished() {
     return this.adRepository.getPublished();
   }
 
-  async getByUser(userId: number) {
-    return this.adRepository.getByUser(userId);
+  async getPublishedByUser(userUidOrId: UidOrId) {
+    const userId = isUid(userUidOrId)
+      ? await this.userRepository.get(userUidOrId).then((u) => u?.id)
+      : userUidOrId;
+
+    if (!userId) throw new NotFoundException('User');
+
+    return this.adRepository.getPublishedByUser(userId);
   }
 
-  async getDraftsByUser(userId: number) {
+  async getDraftsByUser(userUidOrId: UidOrId) {
+    const userId = isUid(userUidOrId)
+      ? await this.userRepository.get(userUidOrId).then((u) => u?.id)
+      : userUidOrId;
+
+    if (!userId) throw new NotFoundException('User');
+
     return this.adRepository.getDraftsByUser(userId);
   }
 
-  async create(props: CreateAdvertisementProps) {
+  async get(uid: string) {
+    return await this.adRepository.get(uid).then((ad) => {
+      if (ad) return ad;
+      throw new NotFoundException('Advertisement');
+    });
+  }
+
+  async setCategory() {}
+
+  async create(userUid: string) {
     const uid = randomUUID();
 
-    const [user, category] = await Promise.all([
-      this.userRepository.get(props.user_uid),
-      this.categoryRepository.get(props.category_uid),
-    ] as const);
+    const user = await this.userRepository.get(userUid);
+    if (!user) throw new NotFoundException('User');
 
-    if (!user || !category) {
-      throw new NotFoundException(!user ? 'User' : 'Category');
-    }
-
-    const validOptions = await this.optRepository.getValidForCategory(
-      category.id,
-      props.property_option_uids,
-    );
-
-    if (!validOptions) {
-      throw new BadRequestException(
-        'property_option_uids',
-        'they are not valid for the given category',
-      );
-    }
-
-    const adToInsert = {
+    const adToInsert: InsertableAdvertisement = {
       uid,
       user_id: user.id,
-      category_id: category.id,
-      title: props.title,
-      description: props.description,
-      price: props.price,
-      currency: props.currency,
-      draft: props.draft,
-      published_at: props.draft ? null : new Date(),
-    } as const;
+      draft: true,
+      published_at: null,
+    };
 
-    const insertedAd = await this.adRepository.create(adToInsert);
-
-    const optionValuesToInsert = validOptions.map<InsertableOptionValue>(
-      (option) => ({
-        uid: randomUUID(),
-        advertisement_id: insertedAd.id,
-        category_property_option_id: option.id,
-      }),
-    );
-
-    await this.optValueRepository.createMultiple(optionValuesToInsert);
+    await this.adRepository.create(adToInsert);
+    return uid;
   }
 }

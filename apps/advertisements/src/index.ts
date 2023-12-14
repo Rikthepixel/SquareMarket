@@ -13,7 +13,6 @@ import errorHandling from './middleware/errorHandling';
 import requestLogger from './middleware/requestLogger';
 import IoCContainer from 'tioc';
 
-
 const PORT: number = parseInt(process.env.SERVER_PORT ?? '8001');
 
 const app = new Koa()

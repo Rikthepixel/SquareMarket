@@ -13,23 +13,48 @@ export interface PublicAdvertisement
   published_at: NonNullable<Advertisement['published_at']>;
 }
 
-export interface UserAdvertisement
-  extends Pick<
-    Advertisement,
-    'uid' | 'id' | 'title' | 'description' | 'price' | 'currency'
+export interface UserPublishedAdvertisement
+  extends Required<
+    Pick<
+      Advertisement,
+      'uid' | 'id' | 'title' | 'description' | 'price' | 'currency'
+    >
   > {
   category: Category;
   published_at: NonNullable<Advertisement['published_at']>;
 }
 
 export interface UserDraftAdvertisement
-  extends Omit<UserAdvertisement, 'published_at'> {}
+  extends Omit<UserPublishedAdvertisement, 'published_at' | 'category'> {
+  category: UserPublishedAdvertisement['category'] | null;
+}
 
-export interface InsertableAdvertisement extends Omit<Advertisement, 'id'> {}
+export interface InsertableAdvertisement
+  extends Omit<
+    Advertisement,
+    'id' | 'category_id' | 'title' | 'description' | 'price' | 'currency'
+  > {
+  category_id?: number;
+
+  title?: string;
+  description?: string;
+  price?: number;
+  currency?: string;
+}
+
+export interface DetailedAdvertisement extends Advertisement {
+  category?: Category;
+  propertyValues: {
+    uid: string;
+    category_property_uid: string;
+    category_property_option_uid: string;
+  }[];
+}
 
 export default interface AdvertisementRepository {
+  get(uid: string): Promise<DetailedAdvertisement | null>;
   getPublished: () => Promise<PublicAdvertisement[]>;
-  getByUser: (userId: number) => Promise<UserAdvertisement[]>;
+  getPublishedByUser: (userId: number) => Promise<UserPublishedAdvertisement[]>;
   getDraftsByUser: (userId: number) => Promise<UserDraftAdvertisement[]>;
 
   changeDraftStatus: (
@@ -37,5 +62,5 @@ export default interface AdvertisementRepository {
     newDraftStatus: boolean,
     publishedAt: Date | null,
   ) => Promise<void>;
-  create: (ad: InsertableAdvertisement) => Promise<Advertisement>;
+  create: (ad: InsertableAdvertisement) => Promise<void>;
 }

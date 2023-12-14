@@ -1,17 +1,95 @@
+import { SnakeCasedProperties } from 'type-fest';
 import Knex from 'knex';
 import AdvertisementRepository, {
+  DetailedAdvertisement,
   InsertableAdvertisement,
   PublicAdvertisement,
-  UserAdvertisement,
+  UserPublishedAdvertisement,
   UserDraftAdvertisement,
 } from './AdvertisementRepository';
-import { UidOrId, getType } from '../../helpers/identifiers';
+import {
+  UidOrId,
+  castUidOrId,
+  getType,
+  UidsToBuffers,
+} from '../../helpers/identifiers';
 import { Advertisement } from '../../entities/Advertisement';
+import { Prefix } from '../../types/utility';
+import { Category } from '../../entities/Category';
 
 export default class KnexAdvertisementRepository
   implements AdvertisementRepository
 {
   constructor(private db: Knex.Knex) {}
+
+  async get(uidOrId: UidOrId): Promise<DetailedAdvertisement | null> {
+    return await this.db.transaction(async (trx) => {
+      const ad = await trx
+        .table('advertisements as ads')
+        .where(
+          `ads.${getType(uidOrId)}`,
+          castUidOrId(uidOrId, trx.fn.uuidToBin),
+        )
+        .leftJoin('categories as cat', 'ads.category_id', '=', 'cat.id')
+        .select(
+          'ads.*',
+          'cat.id as category_id',
+          'cat.uid as category_uid',
+          'cat.name as category_name',
+        )
+        .first<
+          | UidsToBuffers<
+              Advertisement & SnakeCasedProperties<Prefix<Category, 'category'>>
+            >
+          | undefined
+        >()
+        .then((ad) => {
+          if (!ad) return null;
+          const { category_id, category_uid, category_name, ...entry } = ad;
+          console.log(category_id, category_uid, entry);
+
+          return {
+            ...entry,
+            uid: trx.fn.binToUuid(entry.uid),
+            category: category_uid
+              ? {
+                  id: category_id,
+                  uid: trx.fn.binToUuid(category_uid),
+                  name: category_name,
+                }
+              : null,
+          };
+        });
+
+      if (!ad) return null;
+
+      const propertyValues = await trx
+        .table('category_property_option_values as vals')
+        .where('vals.advertisement_id', ad.id)
+        .join(
+          'category_property_options as opts',
+          'vals.category_property_option_id',
+          '=',
+          'opts.id',
+        )
+        .join(
+          'category_properties as props',
+          'opts.category_property_id',
+          '=',
+          'props.id',
+        )
+        .select<DetailedAdvertisement['propertyValues']>(
+          'vals.uid as uid',
+          'props.uid as category_property_uid',
+          'opts.uid as category_property_option_uid',
+        );
+
+      return {
+        ...ad,
+        propertyValues,
+      } as DetailedAdvertisement;
+    });
+  }
 
   async getPublished() {
     return (
@@ -43,11 +121,11 @@ export default class KnexAdvertisementRepository
       },
       category: {
         id: entry.category_id,
-        uid: entry.category_uid,
+        uid: this.db.fn.binToUuid(entry.category_uid),
         name: entry.category_name,
       },
       id: entry.id,
-      uid: entry.uid,
+      uid: this.db.fn.binToUuid(entry.uid),
       title: entry.title,
       description: entry.description,
       price: entry.price,
@@ -56,7 +134,7 @@ export default class KnexAdvertisementRepository
     }));
   }
 
-  async getByUser(userId: number) {
+  async getPublishedByUser(userId: number) {
     return (
       await this.db
         .table('advertisements as ads')
@@ -75,14 +153,14 @@ export default class KnexAdvertisementRepository
           'ads.currency',
           'ads.published_at',
         )
-    ).map<UserAdvertisement>((entry) => ({
+    ).map<UserPublishedAdvertisement>((entry) => ({
       category: {
         id: entry.category_id,
-        uid: entry.category_uid,
+        uid: this.db.fn.binToUuid(entry.category_uid),
         name: entry.category_name,
       },
       id: entry.id,
-      uid: entry.uid,
+      uid: this.db.fn.binToUuid(entry.uid),
       title: entry.title,
       description: entry.description,
       price: entry.price,
@@ -97,7 +175,7 @@ export default class KnexAdvertisementRepository
         .table('advertisements as ads')
         .whereNull('ads.published_at')
         .where('ads.user_id', userId)
-        .join('categories as cat', 'ads.category_id', '=', 'cat.id')
+        .leftJoin('categories as cat', 'ads.category_id', '=', 'cat.id')
         .select(
           'cat.id as category_id',
           'cat.uid as category_uid',
@@ -110,13 +188,15 @@ export default class KnexAdvertisementRepository
           'ads.currency',
         )
     ).map<UserDraftAdvertisement>((entry) => ({
-      category: {
-        id: entry.category_id,
-        uid: entry.category_uid,
-        name: entry.category_name,
-      },
+      category: entry.category_uid
+        ? {
+            id: entry.category_id,
+            uid: this.db.fn.binToUuid(entry.category_uid),
+            name: entry.category_name,
+          }
+        : null,
       id: entry.id,
-      uid: entry.uid,
+      uid: this.db.fn.binToUuid(entry.uid),
       title: entry.title,
       description: entry.description,
       price: entry.price,
@@ -135,17 +215,10 @@ export default class KnexAdvertisementRepository
       .update({ draft: newDraftStatus, published_at: publishedAt });
   }
 
-  async create(ad: InsertableAdvertisement): Promise<Advertisement> {
-    return await this.db.transaction(async (trx) => {
-      const [id] = await trx.table('advertisements').insert({
-        ...ad,
-        uid: this.db.fn.uuidToBin(ad.uid),
-      });
-      return await trx
-        .table('advertisements')
-        .select('*')
-        .where('id', id)
-        .first<Advertisement>();
+  async create(ad: InsertableAdvertisement): Promise<void> {
+    return this.db.table('advertisements').insert({
+      ...ad,
+      uid: this.db.fn.uuidToBin(ad.uid),
     });
   }
 }
