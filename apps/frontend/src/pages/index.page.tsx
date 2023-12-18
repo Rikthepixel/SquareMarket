@@ -90,6 +90,7 @@ function AdvertisementCard({
 }
 
 const filterSchema = z.object({
+  search: z.string().optional(),
   category: z.string().optional(),
   options: z
     .array(
@@ -155,7 +156,7 @@ export default function FrontPage() {
       onSubmit(
         (data) => {
           getAdvertisementsWithFilter({
-            category: data.category,
+            ...data,
             property_options: data.options
               ?.map((opt) => opt.value)
               .filter((opt) => opt !== 'none'),
@@ -172,6 +173,7 @@ export default function FrontPage() {
     <PageContainer>
       <Group justify="center">
         <TextInput
+          {...getInputProps('search')}
           size="md"
           placeholder="Search on title and description"
           rightSection={<MdSearch />}

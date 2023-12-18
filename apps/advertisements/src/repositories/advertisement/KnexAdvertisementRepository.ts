@@ -116,6 +116,14 @@ export default class KnexAdvertisementRepository
         .whereNotNull('ads.published_at')
         .select<any[]>('ads.*');
 
+      if (filter.content) {
+        query = query.where((q) =>
+          q
+            .whereILike('ads.title', `%${filter.content}%`)
+            .orWhereILike('ads.description', `%${filter.content}`),
+        );
+      }
+
       if (category && propertyOptions && propertyOptions?.length !== 0) {
         const optionGroups = await trx
           .table('category_property_options as opts')
@@ -147,22 +155,22 @@ export default class KnexAdvertisementRepository
             }, new Map<number, number[]>()),
           );
 
-        query = query.andWhere((b) =>
-          b.whereIn('ads.id', (q) => {
-            q = q
+        query = query.andWhere((queryAndWhere) =>
+          queryAndWhere.whereIn('ads.id', (queryWhereIn) =>
+            queryWhereIn
               .table('category_property_option_values as vals')
               .join(
                 'category_property_options as opts',
                 'vals.category_property_option_id',
                 '=',
                 'opts.id',
-              );
-
-            for (const [, optionGroup] of optionGroups) {
-              q = q.orWhereIn('opts.id', optionGroup);
-            }
-
-            return q
+              )
+              .where((where) => {
+                for (const [, optionGroup] of optionGroups) {
+                  where = where.orWhereIn('opts.id', optionGroup);
+                }
+                return where;
+              })
               .join(
                 'category_properties as props',
                 'opts.category_property_id',
@@ -171,8 +179,8 @@ export default class KnexAdvertisementRepository
               )
               .join('categories as cat', 'props.category_id', '=', 'cat.id')
               .andWhere('cat.uid', trx.fn.uuidToBin(category))
-              .select('vals.advertisement_id');
-          }),
+              .select('vals.advertisement_id'),
+          ),
         );
       } else if (category) {
         query = query.andWhere((b) =>

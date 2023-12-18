@@ -90,15 +90,11 @@ exports.seed = async function (knex) {
         propValues: [
           {
             propId: propIds[0].id,
-            optId: optionIds.find(
-              (opt) => opt.category_property_id === propIds[0].id,
-            ).id,
+            optId: optionIds.find((opt) => opt.name === 'Samsung').id,
           },
           {
             propId: propIds[1].id,
-            optId: optionIds.find(
-              (opt) => opt.category_property_id === propIds[1].id,
-            ).id,
+            optId: optionIds.find((opt) => opt.name === '256GB').id,
           },
         ],
       },
@@ -106,25 +102,21 @@ exports.seed = async function (knex) {
         uid: knex.fn.uuidToBin(randomUUID()),
         user_id,
         category_id,
-        title: 'Fairphone 5',
+        title: 'Samsung S23',
         price: 600.0,
         currency: 'EUR',
-        description: 'A Fairphone',
+        description: 'A Samsung',
         published_at: new Date(),
         draft: false,
 
         propValues: [
           {
             propId: propIds[0].id,
-            optId: optionIds.find(
-              (opt) => opt.category_property_id === propIds[0].id,
-            ).id,
+            optId: optionIds.find((opt) => opt.name === 'Samsung').id,
           },
           {
             propId: propIds[1].id,
-            optId: optionIds.find(
-              (opt) => opt.category_property_id === propIds[1].id,
-            ).id,
+            optId: optionIds.find((opt) => opt.name === '128GB').id,
           },
         ],
       },
@@ -141,9 +133,7 @@ exports.seed = async function (knex) {
         propValues: [
           {
             propId: propIds[0].id,
-            optId: optionIds.find(
-              (opt) => opt.category_property_id === propIds[0].id,
-            ).id,
+            optId: optionIds.find((opt) => opt.name === 'Apple').id,
           },
           {
             propId: propIds[1].id,

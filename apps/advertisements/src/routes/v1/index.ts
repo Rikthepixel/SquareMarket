@@ -12,6 +12,7 @@ v1Router.get(
   '/filter',
   validate({
     query: z.object({
+      search: z.string().optional(),
       cat: z.string().optional(),
       po: z
         .string()
@@ -25,6 +26,7 @@ v1Router.get(
     const adService = ctx.container.resolve('AdvertisementService');
     ctx.status = 200;
     ctx.body = await adService.getFiltered({
+      content: ctx.validated.query.search,
       category: ctx.validated.query.cat,
       propertyOptions: ctx.validated.query.po,
     });

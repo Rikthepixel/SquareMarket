@@ -53,6 +53,7 @@ export interface DetailedAdvertisement extends Advertisement {
 }
 
 export interface AdvertisementFilter {
+  content?: string;
   category?: string;
   propertyOptions?: string[];
 }

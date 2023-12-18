@@ -13,6 +13,7 @@ interface Advertisement {
 }
 
 interface SearchFilter {
+  search?: string;
   category?: string;
   property_options?: string[];
 }

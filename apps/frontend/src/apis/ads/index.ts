@@ -8,6 +8,10 @@ export async function getFilteredAdvertisements(
 ): Promise<FilteredAdvertisementsResponse> {
   const params = new URLSearchParams();
 
+  if (request.search) {
+    params.append('search', request.search);
+  }
+
   if (request.category) {
     params.append('cat', request.category);
   }
