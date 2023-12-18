@@ -27,6 +27,7 @@ import useTypedParams from '@/hooks/useTypedParams';
 import { z } from 'zod';
 import { useForm, zodResolver } from '@mantine/form';
 import { IoMdCash } from 'react-icons/io';
+import useCategories from '@/stores/useCategories';
 
 const VALID_CURRENCIES = ['EUR', 'USD'] as const;
 
@@ -45,7 +46,7 @@ const FORM_SCHEMA = z.union([
     description: z.string(),
     price: z.number(),
     currency: z.enum(VALID_CURRENCIES),
-    category: z.string()
+    category: z.string(),
     published: z.literal(true),
   }),
   z.object({
@@ -63,20 +64,46 @@ type FormSchema = z.infer<typeof FORM_SCHEMA>;
 export default function EditAdPage() {
   const [images, setImages] = useState<FileWithPath[]>([]);
   const { uid } = useTypedParams(PARAMS_SCHEMA) ?? {};
+  const { loadCategories, loadCategory, categories } = useCategories();
   const { load, advertisement } = useAdvertisementEditor();
+
+  const {
+    getInputProps,
+    values: { published, currency },
+    setValues,
+  } = useForm<FormSchema>({
+    validate: zodResolver(FORM_SCHEMA),
+    validateInputOnChange: true,
+  });
 
   useEffect(() => {
     if (!uid) return;
     load(uid);
   }, [load]);
 
-  const {
-    getInputProps,
-    values: { published, currency },
-  } = useForm<FormSchema>({
-    validate: zodResolver(FORM_SCHEMA),
-    validateInputOnChange: true,
-  });
+  useEffect(() => {
+    const result = advertisement.unwrapValue();
+    if (!result || !result?.category?.uid) return;
+    loadCategory(result.category.uid);
+  }, [advertisement]);
+
+  useEffect(() => {
+    loadCategories();
+  }, []);
+
+  useEffect(() => {
+    const ad = advertisement.unwrapValue();
+    if (!ad) return;
+
+    setValues({
+      title: ad.title,
+      description: ad.description,
+      price: ad.price,
+      currency: ad.currency as 'EUR' | 'USD' | undefined,
+      category: ad.category?.uid,
+      published: ad.published_at !== null,
+    });
+  }, [setValues, advertisement]);
 
   const currencyOptions = useMemo<ComboboxItem[]>(() => {
     return [
@@ -204,15 +231,31 @@ export default function EditAdPage() {
           value={10.0}
           fixedDecimalScale
           decimalScale={2}
-          leftSection={CURRENCY_ICON_MAP[currency] ?? <IoMdCash />}
+          leftSection={
+            currency ? (
+              CURRENCY_ICON_MAP[currency] ?? <IoMdCash />
+            ) : (
+              <IoMdCash />
+            )
+          }
           withAsterisk={published}
         />
         <Divider />
-        <Select
-          label="Category"
-          data={['Phones', 'Computers']}
-          withAsterisk={published}
-        />
+        {categories
+          .map((cats) => (
+            <Select
+              {...getInputProps('category')}
+              label="Category"
+              data={cats.map((cat) => ({
+                label: cat.name,
+                value: cat.uid,
+              }))}
+              withAsterisk={published}
+            />
+          ))
+          .mapError(() => 'An error occurred while loading the categories...')
+          .mapPending(() => 'Loading categories...')
+          .unwrap()}
 
         <Divider />
         <Switch {...getInputProps('published')} label="Published" />

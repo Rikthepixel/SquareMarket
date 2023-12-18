@@ -14,6 +14,7 @@ import UsersSubscription from '../subscribers/UsersSubscription';
 import KnexCategoryRepository from '../repositories/category/KnexCategoryRepository';
 import KnexCategoryPropertyOptionRepository from '../repositories/category-property-option/KnexCategoryPropertyOptionRepository';
 import KnexCategoryPropertyOptionValueRepository from '../repositories/category-property-option-value/KnexCategoryPropertyOptionValueRepository';
+import CategoryService from '../services/CategoryService';
 
 const depenencyProvider = (c: IoCContainer) =>
   c
@@ -55,6 +56,10 @@ const depenencyProvider = (c: IoCContainer) =>
           c.resolve('AdvertisementRepository'),
           c.resolve('UserRespository'),
         ),
+    )
+    .addScoped(
+      'CategoryService',
+      (c) => new CategoryService(c.resolve('CategoryRepository')),
     )
     .addSingleton(
       'UsersSubscription',

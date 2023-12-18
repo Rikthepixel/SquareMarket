@@ -1,5 +1,6 @@
 import { randomUUID } from 'crypto';
 import AdvertisementRepository, {
+  AdvertisementFilter,
   InsertableAdvertisement,
 } from '../repositories/advertisement/AdvertisementRepository';
 import UserRepository from '../repositories/user/UserRepository';
@@ -12,8 +13,12 @@ export default class AdvertisementService {
     private userRepository: UserRepository,
   ) {}
 
+  async getFiltered(filter: AdvertisementFilter) {
+    return await this.adRepository.getFiltered(filter);
+  }
+
   async getPublished() {
-    return this.adRepository.getPublished();
+    return await this.adRepository.getPublished();
   }
 
   async getPublishedByUser(userUidOrId: UidOrId) {

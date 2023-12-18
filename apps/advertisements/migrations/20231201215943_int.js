@@ -84,8 +84,11 @@ exports.up = async function (knex) {
     })
     .createTable('images', function (table) {
       addIds(table);
-      table.integer('advertisement_id').unsigned();
-      table.foreign('advertisement_id').references('advertisements.id');
+      table
+        .integer('advertisement_id')
+        .unsigned()
+        .references('advertisements.id')
+        .onDelete('cascade');
       table.string('path', 255);
       table.string('ext', 10);
     });

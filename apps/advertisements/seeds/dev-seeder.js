@@ -11,8 +11,8 @@ exports.seed = async function (knex) {
      * @type {import("../src/entities/User").User}
      */
     const user = {
-      provider_id: randomUUID(),
-      username: 'test user',
+      provider_id: 'auth0|655608efef7ac688b2c73ae5',
+      username: 'Rik den Breejen',
       default_currency: 'EUR',
     };
     const [user_id] = await trx('users').insert(user);
@@ -71,7 +71,7 @@ exports.seed = async function (knex) {
       .insert(options)
       .then(([firstOptId]) =>
         trx('category_property_options as opt')
-          .select('opt.id', 'opt.uid', 'opt.category_property_id')
+          .select('opt.id', 'opt.uid', 'opt.name', 'opt.category_property_id')
           .where('opt.id', '>=', firstOptId),
       );
 
@@ -84,6 +84,32 @@ exports.seed = async function (knex) {
         price: 450.0,
         currency: 'EUR',
         description: 'A Samsung',
+        published_at: new Date(),
+        draft: false,
+
+        propValues: [
+          {
+            propId: propIds[0].id,
+            optId: optionIds.find(
+              (opt) => opt.category_property_id === propIds[0].id,
+            ).id,
+          },
+          {
+            propId: propIds[1].id,
+            optId: optionIds.find(
+              (opt) => opt.category_property_id === propIds[1].id,
+            ).id,
+          },
+        ],
+      },
+      {
+        uid: knex.fn.uuidToBin(randomUUID()),
+        user_id,
+        category_id,
+        title: 'Fairphone 5',
+        price: 600.0,
+        currency: 'EUR',
+        description: 'A Fairphone',
         published_at: new Date(),
         draft: false,
 
@@ -121,9 +147,7 @@ exports.seed = async function (knex) {
           },
           {
             propId: propIds[1].id,
-            optId: optionIds.find(
-              (opt) => opt.category_property_id === propIds[1].id,
-            ).id,
+            optId: optionIds.find((opt) => opt.name === '256GB').id,
           },
         ],
       },
@@ -150,5 +174,14 @@ exports.seed = async function (knex) {
       .flatMap((v) => v);
 
     await trx('category_property_option_values').insert(optValues);
+
+    await trx('images').insert(
+      adIds.map(({ id, uid }) => ({
+        uid: trx.fn.uuidToBin(randomUUID()),
+        advertisement_id: id,
+        path: '',
+        ext: '',
+      })),
+    );
   });
 };

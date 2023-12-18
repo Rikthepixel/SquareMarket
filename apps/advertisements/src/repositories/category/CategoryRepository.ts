@@ -14,4 +14,6 @@ export interface CategoryWithProperties extends Category {
 export default interface CategoryRepository {
   get(uidOrId: UidOrId): Promise<Category | null>;
   getWithProperties(uidOrId: UidOrId): Promise<CategoryWithProperties | null>;
+
+  getAll(): Promise<Category[]>;
 }

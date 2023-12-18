@@ -23,7 +23,11 @@ export default class KnexCategoryRepository implements CategoryRepository {
         isUid(uidOrId) ? this.db.fn.uuidToBin(uidOrId) : uidOrId,
       )
       .select('cat.id', 'cat.uid', 'cat.name')
-      .first<Category | null>();
+      .first<UidsToBuffers<Category> | null>()
+      .then((cat) => {
+        if (!cat) return null;
+        return { ...cat, uid: this.db.fn.binToUuid(cat.uid) };
+      });
   }
 
   async getWithProperties(
@@ -44,13 +48,13 @@ export default class KnexCategoryRepository implements CategoryRepository {
 
       const properties = await trx
         .table('category_properties as prop')
-        .where('prop.id', category.id)
+        .where('prop.category_id', category.id)
         .select<UidsToBuffers<CategoryProperty>[]>('*');
 
       const options = await trx
         .table('category_property_options as opt')
         .whereIn(
-          'opt.id',
+          'opt.category_property_id',
           properties.map((p) => p.id),
         )
         .select<UidsToBuffers<CategoryPropertyOption>[]>('*')
@@ -69,5 +73,14 @@ export default class KnexCategoryRepository implements CategoryRepository {
         }),
       };
     });
+  }
+
+  getAll(): Promise<Category[]> {
+    return this.db
+      .table('categories as cat')
+      .select<UidsToBuffers<Category>[]>('cat.id', 'cat.uid', 'cat.name')
+      .then((cats) =>
+        cats.map<Category>((c) => ({ ...c, uid: this.db.fn.binToUuid(c.uid) })),
+      );
   }
 }

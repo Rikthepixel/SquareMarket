@@ -39,12 +39,7 @@ export default function FinishProfilePage() {
       p="md"
       maw="100%"
       component="form"
-      onSubmit={onSubmit((req) =>
-        finish(req).then(async () => {
-          console.log('Done');
-          await getStatus();
-        }),
-      )}
+      onSubmit={onSubmit((req) => finish(req).then(() => getStatus()))}
     >
       <Card.Section p="md" bg="red">
         <Text component="h1" fz="2rem" ta="center" c="white">

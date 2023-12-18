@@ -7,7 +7,8 @@ import useSellerDashboard from '@/stores/useSellerDashboard';
 import AdvertisementCard from './components/AdvertisementCard';
 
 export default function Dashboard() {
-  const { drafts, loadDrafts, published, loadPublished } = useSellerDashboard();
+  const { draftAds, loadDrafts, publishedAds, loadPublished } =
+    useSellerDashboard();
 
   const onTabChange = useCallback(
     (tab: string | null) => {
@@ -50,7 +51,7 @@ export default function Dashboard() {
             </Tabs.List>
 
             <Tabs.Panel value="ads">
-              {published
+              {publishedAds
                 .map((ads) => (
                   <Stack gap="md">
                     {ads.map((ad) => (
@@ -64,7 +65,7 @@ export default function Dashboard() {
             </Tabs.Panel>
 
             <Tabs.Panel value="drafts">
-              {drafts
+              {draftAds
                 .map((ads) => (
                   <Stack gap="md">
                     {ads.map((ad) => (

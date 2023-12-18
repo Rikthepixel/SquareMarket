@@ -6,6 +6,8 @@ import AdvertisementRepository, {
   PublicAdvertisement,
   UserPublishedAdvertisement,
   UserDraftAdvertisement,
+  AdvertisementFilter,
+  FilteredAdvertisement,
 } from './AdvertisementRepository';
 import {
   UidOrId,
@@ -16,16 +18,19 @@ import {
 import { Advertisement } from '../../entities/Advertisement';
 import { Prefix } from '../../types/utility';
 import { Category } from '../../entities/Category';
+import Image from '../../entities/Image';
+import CategoryPropertyOption from '../../entities/CategoryPropertyOption';
 
 export default class KnexAdvertisementRepository
   implements AdvertisementRepository
 {
+  private table = 'advertisements as ads';
   constructor(private db: Knex.Knex) {}
 
   async get(uidOrId: UidOrId): Promise<DetailedAdvertisement | null> {
     return await this.db.transaction(async (trx) => {
       const ad = await trx
-        .table('advertisements as ads')
+        .table(this.table)
         .where(
           `ads.${getType(uidOrId)}`,
           castUidOrId(uidOrId, trx.fn.uuidToBin),
@@ -46,7 +51,6 @@ export default class KnexAdvertisementRepository
         .then((ad) => {
           if (!ad) return null;
           const { category_id, category_uid, category_name, ...entry } = ad;
-          console.log(category_id, category_uid, entry);
 
           return {
             ...entry,
@@ -62,6 +66,12 @@ export default class KnexAdvertisementRepository
         });
 
       if (!ad) return null;
+
+      const images = await trx
+        .table('images as imgs')
+        .where('imgs.advertisement_id', ad.id)
+        .select<UidsToBuffers<Pick<Image, 'uid'>>[]>('imgs.uid')
+        .then((imgs) => imgs.map((img) => trx.fn.binToUuid(img.uid)));
 
       const propertyValues = await trx
         .table('category_property_option_values as vals')
@@ -86,15 +96,130 @@ export default class KnexAdvertisementRepository
 
       return {
         ...ad,
+        images,
         propertyValues,
       } as DetailedAdvertisement;
+    });
+  }
+
+  async getFiltered(
+    filter: AdvertisementFilter = {},
+  ): Promise<FilteredAdvertisement[]> {
+    return await this.db.transaction(async (trx) => {
+      const category = filter.category;
+      const propertyOptions = filter.propertyOptions
+        ? [...new Set(filter.propertyOptions)]
+        : undefined;
+
+      let query = trx
+        .table(this.table)
+        .whereNotNull('ads.published_at')
+        .select<any[]>('ads.*');
+
+      if (category && propertyOptions && propertyOptions?.length !== 0) {
+        const optionGroups = await trx
+          .table('category_property_options as opts')
+          .whereIn(
+            'opts.uid',
+            propertyOptions.map((u) => trx.fn.uuidToBin(u)),
+          )
+          .join(
+            'category_properties as props',
+            'opts.category_property_id',
+            '=',
+            'props.id',
+          )
+          .select<
+            UidsToBuffers<
+              Pick<CategoryPropertyOption, 'uid' | 'id'> & {
+                property_id: number;
+              }
+            >[]
+          >('opts.uid', 'opts.id', 'props.id as property_id')
+          .then((opts) =>
+            opts.reduce((groups, option) => {
+              const optGroup = groups.get(option.property_id) ?? [];
+              if (optGroup.length === 0) {
+                groups.set(option.property_id, optGroup);
+              }
+              optGroup.push(option.id);
+              return groups;
+            }, new Map<number, number[]>()),
+          );
+
+        query = query.andWhere((b) =>
+          b.whereIn('ads.id', (q) => {
+            q = q
+              .table('category_property_option_values as vals')
+              .join(
+                'category_property_options as opts',
+                'vals.category_property_option_id',
+                '=',
+                'opts.id',
+              );
+
+            for (const [, optionGroup] of optionGroups) {
+              q = q.orWhereIn('opts.id', optionGroup);
+            }
+
+            return q
+              .join(
+                'category_properties as props',
+                'opts.category_property_id',
+                '=',
+                'props.id',
+              )
+              .join('categories as cat', 'props.category_id', '=', 'cat.id')
+              .andWhere('cat.uid', trx.fn.uuidToBin(category))
+              .select('vals.advertisement_id');
+          }),
+        );
+      } else if (category) {
+        query = query.andWhere((b) =>
+          b.whereIn('ads.category_id', (q) =>
+            q
+              .table('categories as cat')
+              .where('cat.uid', trx.fn.uuidToBin(category))
+              .select('cat.id'),
+          ),
+        );
+      }
+
+      const ads = await query;
+      const images = await trx
+        .table('images as imgs')
+        .whereIn(
+          'imgs.advertisement_id',
+          ads.map((a) => a.id),
+        )
+        .select<
+          UidsToBuffers<Pick<Image, 'id' | 'uid' | 'advertisement_id'>>[]
+        >('imgs.id', 'imgs.uid', 'imgs.advertisement_id')
+        .then((imgs) =>
+          imgs.map((img) => ({
+            ...img,
+            uid: trx.fn.binToUuid(img.uid),
+          })),
+        );
+
+      return ads.map((ad) => ({
+        uid: trx.fn.binToUuid(ad.uid),
+        title: ad.title,
+        description: ad.description,
+        images: images
+          .filter((img) => img.advertisement_id === ad.id)
+          .map((img) => img.uid),
+        price: ad.price,
+        currency: ad.currency,
+        published_at: new Date(ad.published_at),
+      }));
     });
   }
 
   async getPublished() {
     return (
       await this.db
-        .table('advertisements as ads')
+        .table(this.table)
         .whereNotNull('ads.published_at')
         .join('users', 'ads.user_id', '=', 'users.id')
         .join('categories as cat', 'ads.category_id', '=', 'cat.id')
@@ -137,7 +262,7 @@ export default class KnexAdvertisementRepository
   async getPublishedByUser(userId: number) {
     return (
       await this.db
-        .table('advertisements as ads')
+        .table(this.table)
         .whereNotNull('ads.published_at')
         .where('ads.user_id', userId)
         .join('categories as cat', 'ads.category_id', '=', 'cat.id')
@@ -172,7 +297,7 @@ export default class KnexAdvertisementRepository
   async getDraftsByUser(userId: number) {
     return (
       await this.db
-        .table('advertisements as ads')
+        .table(this.table)
         .whereNull('ads.published_at')
         .where('ads.user_id', userId)
         .leftJoin('categories as cat', 'ads.category_id', '=', 'cat.id')
@@ -210,13 +335,13 @@ export default class KnexAdvertisementRepository
     publishedAt: Date | null,
   ) {
     this.db
-      .table('advertisements as ads')
+      .table(this.table)
       .where(`ads.${getType(adUidOrId)}`, adUidOrId)
       .update({ draft: newDraftStatus, published_at: publishedAt });
   }
 
   async create(ad: InsertableAdvertisement): Promise<void> {
-    return this.db.table('advertisements').insert({
+    return this.db.table(this.table).insert({
       ...ad,
       uid: this.db.fn.uuidToBin(ad.uid),
     });

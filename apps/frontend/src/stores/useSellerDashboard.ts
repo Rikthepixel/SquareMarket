@@ -26,8 +26,8 @@ interface PublishedAdvertisement extends Required<Advertisement> {
 interface DraftAdvertisement extends Advertisement {}
 
 interface SellerDashboardState {
-  published: Resource<PublishedAdvertisement[]>;
-  drafts: Resource<DraftAdvertisement[]>;
+  publishedAds: Resource<PublishedAdvertisement[]>;
+  draftAds: Resource<DraftAdvertisement[]>;
 
   loadDrafts(): Promise<void>;
   loadPublished(): Promise<void>;
@@ -35,27 +35,27 @@ interface SellerDashboardState {
 }
 
 const useSellerDashboard = create<SellerDashboardState>((set, get) => ({
-  published: Resource.idle(),
-  drafts: Resource.idle(),
+  publishedAds: Resource.idle(),
+  draftAds: Resource.idle(),
 
   async loadDrafts() {
-    if (get().drafts.isLoading()) return;
+    if (get().draftAds.isLoading()) return;
     const drafts = Resource.loading();
-    set({ drafts });
+    set({ draftAds: drafts });
 
     set({
-      drafts: await Resource.wrapPromise(
+      draftAds: await Resource.wrapPromise(
         getDraftAdvertisements(drafts.signal()),
       ),
     });
   },
 
   async loadPublished() {
-    if (get().published.isLoading()) return;
+    if (get().publishedAds.isLoading()) return;
     const published = Resource.loading();
-    set(() => ({ published }));
+    set(() => ({ publishedAds: published }));
     set({
-      published: await Resource.wrapPromise(
+      publishedAds: await Resource.wrapPromise(
         getPublishedAdvertisements(published.signal()),
       ),
     });
@@ -63,8 +63,8 @@ const useSellerDashboard = create<SellerDashboardState>((set, get) => ({
 
   reset() {
     set({
-      published: Resource.idle(),
-      drafts: Resource.idle(),
+      publishedAds: Resource.idle(),
+      draftAds: Resource.idle(),
     });
   },
 }));

@@ -44,6 +44,7 @@ export interface InsertableAdvertisement
 
 export interface DetailedAdvertisement extends Advertisement {
   category?: Category;
+  images: string[];
   propertyValues: {
     uid: string;
     category_property_uid: string;
@@ -51,8 +52,24 @@ export interface DetailedAdvertisement extends Advertisement {
   }[];
 }
 
+export interface AdvertisementFilter {
+  category?: string;
+  propertyOptions?: string[];
+}
+
+export interface FilteredAdvertisement {
+  uid: string;
+  title?: string;
+  description?: string;
+  images: string[];
+  price?: number;
+  currency?: string;
+  published_at: Date;
+}
+
 export default interface AdvertisementRepository {
   get(uid: string): Promise<DetailedAdvertisement | null>;
+  getFiltered(filter: AdvertisementFilter): Promise<FilteredAdvertisement[]>;
   getPublished: () => Promise<PublicAdvertisement[]>;
   getPublishedByUser: (userId: number) => Promise<UserPublishedAdvertisement[]>;
   getDraftsByUser: (userId: number) => Promise<UserDraftAdvertisement[]>;

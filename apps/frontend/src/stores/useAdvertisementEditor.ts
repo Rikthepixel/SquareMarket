@@ -23,28 +23,11 @@ interface Advertisement {
   }[];
 }
 
-interface Category {
-  uid: string;
-  name: string;
-}
-
-interface Property {
-  uid: string;
-  name: string;
-  options: {
-    uid: string;
-    name: string;
-  }[];
-}
-
 interface AdvertisementEditorState {
   created: Resource<{ uid: string }>;
   advertisement: Resource<Advertisement>;
-  categories: Resource<Category[]>;
-  properties: Resource<Property[]>;
 
   load(uid: string): Promise<void>;
-  loadProperties(categoryUid: string): Promise<void>;
   create(): Promise<void>;
   setCategory(uid?: string): Promise<void>;
   save(): Promise<void>;
@@ -53,19 +36,14 @@ interface AdvertisementEditorState {
 const useAdvertisementEditor = create<AdvertisementEditorState>((set, get) => ({
   created: Resource.idle(),
   advertisement: Resource.idle(),
-  categories: Resource.idle(),
-  properties: Resource.idle(),
 
   async load(uid) {
     if (get().advertisement.isLoading()) return;
-    const loaded = Resource.loading();
-    set({ advertisement: loaded });
+    const advertisement = Resource.loading();
+    set({ advertisement });
     set({
       advertisement: await Resource.wrapPromise(
-        getAdvertisement(uid, loaded.signal()).then((ad) => {
-          if (ad.category?.uid) get().loadProperties(ad.category.uid);
-          return ad;
-        }),
+        getAdvertisement(uid, advertisement.signal()),
       ),
     });
   },
@@ -78,22 +56,15 @@ const useAdvertisementEditor = create<AdvertisementEditorState>((set, get) => ({
     });
   },
 
-  async loadProperties() {},
-
   async setCategory(uid) {
     // Load new properties
     // Reset values
-    const state = get();
-
-    set({ properties: state.properties.abort().loading() });
   },
 
   async reset() {
     set({
       created: Resource.idle(),
       advertisement: Resource.idle(),
-      properties: Resource.idle(),
-      categories: Resource.idle(),
     });
   },
 
