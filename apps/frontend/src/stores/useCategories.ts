@@ -40,7 +40,7 @@ const useCategories = create<CategoriesState>((set, get) => ({
   },
 
   async loadCategory(uid: string) {
-    const category = get().category.abort().loading();
+    const category = get().category.abort().reload();
     set({ category });
     set({
       category: await Resource.wrapPromise(getCategory(uid)),

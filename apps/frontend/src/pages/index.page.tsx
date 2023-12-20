@@ -129,7 +129,7 @@ export default function FrontPage() {
   }, [selectedCategory]);
 
   useEffect(() => {
-    category.map((category) =>
+    category.then((category) =>
       setValues({
         options: category.properties.map((prop) => ({
           name: prop.name,
@@ -141,7 +141,7 @@ export default function FrontPage() {
 
   const categoryOptions = useMemo(
     () =>
-      categories.map((cats) => [
+      categories.then((cats) => [
         {
           label: 'None',
           value: 'none',
@@ -187,7 +187,7 @@ export default function FrontPage() {
       </Group>
       <Collapse in={isFilterOpen}>
         {categoryOptions
-          .map((options) => (
+          .then((options) => (
             <Select
               {...getInputProps('category')}
               label="Category"
@@ -195,11 +195,11 @@ export default function FrontPage() {
               data={options}
             />
           ))
-          .mapError((e) => e.message)
-          .mapPending(() => 'Loading categories...')
+          .catch((e) => e.message)
+          .pending(() => 'Loading categories...')
           .unwrap()}
         {category
-          .map((cat) => (
+          .then((cat) => (
             <Stack>
               {cat.properties.map((prop, idx) => (
                 <Select
@@ -221,20 +221,20 @@ export default function FrontPage() {
               ))}
             </Stack>
           ))
-          .mapError((e) => e.message)
-          .mapLoading(() => 'Loading category properties...')
+          .catch((e) => e.message)
+          .loading(() => 'Loading category properties...')
           .unwrap()}
       </Collapse>
       <Grid mt="md" pb="md">
         {advertisements
-          .map((value) =>
+          .then((value) =>
             value.map((ad) => (
               <Grid.Col key={ad.uid} span={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                 <AdvertisementCard {...ad} />
               </Grid.Col>
             )),
           )
-          .mapError((e) => e.message)
+          .catch((e) => e.message)
           .unwrap()}
       </Grid>
     </PageContainer>

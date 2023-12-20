@@ -20,9 +20,9 @@ export default function CreateAdPage() {
   return (
     <PageContainer>
       {created
-        .map(() => 'Creating a new advertisement')
-        .mapPending(() => 'Creating a new advertisement')
-        .mapError(
+        .then(() => 'Creating a new advertisement')
+        .pending(() => 'Creating a new advertisement')
+        .catch(
           () =>
             'Could not create a new advertisement. Reload or try again later',
         )

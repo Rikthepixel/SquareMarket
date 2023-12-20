@@ -138,7 +138,7 @@ export default class Resource<
    *
    * Resets the `Resource` into a loading state with a value of undefined
    */
-  loading<TNValue = TValue, TNError = TError>(
+  reload<TNValue = TValue, TNError = TError>(
     controller = new AbortController(),
   ) {
     return Resource.loading<TNValue, TNError>(controller);
@@ -156,7 +156,7 @@ export default class Resource<
    *
    * Maps the value state to a new value
    */
-  map<TResult>(map: (value: TValue) => TResult) {
+  then<TResult>(map: (value: TValue) => TResult) {
     if (this.state.kind !== 'value') return this;
     return Resource.wrapValue<TResult, TError, TLoading>(
       map(this.state.result),
@@ -167,7 +167,7 @@ export default class Resource<
    *
    * Maps the error state to a new value
    */
-  mapError<TResult>(map: (error: TError) => TResult) {
+  catch<TResult>(map: (error: TError) => TResult) {
     if (this.state.kind !== 'error') return this;
     return Resource.wrapError<TValue, TResult, TLoading, TIdle>(
       map(this.state.result),
@@ -178,7 +178,7 @@ export default class Resource<
    *
    * Maps the loading state to a new value
    */
-  mapLoading<TResult>(map: (loading: TLoading) => TResult) {
+  loading<TResult>(map: (loading: TLoading) => TResult) {
     if (this.state.kind !== 'loading') return this;
     return Resource.wrapLoading<TValue, TError, TResult>(
       map(this.state.result),
@@ -190,7 +190,7 @@ export default class Resource<
    *
    * Maps the loading and idle state to a new value
    */
-  mapPending<TResult>(map: (pending: TLoading | TIdle) => TResult) {
+  pending<TResult>(map: (pending: TLoading | TIdle) => TResult) {
     if (this.state.kind !== 'loading' && this.state.kind !== 'idle')
       return this;
     return new Resource<TValue, TError, TResult, TResult>({

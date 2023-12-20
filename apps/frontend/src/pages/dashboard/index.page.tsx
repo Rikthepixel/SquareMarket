@@ -52,29 +52,29 @@ export default function Dashboard() {
 
             <Tabs.Panel value="ads">
               {publishedAds
-                .map((ads) => (
+                .then((ads) => (
                   <Stack gap="md">
                     {ads.map((ad) => (
                       <AdvertisementCard key={ad.uid} ad={ad} draft={false} />
                     ))}
                   </Stack>
                 ))
-                .mapPending(() => 'Loading published advertisements...')
-                .mapError(() => 'Error')
+                .pending(() => 'Loading published advertisements...')
+                .catch(() => 'Error')
                 .unwrap()}
             </Tabs.Panel>
 
             <Tabs.Panel value="drafts">
               {draftAds
-                .map((ads) => (
+                .then((ads) => (
                   <Stack gap="md">
                     {ads.map((ad) => (
                       <AdvertisementCard key={ad.uid} ad={ad} draft={true} />
                     ))}
                   </Stack>
                 ))
-                .mapPending(() => 'Loading drafts...')
-                .mapError(() => 'Error')
+                .pending(() => 'Loading drafts...')
+                .catch(() => 'Error')
                 .unwrap()}
             </Tabs.Panel>
           </Stack>

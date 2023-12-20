@@ -21,7 +21,7 @@ import {
 import { Dropzone, FileWithPath, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { Carousel } from '@mantine/carousel';
 import { MdAttachMoney, MdEuro, MdPhoto, MdSave } from 'react-icons/md';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import useAdvertisementEditor from '@/stores/useAdvertisementEditor';
 import useTypedParams from '@/hooks/useTypedParams';
 import { z } from 'zod';
@@ -64,11 +64,13 @@ type FormSchema = z.infer<typeof FORM_SCHEMA>;
 export default function EditAdPage() {
   const [images, setImages] = useState<FileWithPath[]>([]);
   const { uid } = useTypedParams(PARAMS_SCHEMA) ?? {};
-  const { loadCategories, loadCategory, categories } = useCategories();
+  const { loadCategories, loadCategory, categories, category } =
+    useCategories();
   const { load, advertisement } = useAdvertisementEditor();
 
   const {
     getInputProps,
+    onSubmit,
     values: { published, currency },
     setValues,
   } = useForm<FormSchema>({
@@ -82,9 +84,10 @@ export default function EditAdPage() {
   }, [load]);
 
   useEffect(() => {
-    const result = advertisement.unwrapValue();
-    if (!result || !result?.category?.uid) return;
-    loadCategory(result.category.uid);
+    advertisement.then((ad) => {
+      if (!ad.category?.uid) return;
+      loadCategory(ad.category.uid);
+    });
   }, [advertisement]);
 
   useEffect(() => {
@@ -104,6 +107,8 @@ export default function EditAdPage() {
       published: ad.published_at !== null,
     });
   }, [setValues, advertisement]);
+
+  const onSave = useMemo(() => onSubmit((data) => {}), []);
 
   const currencyOptions = useMemo<ComboboxItem[]>(() => {
     return [
@@ -242,7 +247,7 @@ export default function EditAdPage() {
         />
         <Divider />
         {categories
-          .map((cats) => (
+          .then((cats) => (
             <Select
               {...getInputProps('category')}
               label="Category"
@@ -253,8 +258,45 @@ export default function EditAdPage() {
               withAsterisk={published}
             />
           ))
-          .mapError(() => 'An error occurred while loading the categories...')
-          .mapPending(() => 'Loading categories...')
+          .catch(() => 'An error occurred while loading the categories...')
+          .pending(() => 'Loading categories...')
+          .unwrap()}
+
+        {category
+          .then((cat) => {
+            const defaultProperties = advertisement
+              .then((ad) => ad.propertyValues)
+              .unwrapValue();
+
+            return (
+              <Stack>
+                {cat.properties.map((prop, idx) => (
+                  <Select
+                    key={prop.uid}
+                    label={prop.name}
+                    defaultValue={
+                      defaultProperties?.find(
+                        (prop) => prop.category_property_uid === prop.uid,
+                      )?.uid ?? 'none'
+                    }
+                    data={[
+                      {
+                        label: 'None',
+                        value: 'none',
+                      },
+                      ...prop.options.map((opt) => ({
+                        label: opt.name,
+                        value: opt.uid,
+                      })),
+                    ]}
+                    {...getInputProps(`options.${idx}.value`)}
+                  />
+                ))}
+              </Stack>
+            );
+          })
+          .catch((e) => e.message)
+          .loading(() => 'Loading category properties...')
           .unwrap()}
 
         <Divider />
