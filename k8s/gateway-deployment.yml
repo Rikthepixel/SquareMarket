@@ -39,7 +39,7 @@ spec:
             - name: SERVER_PORT
               value: "80"
           ports:
-            - containerPort: 8081
+            - containerPort: 80
       restartPolicy: Always
 ---
 # https://kubernetes.io/docs/concepts/services-networking/service/
@@ -49,7 +49,7 @@ metadata:
   name: gateway-service
 spec:
   selector:
-    app: gateway-service
+    app: gateway-pod
   type: ClusterIP
   ports:
     - name: http
