@@ -20,7 +20,7 @@ export default function CreateAdPage() {
   return (
     <PageContainer>
       {created
-        .then(() => 'Creating a new advertisement')
+        .map(() => 'Creating a new advertisement')
         .pending(() => 'Creating a new advertisement')
         .catch(
           () =>

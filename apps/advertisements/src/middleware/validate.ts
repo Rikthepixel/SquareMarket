@@ -50,12 +50,12 @@ const validate =
         query: schemas.query?.parse(ctx.request.query),
         params: schemas.params?.parse(ctx.params),
       };
-
-      await next();
     } catch (err) {
       if (!(err instanceof z.ZodError)) throw err;
-      return ctx.throw(422, err);
+      return ctx.throw(422, err.toString());
     }
+
+    await next();
   };
 
 export default validate;

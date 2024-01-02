@@ -8,6 +8,7 @@ export const getAdvertisementResponseSchema = z.object({
   currency: z.string().optional(),
   draft: z.boolean(),
   published_at: z.coerce.date().nullable(),
+  images: z.string().array(),
 
   category: z
     .object({

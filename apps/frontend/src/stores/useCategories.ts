@@ -22,6 +22,7 @@ interface CategoriesState {
 
   loadCategories(): Promise<void>;
   loadCategory(uid: string): Promise<void>;
+  resetCategory(): void;
 }
 
 const useCategories = create<CategoriesState>((set, get) => ({
@@ -45,6 +46,10 @@ const useCategories = create<CategoriesState>((set, get) => ({
     set({
       category: await Resource.wrapPromise(getCategory(uid)),
     });
+  },
+
+  resetCategory() {
+    set({ category: Resource.idle() });
   },
 }));
 

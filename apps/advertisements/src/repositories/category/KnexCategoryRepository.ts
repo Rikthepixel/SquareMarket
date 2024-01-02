@@ -75,8 +75,8 @@ export default class KnexCategoryRepository implements CategoryRepository {
     });
   }
 
-  getAll(): Promise<Category[]> {
-    return this.db
+  async getAll(): Promise<Category[]> {
+    return await this.db
       .table('categories as cat')
       .select<UidsToBuffers<Category>[]>('cat.id', 'cat.uid', 'cat.name')
       .then((cats) =>

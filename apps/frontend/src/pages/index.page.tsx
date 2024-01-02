@@ -129,7 +129,7 @@ export default function FrontPage() {
   }, [selectedCategory]);
 
   useEffect(() => {
-    category.then((category) =>
+    category.map((category) =>
       setValues({
         options: category.properties.map((prop) => ({
           name: prop.name,
@@ -141,7 +141,7 @@ export default function FrontPage() {
 
   const categoryOptions = useMemo(
     () =>
-      categories.then((cats) => [
+      categories.map((cats) => [
         {
           label: 'None',
           value: 'none',
@@ -187,7 +187,7 @@ export default function FrontPage() {
       </Group>
       <Collapse in={isFilterOpen}>
         {categoryOptions
-          .then((options) => (
+          .map((options) => (
             <Select
               {...getInputProps('category')}
               label="Category"
@@ -199,7 +199,7 @@ export default function FrontPage() {
           .pending(() => 'Loading categories...')
           .unwrap()}
         {category
-          .then((cat) => (
+          .map((cat) => (
             <Stack>
               {cat.properties.map((prop, idx) => (
                 <Select
@@ -227,7 +227,7 @@ export default function FrontPage() {
       </Collapse>
       <Grid mt="md" pb="md">
         {advertisements
-          .then((value) =>
+          .map((value) =>
             value.map((ad) => (
               <Grid.Col key={ad.uid} span={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
                 <AdvertisementCard {...ad} />

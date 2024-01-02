@@ -47,9 +47,7 @@ export default class Resource<
   >(promise: Promise<TValue>): Promise<Resource<TValue, TError, TLoading, TIdle>> {
     return promise
       .then((val) => Resource.wrapValue<TValue, TError, TLoading, TIdle>(val))
-      .catch((err: TError) =>
-        Resource.wrapError<TValue, TError, TLoading, TIdle>(err),
-      );
+      .catch((err: TError) => Resource.wrapError<TValue, TError, TLoading, TIdle>(err));
   }
 
   /**
@@ -156,7 +154,7 @@ export default class Resource<
    *
    * Maps the value state to a new value
    */
-  then<TResult>(map: (value: TValue) => TResult) {
+  map<TResult>(map: (value: TValue) => TResult) {
     if (this.state.kind !== 'value') return this;
     return Resource.wrapValue<TResult, TError, TLoading>(
       map(this.state.result),

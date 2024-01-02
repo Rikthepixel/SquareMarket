@@ -28,7 +28,7 @@ const useAdvertisements = create<AdvertisementsState>((set, get) => ({
   advertisements: Resource.idle(),
 
   async getAdvertisementsWithFilter(filter = {}) {
-    const advertisements = get().advertisements.abort().loading();
+    const advertisements = get().advertisements.abort().reload();
     set({ advertisements });
     set({
       advertisements: await Resource.wrapPromise(

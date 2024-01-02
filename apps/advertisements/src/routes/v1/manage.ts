@@ -3,6 +3,7 @@ import makeRouter, { AppRouter } from '../../helpers/router';
 import { AuthState } from '../../middleware/auth';
 import validate from '../../middleware/validate';
 import { advertisementCreatedResponse } from '../../responses/manage/AdvertisementCreationResponse';
+import { putAdvertisementRequest } from '../../requests/manage/PutAdvertisementRequest';
 
 const manageRouter = makeRouter<object, AuthState>();
 
@@ -52,6 +53,29 @@ manageRouter
       const adService = ctx.container.resolve('AdvertisementService');
       ctx.status = 200;
       ctx.body = await adService.get(ctx.validated.params.uid);
+    },
+  )
+  .put(
+    'Put advertisement',
+    '/:uid',
+    validate({
+      params: z.object({ uid: z.string() }),
+      body: putAdvertisementRequest,
+    }),
+    async (ctx) => {
+      const { params, body } = ctx.validated;
+      const adService = ctx.container.resolve('AdvertisementService');
+      await adService.put(params.uid, {
+        title: body.title,
+        description: body.description,
+        price: body.price,
+        currency: body.currency,
+        category_uid: body.category,
+        propertyValues: body.propertyValues,
+        draft: !body.published
+      });
+      ctx.status = 200;
+      ctx.body = await adService.get(params.uid);
     },
   );
 

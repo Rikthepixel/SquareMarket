@@ -52,7 +52,7 @@ export default function Dashboard() {
 
             <Tabs.Panel value="ads">
               {publishedAds
-                .then((ads) => (
+                .map((ads) => (
                   <Stack gap="md">
                     {ads.map((ad) => (
                       <AdvertisementCard key={ad.uid} ad={ad} draft={false} />
@@ -66,7 +66,7 @@ export default function Dashboard() {
 
             <Tabs.Panel value="drafts">
               {draftAds
-                .then((ads) => (
+                .map((ads) => (
                   <Stack gap="md">
                     {ads.map((ad) => (
                       <AdvertisementCard key={ad.uid} ad={ad} draft={true} />

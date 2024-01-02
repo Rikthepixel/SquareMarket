@@ -29,17 +29,23 @@ export interface UserDraftAdvertisement
   category: UserPublishedAdvertisement['category'] | null;
 }
 
-export interface InsertableAdvertisement
-  extends Omit<
-    Advertisement,
-    'id' | 'category_id' | 'title' | 'description' | 'price' | 'currency'
-  > {
-  category_id?: number;
+export interface InsertableAdvertisement {
+  uid: string;
+  user_id: number;
+  draft: boolean;
+  published_at: Date | null;
+}
 
-  title?: string;
-  description?: string;
-  price?: number;
-  currency?: string;
+export interface UpdatableAdvertisement {
+  title?: string | null;
+  description?: string | null;
+  price?: number | null;
+  currency?: string | null;
+  draft: boolean;
+  published_at: Date | null;
+
+  category_id?: number | null;
+  propertyValues?: Record<string, string>;
 }
 
 export interface DetailedAdvertisement extends Advertisement {
@@ -71,14 +77,9 @@ export interface FilteredAdvertisement {
 export default interface AdvertisementRepository {
   get(uid: string): Promise<DetailedAdvertisement | null>;
   getFiltered(filter: AdvertisementFilter): Promise<FilteredAdvertisement[]>;
-  getPublished: () => Promise<PublicAdvertisement[]>;
-  getPublishedByUser: (userId: number) => Promise<UserPublishedAdvertisement[]>;
-  getDraftsByUser: (userId: number) => Promise<UserDraftAdvertisement[]>;
-
-  changeDraftStatus: (
-    adUidOrId: UidOrId,
-    newDraftStatus: boolean,
-    publishedAt: Date | null,
-  ) => Promise<void>;
-  create: (ad: InsertableAdvertisement) => Promise<void>;
+  getPublished(): Promise<PublicAdvertisement[]>;
+  getPublishedByUser(userId: number): Promise<UserPublishedAdvertisement[]>;
+  getDraftsByUser(userId: number): Promise<UserDraftAdvertisement[]>;
+  create(ad: InsertableAdvertisement): Promise<void>;
+  put(uid: UidOrId, ad: UpdatableAdvertisement): Promise<void>;
 }

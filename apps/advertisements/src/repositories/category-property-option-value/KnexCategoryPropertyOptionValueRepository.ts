@@ -1,6 +1,6 @@
 import { Knex } from 'knex';
 import CategoryPropertyOptionValueRepository, {
-  InsertableOptionValue,
+  SyncableOptionValue,
 } from './CategoryPropertyOptionValueRepository';
 import CategoryPropertyOptionValue from '../../entities/CategoryPropertyOptionValue';
 import { UidsToBuffers } from '../../helpers/identifiers';
@@ -12,8 +12,8 @@ export default class KnexCategoryPropertyOptionValueRepository
 
   private table = 'category_property_option_values';
 
-  getByAdvertisement(id: number): Promise<CategoryPropertyOptionValue[]> {
-    return this.db
+  async getByAdvertisement(id: number): Promise<CategoryPropertyOptionValue[]> {
+    return await this.db
       .table(this.table + ' as vals')
       .where('vals.advertisement_id', id)
       .select<UidsToBuffers<CategoryPropertyOptionValue>[]>('*')
@@ -22,7 +22,46 @@ export default class KnexCategoryPropertyOptionValueRepository
       );
   }
 
-  createMultiple(values: InsertableOptionValue[]): Promise<void> {
-    return this.db.table(this.table).insert(values);
+  async syncByAdvertisement(
+    advertisementId: number,
+    values: SyncableOptionValue[],
+  ): Promise<void> {
+    return await this.db.transaction(async (trx) => {
+      const options =
+        values.length === 0
+          ? null
+          : await trx
+              .table('category_property_options as opts')
+              .whereIn(
+                'opts.uid',
+                values.map((val) => trx.fn.uuidToBin(val.option_uid)),
+              )
+              .select<{ id: number; uid: Buffer }[]>('opts.id', 'opts.uid')
+              .then((opts) =>
+                opts.map((opt) => ({
+                  id: opt.id,
+                  uid: trx.fn.binToUuid(opt.uid),
+                })),
+              );
+
+      await trx
+        .table(this.table + ' as vals')
+        .where('vals.advertisement_id', advertisementId)
+        .delete();
+
+      if (!options) return;
+
+      await trx.table(this.table).insert(
+        values.map((value) => {
+          const option = options.find((opt) => opt.uid === value.option_uid);
+          if (!option) return undefined;
+          return {
+            uid: trx.fn.uuidToBin(value.uid),
+            advertisement_id: advertisementId,
+            category_property_option_id: option.id,
+          };
+        }),
+      );
+    });
   }
 }

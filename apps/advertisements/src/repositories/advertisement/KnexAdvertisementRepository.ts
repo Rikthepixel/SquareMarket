@@ -8,6 +8,7 @@ import AdvertisementRepository, {
   UserDraftAdvertisement,
   AdvertisementFilter,
   FilteredAdvertisement,
+  UpdatableAdvertisement,
 } from './AdvertisementRepository';
 import {
   UidOrId,
@@ -88,10 +89,19 @@ export default class KnexAdvertisementRepository
           '=',
           'props.id',
         )
-        .select<DetailedAdvertisement['propertyValues']>(
+        .select<UidsToBuffers<DetailedAdvertisement['propertyValues']>>(
           'vals.uid as uid',
           'props.uid as category_property_uid',
           'opts.uid as category_property_option_uid',
+        )
+        .then<DetailedAdvertisement['propertyValues']>((vals) =>
+          vals.map((val) => ({
+            uid: trx.fn.binToUuid(val.uid),
+            category_property_uid: trx.fn.binToUuid(val.category_property_uid),
+            category_property_option_uid: trx.fn.binToUuid(
+              val.category_property_option_uid,
+            ),
+          })),
         );
 
       return {
@@ -337,21 +347,17 @@ export default class KnexAdvertisementRepository
     }));
   }
 
-  async changeDraftStatus(
-    adUidOrId: UidOrId,
-    newDraftStatus: boolean,
-    publishedAt: Date | null,
-  ) {
-    this.db
-      .table(this.table)
-      .where(`ads.${getType(adUidOrId)}`, adUidOrId)
-      .update({ draft: newDraftStatus, published_at: publishedAt });
-  }
-
   async create(ad: InsertableAdvertisement): Promise<void> {
-    return this.db.table(this.table).insert({
+    await this.db.table(this.table).insert({
       ...ad,
       uid: this.db.fn.uuidToBin(ad.uid),
     });
+  }
+
+  async put(uidOrId: UidOrId, ad: UpdatableAdvertisement): Promise<void> {
+    await this.db
+      .table(this.table)
+      .where(`ads.${getType(uidOrId)}`, castUidOrId(uidOrId, this.db.fn.uuidToBin))
+      .update(ad)
   }
 }

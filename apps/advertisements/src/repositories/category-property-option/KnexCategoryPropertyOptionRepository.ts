@@ -26,14 +26,16 @@ export default class KnexCategoryPropertyOptionRepository
 
   async getValidForCategory(categoryUidOrId: UidOrId, options: UidOrId[]) {
     const optionIds: number[] = [];
-    const optionUids: string[] = [];
+    const optionUids: Buffer[] = [];
+
+    if (options.length === 0) return [];
 
     for (const opt of options) {
       if (isId(opt)) {
         optionIds.push(opt);
         continue;
       }
-      optionUids.push(opt);
+      optionUids.push(this.db.fn.uuidToBin(opt));
     }
 
     const result = await this.db
@@ -47,12 +49,7 @@ export default class KnexCategoryPropertyOptionRepository
         '=',
         'opts.category_property_id',
       )
-      .innerJoin(
-        'categories as cats',
-        'cats.id',
-        '=',
-        'category_properties.category_id',
-      )
+      .innerJoin('categories as cats', 'cats.id', '=', 'props.category_id')
       .where(
         `cats.${getType(categoryUidOrId)}`,
         castUidOrId(categoryUidOrId, this.db.fn.uuidToBin),
@@ -61,7 +58,7 @@ export default class KnexCategoryPropertyOptionRepository
         UidsToBuffers<
           Pick<CategoryPropertyOption, 'id' | 'uid' | 'category_property_id'>
         >[]
-      >('opts.id', 'opts.uid', 'opts.category_property_option_id');
+      >('opts.id', 'opts.uid', 'opts.category_property_id');
 
     if (result.length !== options.length) return null;
 

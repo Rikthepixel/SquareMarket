@@ -55,6 +55,9 @@ const depenencyProvider = (c: IoCContainer) =>
         new AdvertisementService(
           c.resolve('AdvertisementRepository'),
           c.resolve('UserRespository'),
+          c.resolve('CategoryRepository'),
+          c.resolve('CategoryPropertyOptionRepository'),
+          c.resolve('CategoryPropertyOptionValueRepository'),
         ),
     )
     .addScoped(
