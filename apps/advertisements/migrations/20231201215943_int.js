@@ -88,7 +88,6 @@ exports.up = async function (knex) {
         .integer('advertisement_id')
         .unsigned()
         .references('advertisements.id')
-        .onDelete('cascade');
       table.string('mime', 255);
     });
 };

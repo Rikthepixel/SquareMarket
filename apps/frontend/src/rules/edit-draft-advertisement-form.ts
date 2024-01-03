@@ -2,9 +2,9 @@ import { VALID_CURRENCIES } from '@/configs/advertisements';
 import { z } from 'zod';
 
 const editDraftAdvertisementSchema = z.object({
-  title: z.string().optional(),
-  description: z.string().optional(),
-  price: z.coerce.number().optional(),
+  title: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  price: z.coerce.number().optional().nullable(),
   currency: z.enum(VALID_CURRENCIES).or(z.literal('none')).optional(),
   category: z.string().uuid().or(z.literal('none')).optional(),
   options: z.record(

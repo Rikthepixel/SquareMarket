@@ -39,6 +39,33 @@ export default class FileImageRepository implements ImageRepository {
       .then((imgs) => imgs.map((img) => this.db.fn.binToUuid(img.uid)));
   }
 
+  async deleteByAdvertisement(advertisementId: number): Promise<void> {
+    await this.db.transaction(async (trx) => {
+      const images = await trx
+        .table('images')
+        .where('advertisement_id', advertisementId)
+        .select<{ uid: Buffer; id: number }[]>('uid', 'id');
+
+      if (!images || images.length === 0) return;
+
+      await trx
+        .table('images')
+        .whereIn(
+          'id',
+          images.map((img) => img.id),
+        )
+        .del();
+
+      await Promise.all(
+        images.map(async (img) => {
+          const imagePath = path.join(this.basePath, trx.fn.binToUuid(img.uid));
+          if (!existsSync(imagePath)) return null;
+          await fs.unlink(imagePath);
+        }),
+      );
+    });
+  }
+
   async deleteMultiple(imagesToDelete: UidOrId[]): Promise<void> {
     await this.db.transaction(async (trx) => {
       const imageUidsToDelete: Buffer[] = [];
@@ -68,13 +95,13 @@ export default class FileImageRepository implements ImageRepository {
         )
         .del();
 
-      await Promise.all([
-        ...images.map(async (img) => {
+      await Promise.all(
+        images.map(async (img) => {
           const imagePath = path.join(this.basePath, trx.fn.binToUuid(img.uid));
           if (!existsSync(imagePath)) return null;
-          await fs.unlink(path.join(this.basePath, trx.fn.binToUuid(img.uid)));
+          await fs.unlink(imagePath);
         }),
-      ]);
+      );
     });
   }
 

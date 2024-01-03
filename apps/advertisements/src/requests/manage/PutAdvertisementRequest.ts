@@ -12,14 +12,17 @@ const published = z.object({
 });
 
 const draft = z.object({
-  title: z.string().optional(),
-  description: z.string().optional(),
-  price: z.coerce.number().optional(),
-  currency: z.enum(['EUR', 'USD']).optional(),
-  category: z.string().uuid().optional(),
+  title: z.string().optional().nullable(),
+  description: z.string().optional().nullable(),
+  price: z.coerce.number().optional().nullable(),
+  currency: z.enum(['EUR', 'USD']).optional().nullable(),
+  category: z.string().uuid().optional().nullable(),
   published: z.literal(false),
-  propertyValues: z.record(z.string().uuid(), z.string().uuid()).optional(),
-  images: z.string().array().optional(),
+  propertyValues: z
+    .record(z.string().uuid(), z.string().uuid())
+    .optional()
+    .nullable(),
+  images: z.string().array().optional().nullable(),
 });
 
 export type PutAdvertisementRequest = z.infer<typeof published | typeof draft>;

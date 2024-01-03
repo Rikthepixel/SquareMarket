@@ -13,16 +13,16 @@ import BadRequestException from '../exceptions/common/BadRequest';
 import ImageRepository from '../repositories/images/ImageRepository';
 
 interface UpdatableAdvertisement {
-  title?: string;
-  description?: string;
-  price?: number;
-  currency?: string;
+  title?: string | null;
+  description?: string | null;
+  price?: number | null;
+  currency?: string | null;
 
   draft: boolean;
 
-  category_uid?: string;
+  category_uid?: string | null;
   images: string[];
-  propertyValues?: Record<string, string>;
+  propertyValues?: Record<string, string> | null;
 }
 
 export default class AdvertisementService {
@@ -110,6 +110,8 @@ export default class AdvertisementService {
       if (id) return id;
       throw new NotFoundException('advertisement');
     });
+
+    await this.imageRepository.deleteByAdvertisement(advertisementId)
     await this.adRepository.delete(advertisementId);
   }
 

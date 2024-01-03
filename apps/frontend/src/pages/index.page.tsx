@@ -228,11 +228,13 @@ export default function FrontPage() {
       <Grid mt="md" pb="md">
         {advertisements
           .map((value) =>
-            value.map((ad) => (
-              <Grid.Col key={ad.uid} span={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-                <AdvertisementCard {...ad} />
-              </Grid.Col>
-            )),
+            value.length === 0
+              ? 'There are no advertisements yet, be the first to place one!'
+              : value.map((ad) => (
+                  <Grid.Col key={ad.uid} span={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                    <AdvertisementCard {...ad} />
+                  </Grid.Col>
+                )),
           )
           .catch((e) => e.message)
           .unwrap()}

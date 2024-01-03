@@ -11,6 +11,7 @@ export default interface ImageRepository {
   upload(advertisementId: number, images: UploadableImage[]): Promise<void>;
 
   getByAdvertisement(advertisementId: number): Promise<string[]>;
+  deleteByAdvertisement(advertisementId: number): Promise<void>;
   deleteMultiple(imagesToDelete: UidOrId[]): Promise<void>;
 
   getContent(

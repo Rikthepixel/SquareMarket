@@ -25,13 +25,13 @@ import CategoryPropertyOption from '../../entities/CategoryPropertyOption';
 export default class KnexAdvertisementRepository
   implements AdvertisementRepository
 {
-  private table = 'advertisements as ads';
+  private table = 'advertisements';
   constructor(private db: Knex.Knex) {}
 
   async get(uidOrId: UidOrId): Promise<DetailedAdvertisement | null> {
     return await this.db.transaction(async (trx) => {
       const ad = await trx
-        .table(this.table)
+        .table(this.table + ' as ads')
         .where(
           `ads.${getType(uidOrId)}`,
           castUidOrId(uidOrId, trx.fn.uuidToBin),
@@ -115,7 +115,7 @@ export default class KnexAdvertisementRepository
 
   async getId(uid: string): Promise<number | null> {
     return await this.db
-      .table(this.table)
+      .table(this.table + ' as ads')
       .where(`ads.uid`, this.db.fn.uuidToBin(uid))
       .select('ads.id')
       .first()
@@ -135,7 +135,7 @@ export default class KnexAdvertisementRepository
         : undefined;
 
       let query = trx
-        .table(this.table)
+        .table(this.table + ' as ads')
         .whereNotNull('ads.published_at')
         .select<any[]>('ads.*');
 
@@ -143,7 +143,7 @@ export default class KnexAdvertisementRepository
         query = query.where((q) =>
           q
             .whereILike('ads.title', `%${filter.content}%`)
-            .orWhereILike('ads.description', `%${filter.content}`),
+            .orWhereILike('ads.description', `%${filter.content}%`),
         );
       }
 
@@ -251,7 +251,7 @@ export default class KnexAdvertisementRepository
   async getPublished() {
     return await this.db.transaction(async (trx) => {
       const advertisements = await trx
-        .table(this.table)
+        .table(this.table + ' as ads')
         .whereNotNull('ads.published_at')
         .join('users', 'ads.user_id', '=', 'users.id')
         .join('categories as cat', 'ads.category_id', '=', 'cat.id')
@@ -316,7 +316,7 @@ export default class KnexAdvertisementRepository
   async getPublishedByUser(userId: number) {
     return this.db.transaction(async (trx) => {
       const advertisements = await this.db
-        .table(this.table)
+        .table(this.table + ' as ads')
         .whereNotNull('ads.published_at')
         .where('ads.user_id', userId)
         .join('categories as cat', 'ads.category_id', '=', 'cat.id')
@@ -373,7 +373,7 @@ export default class KnexAdvertisementRepository
   async getDraftsByUser(userId: number) {
     return this.db.transaction(async (trx) => {
       const advertisements = await this.db
-        .table(this.table)
+        .table(this.table + ' as ads')
         .whereNull('ads.published_at')
         .where('ads.user_id', userId)
         .leftJoin('categories as cat', 'ads.category_id', '=', 'cat.id')
@@ -436,7 +436,7 @@ export default class KnexAdvertisementRepository
 
   async update(uidOrId: UidOrId, ad: UpdatableAdvertisement): Promise<void> {
     await this.db
-      .table(this.table)
+      .table(this.table + ' as ads')
       .where(
         `ads.${getType(uidOrId)}`,
         castUidOrId(uidOrId, this.db.fn.uuidToBin),
@@ -446,7 +446,7 @@ export default class KnexAdvertisementRepository
 
   async delete(uidOrId: UidOrId): Promise<void> {
     await this.db
-      .table(this.table)
+      .table(this.table + ' as ads')
       .where(
         `ads.${getType(uidOrId)}`,
         castUidOrId(uidOrId, this.db.fn.uuidToBin),
