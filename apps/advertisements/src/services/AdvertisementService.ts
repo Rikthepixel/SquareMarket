@@ -98,6 +98,21 @@ export default class AdvertisementService {
     return uid;
   }
 
+  async unpublish(uid: string) {
+    await this.adRepository.update(uid, {
+      draft: true,
+      published_at: null,
+    });
+  }
+
+  async delete(uid: string) {
+    const advertisementId = await this.adRepository.getId(uid).then((id) => {
+      if (id) return id;
+      throw new NotFoundException('advertisement');
+    });
+    await this.adRepository.delete(advertisementId);
+  }
+
   async put(uid: string, changes: UpdatableAdvertisement) {
     const advertisement = await this.adRepository.get(uid).then((ad) => {
       if (ad) return ad;
@@ -157,7 +172,7 @@ export default class AdvertisementService {
       );
     }
 
-    await this.adRepository.put(advertisement.id, {
+    await this.adRepository.update(advertisement.id, {
       category_id: category?.id ?? null,
       title: changes.title ?? null,
       description: changes.description ?? null,

@@ -59,3 +59,11 @@ export async function uploadAdvertisementImage(uid: string, images: File[]) {
     })
     .json<string[]>();
 }
+
+export async function unpublishAdvertisement(uid: string) {
+  return await backend.delete(`v1/ads/manage/${uid}/unpublish`);
+}
+
+export async function deleteAdvertisement(uid: string) {
+  return await backend.delete(`v1/ads/manage/${uid}`);
+}

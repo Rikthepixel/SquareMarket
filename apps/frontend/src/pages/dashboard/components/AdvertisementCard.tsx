@@ -1,4 +1,5 @@
 import { getImageUrl } from '@/apis/ads/images';
+import { deleteAdvertisement, unpublishAdvertisement } from '@/apis/ads/manage';
 import {
   Badge,
   Image,
@@ -27,21 +28,24 @@ interface Advertisement {
 export default function AdvertisementCard({
   ad,
   draft,
+  onDeleted,
+  onUnpublished,
 }: {
   ad: Advertisement;
   draft: boolean;
+  onUnpublished?: () => void;
+  onDeleted: () => void;
 }) {
-  const currencyFormatter = useMemo(
-    () =>
-      ad.currency
-        ? new Intl.NumberFormat(undefined, {
-            style: 'currency',
-            currency: ad.currency,
-            notation: 'standard',
-          })
-        : null,
-    [ad.currency],
-  );
+  const currencyFormatter = ad.currency
+    ? new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency: ad.currency,
+        notation: 'standard',
+      })
+    : null;
+
+  const unpublishAd = () => unpublishAdvertisement(ad.uid).then(onDeleted);
+  const deleteAd = () => deleteAdvertisement(ad.uid).then(onUnpublished);
 
   return (
     <Paper
@@ -94,8 +98,14 @@ export default function AdvertisementCard({
                 Edit
               </Button>
             </Link>
-            {!draft && <Button rightSection={<MdDownload />}>Unpublish</Button>}
-            <Button rightSection={<MdDelete />}>Delete</Button>
+            {!draft && (
+              <Button rightSection={<MdDownload />} onClick={unpublishAd}>
+                Unpublish
+              </Button>
+            )}
+            <Button rightSection={<MdDelete />} onClick={deleteAd}>
+              Delete
+            </Button>
           </Group>
         </Stack>
       </SimpleGrid>

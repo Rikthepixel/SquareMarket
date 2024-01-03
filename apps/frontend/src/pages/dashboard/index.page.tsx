@@ -1,5 +1,5 @@
 import { Button, Stack, Tabs, Text } from '@mantine/core';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { MdAdd, MdEdit, MdFolder } from 'react-icons/md';
 import PageContainer from '@/components/page/Container';
 import { Link } from 'wouter';
@@ -10,23 +10,26 @@ export default function Dashboard() {
   const { draftAds, loadDrafts, publishedAds, loadPublished } =
     useSellerDashboard();
 
-  const onTabChange = useCallback(
-    (tab: string | null) => {
-      switch (tab) {
-        case 'drafts':
-          loadDrafts();
-          break;
-        case 'ads':
-          loadPublished();
-          break;
-      }
-    },
-    [loadDrafts, loadPublished],
-  );
+  const [tab, setTab] = useState<string>('ads');
+
+  function onTabChange(tab: string | null) {
+    setTab(tab ?? 'ads');
+  }
+
+  const reloadTab = useCallback(() => {
+    switch (tab) {
+      case 'drafts':
+        loadDrafts();
+        break;
+      case 'ads':
+        loadPublished();
+        break;
+    }
+  }, [tab, loadDrafts, loadPublished]);
 
   useEffect(() => {
-    onTabChange('ads');
-  }, []);
+    reloadTab();
+  }, [tab, reloadTab]);
 
   return (
     <PageContainer maw="1280px">
@@ -55,7 +58,13 @@ export default function Dashboard() {
                 .map((ads) => (
                   <Stack gap="md">
                     {ads.map((ad) => (
-                      <AdvertisementCard key={ad.uid} ad={ad} draft={false} />
+                      <AdvertisementCard
+                        key={ad.uid}
+                        ad={ad}
+                        draft={false}
+                        onUnpublished={reloadTab}
+                        onDeleted={reloadTab}
+                      />
                     ))}
                   </Stack>
                 ))
@@ -69,7 +78,12 @@ export default function Dashboard() {
                 .map((ads) => (
                   <Stack gap="md">
                     {ads.map((ad) => (
-                      <AdvertisementCard key={ad.uid} ad={ad} draft={true} />
+                      <AdvertisementCard
+                        key={ad.uid}
+                        ad={ad}
+                        draft={true}
+                        onDeleted={reloadTab}
+                      />
                     ))}
                   </Stack>
                 ))

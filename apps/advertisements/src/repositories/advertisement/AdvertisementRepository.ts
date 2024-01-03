@@ -48,7 +48,7 @@ export interface UpdatableAdvertisement {
   published_at: Date | null;
 
   category_id?: number | null;
-  propertyValues?: Record<string, string>;
+  propertyValues?: Record<string, string> | null;
 }
 
 export interface DetailedAdvertisement extends Advertisement {
@@ -85,5 +85,6 @@ export default interface AdvertisementRepository {
   getPublishedByUser(userId: number): Promise<UserPublishedAdvertisement[]>;
   getDraftsByUser(userId: number): Promise<UserDraftAdvertisement[]>;
   create(ad: InsertableAdvertisement): Promise<void>;
-  put(uid: UidOrId, ad: UpdatableAdvertisement): Promise<void>;
+  update(uid: UidOrId, ad: UpdatableAdvertisement): Promise<void>;
+  delete(uid: UidOrId): Promise<void>;
 }

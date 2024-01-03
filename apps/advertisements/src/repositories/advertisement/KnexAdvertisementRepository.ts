@@ -434,7 +434,7 @@ export default class KnexAdvertisementRepository
     });
   }
 
-  async put(uidOrId: UidOrId, ad: UpdatableAdvertisement): Promise<void> {
+  async update(uidOrId: UidOrId, ad: UpdatableAdvertisement): Promise<void> {
     await this.db
       .table(this.table)
       .where(
@@ -442,5 +442,15 @@ export default class KnexAdvertisementRepository
         castUidOrId(uidOrId, this.db.fn.uuidToBin),
       )
       .update(ad);
+  }
+
+  async delete(uidOrId: UidOrId): Promise<void> {
+    await this.db
+      .table(this.table)
+      .where(
+        `ads.${getType(uidOrId)}`,
+        castUidOrId(uidOrId, this.db.fn.uuidToBin),
+      )
+      .delete();
   }
 }

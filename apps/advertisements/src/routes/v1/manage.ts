@@ -80,6 +80,32 @@ manageRouter
       ctx.status = 200;
     },
   )
+  .delete(
+    'Delete advertisement',
+    '/:uid',
+    validate({
+      params: z.object({ uid: z.string().uuid() }),
+    }),
+    async (ctx) => {
+      const { params } = ctx.validated;
+      const adService = ctx.container.resolve('AdvertisementService');
+      await adService.delete(params.uid);
+      ctx.status = 200;
+    },
+  )
+  .delete(
+    'Unpublish advertisement',
+    '/:uid/unpublish',
+    validate({
+      params: z.object({ uid: z.string().uuid() }),
+    }),
+    async (ctx) => {
+      const { params } = ctx.validated;
+      const adService = ctx.container.resolve('AdvertisementService');
+      await adService.unpublish(params.uid);
+      ctx.status = 200;
+    },
+  )
   .post(
     'Add images',
     '/:uid/images',
