@@ -11,6 +11,7 @@ export const getDraftAdvertisementsResponseSchema = z
       uid: z.string(),
       name: z.string(),
     }),
+    images: z.string().array(),
   })
   .array();
 

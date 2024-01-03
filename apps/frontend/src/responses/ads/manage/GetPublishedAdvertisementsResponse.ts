@@ -11,6 +11,7 @@ export const getPublishedAdvertisementsResponseSchema = z
       uid: z.string(),
       name: z.string(),
     }),
+    images: z.string().array(),
     published_at: z.date(),
   })
   .array();

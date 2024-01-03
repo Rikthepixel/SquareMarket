@@ -1,3 +1,4 @@
+import { getImageUrl } from '@/apis/ads/images';
 import {
   Badge,
   Image,
@@ -15,6 +16,7 @@ import { Link } from 'wouter';
 
 interface Advertisement {
   uid: string;
+  images: string[];
   title?: string;
   description?: string;
   price?: number;
@@ -41,8 +43,6 @@ export default function AdvertisementCard({
     [ad.currency],
   );
 
-  const image: null | string = null;
-
   return (
     <Paper
       component="article"
@@ -57,7 +57,8 @@ export default function AdvertisementCard({
         align="flex-start"
       >
         <Image
-          src={image ?? '/placeholder-ad-img.webp'}
+          src={ad.images.at(0) ? getImageUrl(ad.images.at(0)!) : null}
+          fallbackSrc="/placeholder-ad-img.webp"
           alt="Ad picture"
           maw="14rem"
           w="100%"
@@ -93,11 +94,7 @@ export default function AdvertisementCard({
                 Edit
               </Button>
             </Link>
-            {draft ? (
-              <Button rightSection={<MdPublish />}>Publish</Button>
-            ) : (
-              <Button rightSection={<MdDownload />}>Unpublish</Button>
-            )}
+            {!draft && <Button rightSection={<MdDownload />}>Unpublish</Button>}
             <Button rightSection={<MdDelete />}>Delete</Button>
           </Group>
         </Stack>

@@ -15,6 +15,10 @@ import KnexCategoryRepository from '../repositories/category/KnexCategoryReposit
 import KnexCategoryPropertyOptionRepository from '../repositories/category-property-option/KnexCategoryPropertyOptionRepository';
 import KnexCategoryPropertyOptionValueRepository from '../repositories/category-property-option-value/KnexCategoryPropertyOptionValueRepository';
 import CategoryService from '../services/CategoryService';
+import FileImageRepository from '../repositories/images/FileImageRepository';
+import { mkdirSync } from 'fs';
+import path from 'path';
+import ImageService from '../services/ImageService';
 
 const depenencyProvider = (c: IoCContainer) =>
   c
@@ -45,6 +49,11 @@ const depenencyProvider = (c: IoCContainer) =>
       'CategoryPropertyOptionValueRepository',
       (c) => new KnexCategoryPropertyOptionValueRepository(c.resolve('db')),
     )
+    .addScoped('ImageRepository', (c) => {
+      const basePath = path.join(process.cwd(), 'storage', 'images');
+      mkdirSync(basePath, { recursive: true });
+      return new FileImageRepository(c.resolve('db'), basePath);
+    })
     .addScoped(
       'UserService',
       (c) => new UserService(c.resolve('UserRespository')),
@@ -58,11 +67,16 @@ const depenencyProvider = (c: IoCContainer) =>
           c.resolve('CategoryRepository'),
           c.resolve('CategoryPropertyOptionRepository'),
           c.resolve('CategoryPropertyOptionValueRepository'),
+          c.resolve('ImageRepository'),
         ),
     )
     .addScoped(
       'CategoryService',
       (c) => new CategoryService(c.resolve('CategoryRepository')),
+    )
+    .addScoped(
+      'ImageService',
+      (c) => new ImageService(c.resolve('ImageRepository')),
     )
     .addSingleton(
       'UsersSubscription',

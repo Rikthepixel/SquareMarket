@@ -1,4 +1,4 @@
-import PageContainer from '@/components/page/Container';
+import { IoMdCash } from 'react-icons/io';
 import {
   Button,
   Divider,
@@ -14,25 +14,29 @@ import {
   Paper,
   AspectRatio,
   ComboboxItem,
+  Input,
 } from '@mantine/core';
 import { Dropzone, FileWithPath, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { Carousel } from '@mantine/carousel';
 import { MdAttachMoney, MdEuro, MdPhoto, MdSave } from 'react-icons/md';
 import { useEffect } from 'react';
+import { useForm, zodResolver } from '@mantine/form';
+import PageContainer from '@/components/page/Container';
 import useAdvertisementEditor, {
   EditedAdvertisement,
 } from '@/stores/useAdvertisementEditor';
-import useTypedParams from '@/hooks/useTypedParams';
-import { z } from 'zod';
-import { useForm, zodResolver } from '@mantine/form';
-import { IoMdCash } from 'react-icons/io';
-import useCategories from '@/stores/useCategories';
-import ImageSlide from './components/ImageSlide';
-import { VALID_CURRENCIES } from '@/configs/advertisements';
 import editAdvertisementSchema, {
   EditAdvertisementSchema,
 } from '@/rules/edit-advertisement-form';
+
+import useTypedParams from '@/hooks/useTypedParams';
+
+import { z } from 'zod';
+import useCategories from '@/stores/useCategories';
+import ImageSlide from './components/ImageSlide';
+import { VALID_CURRENCIES } from '@/configs/advertisements';
 import { getImageUrl } from '@/apis/ads/images';
+import ArrayUtils from '@/helpers/Array';
 
 const CURRENCY_OPTIONS: ComboboxItem[] = [
   {
@@ -72,12 +76,14 @@ export default function EditAdPage() {
     setValues,
     onSubmit: makeSubmitHandler,
     values,
+    errors,
   } = useForm<EditAdvertisementSchema>({
     validate: zodResolver(editAdvertisementSchema),
     validateInputOnChange: true,
     initialValues: {
       options: {},
       published: false,
+      images: [],
     },
   });
 
@@ -94,16 +100,6 @@ export default function EditAdPage() {
       }
 
       resetEdited();
-
-      console.log(
-        Object.fromEntries(
-          ad.propertyValues.map((propValue) => [
-            propValue.category_property_uid,
-            propValue.category_property_option_uid,
-          ]),
-        ),
-      );
-
       setEdited({
         title: ad.title,
         description: ad.description,
@@ -128,6 +124,7 @@ export default function EditAdPage() {
         currency: (ad.currency as 'EUR' | 'USD' | undefined) ?? 'none',
         category: ad.category?.uid ?? 'none',
         published: ad.published_at !== null,
+        images: ad.images,
       } as EditAdvertisementSchema);
     });
   }, [setValues, advertisement]);
@@ -166,6 +163,17 @@ export default function EditAdPage() {
     }
   }, [values.category, advertisement, loadCategory, resetCategory]);
 
+  useEffect(() => {
+    setValues({
+      images: [
+        ...edited.images,
+        ...edited.imagesToUpload.map(
+          (file) => `${file.size}${file.path}${file.name}${file.type}`,
+        ),
+      ],
+    });
+  }, [setValues, edited.images, edited.imagesToUpload]);
+
   const onSubmit = makeSubmitHandler(async (data) => {
     const propertyValues: Record<string, string> = {};
     for (const [key, option] of Object.entries(data.options)) {
@@ -188,6 +196,7 @@ export default function EditAdPage() {
     } satisfies Partial<EditedAdvertisement>;
 
     delete edited.options;
+    delete edited.images;
 
     setEdited(edited);
     await saveAdvertisement();
@@ -195,33 +204,27 @@ export default function EditAdPage() {
 
   const onImagesAdded = (newImages: FileWithPath[]) => {
     setEdited({
-      imagesToUpload: [...newImages, ...edited.imagesToUpload],
+      imagesToUpload: [...edited.imagesToUpload, ...newImages],
     });
   };
 
-  const makeOnUploadedImageRemoved = (image: string) =>
+  const makeOnUploadedImageRemoved = (imgToRemove: string) =>
     function () {
-      const newImages = [...edited.images];
-      const imageIdx = newImages.findIndex((img) => img === image);
-
-      if (imageIdx === -1) return;
-      newImages.splice(imageIdx, 1);
-
       setEdited({
-        images: newImages,
+        images: ArrayUtils.toSpliced(
+          edited.images,
+          (img) => img === imgToRemove,
+        ),
       });
     };
 
-  const makeOnImageRemoved = (image: FileWithPath) =>
+  const makeOnImageRemoved = (imgToRemove: FileWithPath) =>
     function () {
-      const newImages = [...edited.imagesToUpload];
-      const imageIdx = newImages.findIndex((img) => img === image);
-
-      if (imageIdx === -1) return;
-      newImages.splice(imageIdx, 1);
-
       setEdited({
-        imagesToUpload: newImages,
+        imagesToUpload: ArrayUtils.toSpliced(
+          edited.imagesToUpload,
+          (img) => img === imgToRemove,
+        ),
       });
     };
 
@@ -231,69 +234,71 @@ export default function EditAdPage() {
         .map(() => (
           <form onSubmit={onSubmit}>
             <Stack gap="md">
-              <Carousel
-                w="100%"
-                slideSize={{ base: '100%', sm: '50%', md: 'calc(100% / 3)' }}
-                slideGap={{ base: 0, sm: 'md' }}
-                align="start"
-                withControls
-                withIndicators
-              >
-                <Carousel.Slide>
-                  <Paper h="100%" withBorder>
-                    <AspectRatio ratio={4 / 3}>
-                      <Dropzone
-                        onDrop={onImagesAdded}
-                        maxSize={3 * 1024 ** 2}
-                        accept={IMAGE_MIME_TYPE}
-                        p="md"
-                        multiple
-                      >
-                        <Group
-                          justify="center"
-                          gap="md"
-                          style={{ pointerEvents: 'none' }}
+              <Input.Wrapper label="Images" error={errors.images}>
+                <Carousel
+                  w="100%"
+                  slideSize={{ base: '100%', sm: '50%', md: 'calc(100% / 3)' }}
+                  slideGap={{ base: 0, sm: 'md' }}
+                  align="start"
+                  withControls
+                  withIndicators
+                >
+                  <Carousel.Slide>
+                    <Paper h="100%" withBorder>
+                      <AspectRatio ratio={4 / 3}>
+                        <Dropzone
+                          onDrop={onImagesAdded}
+                          maxSize={3 * 1024 ** 2}
+                          accept={IMAGE_MIME_TYPE}
+                          p="md"
+                          multiple
                         >
-                          <MdPhoto
-                            style={{
-                              width: rem(52),
-                              height: rem(52),
-                            }}
-                            stroke={1.5}
-                          />
-                          <Stack gap="md">
-                            <Text size="xl" inline>
-                              Drag images here or click to select files
-                            </Text>
-                            <Text size="sm" c="dimmed" inline>
-                              Attach as many files as you like, each file should
-                              not exceed 5mb
-                            </Text>
-                          </Stack>
-                        </Group>
-                      </Dropzone>
-                    </AspectRatio>
-                  </Paper>
-                </Carousel.Slide>
-                {edited.imagesToUpload.map((image) => {
-                  const imageUrl = URL.createObjectURL(image);
-                  return (
+                          <Group
+                            justify="center"
+                            gap="md"
+                            style={{ pointerEvents: 'none' }}
+                          >
+                            <MdPhoto
+                              style={{
+                                width: rem(52),
+                                height: rem(52),
+                              }}
+                              stroke={1.5}
+                            />
+                            <Stack gap="md">
+                              <Text size="xl" inline>
+                                Drag images here or click to select files
+                              </Text>
+                              <Text size="sm" c="dimmed" inline>
+                                Attach as many files as you like, each file
+                                should not exceed 5mb
+                              </Text>
+                            </Stack>
+                          </Group>
+                        </Dropzone>
+                      </AspectRatio>
+                    </Paper>
+                  </Carousel.Slide>
+                  {edited.imagesToUpload.map((image) => {
+                    const imageUrl = URL.createObjectURL(image);
+                    return (
+                      <ImageSlide
+                        key={`${image.path}-${image.name}-${image.size}`}
+                        src={imageUrl}
+                        onLoad={() => URL.revokeObjectURL(imageUrl)}
+                        onDelete={makeOnImageRemoved(image)}
+                      />
+                    );
+                  })}
+                  {edited.images.map((imageUid) => (
                     <ImageSlide
-                      key={`${image.path}-${image.name}-${image.size}`}
-                      src={imageUrl}
-                      onLoad={() => URL.revokeObjectURL(imageUrl)}
-                      onDelete={makeOnImageRemoved(image)}
+                      key={`uuid-${imageUid}`}
+                      src={getImageUrl(imageUid)}
+                      onDelete={makeOnUploadedImageRemoved(imageUid)}
                     />
-                  );
-                })}
-                {edited.images.map((imageUid) => (
-                  <ImageSlide
-                    key={`uuid-${imageUid}`}
-                    src={getImageUrl(imageUid)}
-                    onDelete={makeOnUploadedImageRemoved(imageUid)}
-                  />
-                ))}
-              </Carousel>
+                  ))}
+                </Carousel>
+              </Input.Wrapper>
               <TextInput
                 {...getInputProps('title')}
                 placeholder="Title of your advertisement..."

@@ -1,7 +1,8 @@
 import {
   createAdvertisement,
   getAdvertisement,
-  putAdvertisement, uploadAdvertisementImage,
+  putAdvertisement,
+  uploadAdvertisementImage,
 } from '@/apis/ads/manage';
 import Resource from '@/helpers/Resource';
 import { FileWithPath } from '@mantine/dropzone';
@@ -113,21 +114,31 @@ const useAdvertisementEditor = create<AdvertisementEditorState>((set, get) => ({
 
   async save() {
     const state = get();
-    const advertisement = state.advertisement.unwrapValue();
-    if (!advertisement || state.isSaving) return;
+    const ad = state.advertisement.unwrapValue();
+    if (!ad || state.isSaving) return;
 
     set({ isSaving: true });
-    const { imagesToUpload, ...edited } = state.edited;
+    const { imagesToUpload, images, ...edited } = state.edited;
+    const uploadedImages =
+      imagesToUpload.length > 0
+        ? await uploadAdvertisementImage(ad.uid, imagesToUpload).catch((e) => {
+            set({ isSaving: false });
+            throw e;
+          })
+        : [];
+
+    await putAdvertisement(ad.uid, {
+      ...edited,
+      images: [...uploadedImages, ...images],
+    }).catch((e) => {
+      set({ isSaving: false });
+      throw e;
+    });
 
     set({
       isSaving: false,
       advertisement: await Resource.wrapPromise(
-        Promise.all([
-          putAdvertisement(advertisement.uid, edited),
-          imagesToUpload.length > 0
-            ? uploadAdvertisementImage(advertisement.uid, imagesToUpload)
-            : null,
-        ]).then(([ad]) => ad),
+        getAdvertisement(ad.uid, state.advertisement.abort().reload().signal()),
       ),
     });
   },

@@ -8,6 +8,9 @@ dist
 /db/data
 /db/.env
 
+# Storage
+/storage
+
 # ENV
 /.env
 /.env.local

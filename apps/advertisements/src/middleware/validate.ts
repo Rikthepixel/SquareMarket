@@ -1,6 +1,8 @@
 import Koa from 'koa';
 import { RouterParamContext } from '@koa/router';
 import z from 'zod';
+import { validateBufferMIMEType } from 'validate-image-type';
+import multer from '@koa/multer';
 
 type InferSchema<TSchema extends z.ZodType | undefined | unknown> =
   TSchema extends z.ZodType
@@ -17,8 +19,10 @@ type ZodMiddleware<TSchemas extends PropSchemas> = Koa.Middleware<
       params: InferSchema<TSchemas['params']>;
       headers: InferSchema<TSchemas['headers']>;
       body: InferSchema<TSchemas['body']>;
+      images: multer.File[];
     };
-  } & RouterParamContext,
+  } & RouterParamContext &
+    Koa.DefaultContext,
   InferSchema<
     TSchemas['response'] extends z.ZodType ? TSchemas['response'] : z.ZodTypeAny
   >
@@ -36,6 +40,7 @@ interface PropSchemas<
   params?: TParams;
   query?: TQuery;
   response?: TResponse;
+  images?: { field: string; types: string[] }[];
 }
 
 const validate =
@@ -49,7 +54,28 @@ const validate =
         headers: schemas.headers?.parse(ctx.request.headers),
         query: schemas.query?.parse(ctx.request.query),
         params: schemas.params?.parse(ctx.params),
+        images: [],
       };
+
+      if (ctx.files && schemas.images) {
+        const files = Array.isArray(ctx.files)
+          ? ctx.files
+          : Object.values(ctx.files).flatMap((f) => f);
+
+        for (const file of files) {
+          const validatorField = schemas.images.find(
+            (validatorField) => validatorField.field === file.fieldname,
+          );
+          if (!validatorField) continue;
+          const result = await validateBufferMIMEType(file.buffer, {
+            originalFilename: file.originalname,
+            allowMimeTypes: validatorField.types,
+          });
+
+          if (!result.ok) continue;
+          ctx.validated.images.push(file);
+        }
+      }
     } catch (err) {
       if (!(err instanceof z.ZodError)) throw err;
       return ctx.throw(422, err.toString());

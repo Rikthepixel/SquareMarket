@@ -166,11 +166,10 @@ exports.seed = async function (knex) {
     await trx('category_property_option_values').insert(optValues);
 
     await trx('images').insert(
-      adIds.map(({ id, uid }) => ({
+      adIds.map(({ id }) => ({
         uid: trx.fn.uuidToBin(randomUUID()),
         advertisement_id: id,
-        path: '',
-        ext: '',
+        mime: 'image/png',
       })),
     );
   });

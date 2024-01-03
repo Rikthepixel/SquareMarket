@@ -61,6 +61,11 @@ gateway({
         target: SERVICES.ads,
       },
       {
+        prefix: '/v1/ads/images',
+        prefixRewrite: '/v1/images',
+        target: SERVICES.ads,
+      },
+      {
         prefix: '/v1/accounts',
         prefixRewrite: '/v1',
         target: SERVICES.accounts,

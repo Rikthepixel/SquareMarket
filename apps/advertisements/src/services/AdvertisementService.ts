@@ -10,6 +10,7 @@ import CategoryRepository from '../repositories/category/CategoryRepository';
 import CategoryPropertyOptionValueRepository from '../repositories/category-property-option-value/CategoryPropertyOptionValueRepository';
 import CategoryPropertyOptionRepository from '../repositories/category-property-option/CategoryPropertyOptionRepository';
 import BadRequestException from '../exceptions/common/BadRequest';
+import ImageRepository from '../repositories/images/ImageRepository';
 
 interface UpdatableAdvertisement {
   title?: string;
@@ -20,6 +21,7 @@ interface UpdatableAdvertisement {
   draft: boolean;
 
   category_uid?: string;
+  images: string[];
   propertyValues?: Record<string, string>;
 }
 
@@ -30,6 +32,7 @@ export default class AdvertisementService {
     private categoryRepository: CategoryRepository,
     private propertyOptionsRepository: CategoryPropertyOptionRepository,
     private propertyOptionValueRepository: CategoryPropertyOptionValueRepository,
+    private imageRepository: ImageRepository,
   ) {}
 
   async getFiltered(filter: AdvertisementFilter) {
@@ -67,6 +70,17 @@ export default class AdvertisementService {
     });
   }
 
+  async addImages(uid: string, files: { content: Buffer; mime: string }[]) {
+    const advertisementId = await this.adRepository.getId(uid).then((id) => {
+      if (id) return id;
+      throw new NotFoundException('advertisement');
+    });
+
+    const images = files.map((img) => ({ ...img, uid: randomUUID() }));
+    await this.imageRepository.upload(advertisementId, images);
+    return images.map((img) => img.uid);
+  }
+
   async create(userUid: string) {
     const uid = randomUUID();
 
@@ -97,7 +111,23 @@ export default class AdvertisementService {
         })
       : null;
 
-   if (category) {
+    const allRemainingImagesValid = changes.images.every((img) =>
+      advertisement.images.includes(img),
+    );
+    if (allRemainingImagesValid) {
+      await this.imageRepository.deleteMultiple(
+        advertisement.images.filter(
+          (imgUid) => !changes.images.includes(imgUid),
+        ),
+      );
+    } else {
+      throw new BadRequestException(
+        'images',
+        "some images don't belong to the given advertisement",
+      );
+    }
+
+    if (category) {
       const options = await this.propertyOptionsRepository
         .getValidForCategory(
           category.id,

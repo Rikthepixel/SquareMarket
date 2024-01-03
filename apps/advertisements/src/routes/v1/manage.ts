@@ -4,6 +4,7 @@ import { AuthState } from '../../middleware/auth';
 import validate from '../../middleware/validate';
 import { advertisementCreatedResponse } from '../../responses/manage/AdvertisementCreationResponse';
 import { putAdvertisementRequest } from '../../requests/manage/PutAdvertisementRequest';
+import multer from '@koa/multer';
 
 const manageRouter = makeRouter<object, AuthState>();
 
@@ -59,12 +60,13 @@ manageRouter
     'Put advertisement',
     '/:uid',
     validate({
-      params: z.object({ uid: z.string() }),
+      params: z.object({ uid: z.string().uuid() }),
       body: putAdvertisementRequest,
     }),
     async (ctx) => {
       const { params, body } = ctx.validated;
       const adService = ctx.container.resolve('AdvertisementService');
+
       await adService.put(params.uid, {
         title: body.title,
         description: body.description,
@@ -72,10 +74,36 @@ manageRouter
         currency: body.currency,
         category_uid: body.category,
         propertyValues: body.propertyValues,
-        draft: !body.published
+        images: body.images ?? [],
+        draft: !body.published,
       });
       ctx.status = 200;
-      ctx.body = await adService.get(params.uid);
+    },
+  )
+  .post(
+    'Add images',
+    '/:uid/images',
+    multer({ limits: { fileSize: 10_000_000 } }).array('image'),
+    validate({
+      params: z.object({ uid: z.string().uuid() }),
+      images: [
+        {
+          field: 'image',
+          types: ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'],
+        },
+      ],
+    }),
+    async (ctx) => {
+      const { params, images } = ctx.validated;
+      const adService = ctx.container.resolve('AdvertisementService');
+      ctx.status = 200;
+      ctx.body = await adService.addImages(
+        params.uid,
+        images.map((file) => ({
+          content: file.buffer,
+          mime: file.mimetype,
+        })),
+      );
     },
   );
 

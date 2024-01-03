@@ -42,15 +42,9 @@ export async function putAdvertisement(
   uid: string,
   request: PutAdvertisementRequest,
 ) {
-  return await backend
-    .put(`v1/ads/manage/${uid}`, {
-      json: request,
-    })
-    .then(async (kyResponse) => {
-      const response = await kyResponse.json<GetAdvertisementResponse>();
-      response.draft = Boolean(response.draft);
-      return response;
-    });
+  return await backend.put(`v1/ads/manage/${uid}`, {
+    json: request,
+  });
 }
 
 export async function uploadAdvertisementImage(uid: string, images: File[]) {
@@ -59,7 +53,9 @@ export async function uploadAdvertisementImage(uid: string, images: File[]) {
     request.append('image', image);
   }
 
-  return await backend.post(`v1/ads/manage/${uid}/images`, {
-    body: request,
-  });
+  return await backend
+    .post(`v1/ads/manage/${uid}/images`, {
+      body: request,
+    })
+    .json<string[]>();
 }

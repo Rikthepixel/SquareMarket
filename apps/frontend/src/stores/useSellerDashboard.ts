@@ -12,6 +12,7 @@ interface Advertisement {
   description?: string;
   price?: number;
   currency?: string;
+  images: string[];
 
   category?: {
     uid: string;

@@ -72,6 +72,7 @@ export default class KnexAdvertisementRepository
         .table('images as imgs')
         .where('imgs.advertisement_id', ad.id)
         .select<UidsToBuffers<Pick<Image, 'uid'>>[]>('imgs.uid')
+        .orderBy('id', 'desc')
         .then((imgs) => imgs.map((img) => trx.fn.binToUuid(img.uid)));
 
       const propertyValues = await trx
@@ -110,6 +111,18 @@ export default class KnexAdvertisementRepository
         propertyValues,
       } as DetailedAdvertisement;
     });
+  }
+
+  async getId(uid: string): Promise<number | null> {
+    return await this.db
+      .table(this.table)
+      .where(`ads.uid`, this.db.fn.uuidToBin(uid))
+      .select('ads.id')
+      .first()
+      .then((ad) => {
+        if (!ad) return null;
+        return ad.id;
+      });
   }
 
   async getFiltered(
@@ -210,6 +223,7 @@ export default class KnexAdvertisementRepository
           'imgs.advertisement_id',
           ads.map((a) => a.id),
         )
+        .orderBy('id', 'desc')
         .select<
           UidsToBuffers<Pick<Image, 'id' | 'uid' | 'advertisement_id'>>[]
         >('imgs.id', 'imgs.uid', 'imgs.advertisement_id')
@@ -235,13 +249,13 @@ export default class KnexAdvertisementRepository
   }
 
   async getPublished() {
-    return (
-      await this.db
+    return await this.db.transaction(async (trx) => {
+      const advertisements = await trx
         .table(this.table)
         .whereNotNull('ads.published_at')
         .join('users', 'ads.user_id', '=', 'users.id')
         .join('categories as cat', 'ads.category_id', '=', 'cat.id')
-        .select(
+        .select<any[]>(
           'users.id as seller_id',
           'users.provider_id as seller_provider_id',
           'users.username as seller_name',
@@ -256,30 +270,52 @@ export default class KnexAdvertisementRepository
           'ads.currency',
           'ads.published_at',
         )
-    ).map<PublicAdvertisement>((entry) => ({
-      seller: {
-        id: entry.seller_id,
-        provider_id: entry.seller_provider_id,
-        username: entry.seller_name,
-      },
-      category: {
-        id: entry.category_id,
-        uid: this.db.fn.binToUuid(entry.category_uid),
-        name: entry.category_name,
-      },
-      id: entry.id,
-      uid: this.db.fn.binToUuid(entry.uid),
-      title: entry.title,
-      description: entry.description,
-      price: entry.price,
-      currency: entry.currency,
-      published_at: entry.published_at,
-    }));
+        .then((ads) =>
+          ads.map<Omit<PublicAdvertisement, 'images'>>((entry) => ({
+            seller: {
+              id: entry.seller_id,
+              provider_id: entry.seller_provider_id,
+              username: entry.seller_name,
+            },
+            category: {
+              id: entry.category_id,
+              uid: this.db.fn.binToUuid(entry.category_uid),
+              name: entry.category_name,
+            },
+            id: entry.id,
+            uid: this.db.fn.binToUuid(entry.uid),
+            title: entry.title,
+            description: entry.description,
+            price: entry.price,
+            currency: entry.currency,
+            published_at: entry.published_at,
+          })),
+        );
+
+      const images = await trx
+        .table('images')
+        .whereIn(
+          'advertisement_id',
+          advertisements.map((ad) => ad.id),
+        )
+        .orderBy('id', 'desc')
+        .select<{ uid: Buffer; advertisement_id: number }[]>(
+          'uid',
+          'advertisement_id',
+        );
+
+      return advertisements.map((ad) => ({
+        ...ad,
+        images: images
+          .filter((img) => img.advertisement_id === ad.id)
+          .map((img) => trx.fn.binToUuid(img.uid)),
+      }));
+    });
   }
 
   async getPublishedByUser(userId: number) {
-    return (
-      await this.db
+    return this.db.transaction(async (trx) => {
+      const advertisements = await this.db
         .table(this.table)
         .whereNotNull('ads.published_at')
         .where('ads.user_id', userId)
@@ -296,25 +332,47 @@ export default class KnexAdvertisementRepository
           'ads.currency',
           'ads.published_at',
         )
-    ).map<UserPublishedAdvertisement>((entry) => ({
-      category: {
-        id: entry.category_id,
-        uid: this.db.fn.binToUuid(entry.category_uid),
-        name: entry.category_name,
-      },
-      id: entry.id,
-      uid: this.db.fn.binToUuid(entry.uid),
-      title: entry.title,
-      description: entry.description,
-      price: entry.price,
-      currency: entry.currency,
-      published_at: entry.published_at,
-    }));
+        .then((ads) =>
+          ads.map<Omit<UserPublishedAdvertisement, 'images'>>((entry) => ({
+            category: {
+              id: entry.category_id,
+              uid: this.db.fn.binToUuid(entry.category_uid),
+              name: entry.category_name,
+            },
+            id: entry.id,
+            uid: this.db.fn.binToUuid(entry.uid),
+            title: entry.title,
+            description: entry.description,
+            price: entry.price,
+            currency: entry.currency,
+            published_at: entry.published_at,
+          })),
+        );
+
+      const images = await trx
+        .table('images')
+        .whereIn(
+          'advertisement_id',
+          advertisements.map((ad) => ad.id),
+        )
+        .orderBy('id', 'desc')
+        .select<{ uid: Buffer; advertisement_id: number }[]>(
+          'uid',
+          'advertisement_id',
+        );
+
+      return advertisements.map((ad) => ({
+        ...ad,
+        images: images
+          .filter((img) => img.advertisement_id === ad.id)
+          .map((img) => trx.fn.binToUuid(img.uid)),
+      }));
+    });
   }
 
   async getDraftsByUser(userId: number) {
-    return (
-      await this.db
+    return this.db.transaction(async (trx) => {
+      const advertisements = await this.db
         .table(this.table)
         .whereNull('ads.published_at')
         .where('ads.user_id', userId)
@@ -330,21 +388,43 @@ export default class KnexAdvertisementRepository
           'ads.price',
           'ads.currency',
         )
-    ).map<UserDraftAdvertisement>((entry) => ({
-      category: entry.category_uid
-        ? {
-            id: entry.category_id,
-            uid: this.db.fn.binToUuid(entry.category_uid),
-            name: entry.category_name,
-          }
-        : null,
-      id: entry.id,
-      uid: this.db.fn.binToUuid(entry.uid),
-      title: entry.title,
-      description: entry.description,
-      price: entry.price,
-      currency: entry.currency,
-    }));
+        .then((ads) =>
+          ads.map<Omit<UserDraftAdvertisement, 'images'>>((entry) => ({
+            category: entry.category_uid
+              ? {
+                  id: entry.category_id,
+                  uid: this.db.fn.binToUuid(entry.category_uid),
+                  name: entry.category_name,
+                }
+              : null,
+            id: entry.id,
+            uid: this.db.fn.binToUuid(entry.uid),
+            title: entry.title,
+            description: entry.description,
+            price: entry.price,
+            currency: entry.currency,
+          })),
+        );
+
+      const images = await trx
+        .table('images')
+        .whereIn(
+          'advertisement_id',
+          advertisements.map((ad) => ad.id),
+        )
+        .orderBy('id', 'desc')
+        .select<{ uid: Buffer; advertisement_id: number }[]>(
+          'uid',
+          'advertisement_id',
+        );
+
+      return advertisements.map((ad) => ({
+        ...ad,
+        images: images
+          .filter((img) => img.advertisement_id === ad.id)
+          .map((img) => trx.fn.binToUuid(img.uid)),
+      }));
+    });
   }
 
   async create(ad: InsertableAdvertisement): Promise<void> {
@@ -357,7 +437,10 @@ export default class KnexAdvertisementRepository
   async put(uidOrId: UidOrId, ad: UpdatableAdvertisement): Promise<void> {
     await this.db
       .table(this.table)
-      .where(`ads.${getType(uidOrId)}`, castUidOrId(uidOrId, this.db.fn.uuidToBin))
-      .update(ad)
+      .where(
+        `ads.${getType(uidOrId)}`,
+        castUidOrId(uidOrId, this.db.fn.uuidToBin),
+      )
+      .update(ad);
   }
 }

@@ -8,6 +8,7 @@ export interface PublicAdvertisement
     Advertisement,
     'uid' | 'id' | 'title' | 'description' | 'price' | 'currency'
   > {
+  images: string[];
   seller: Pick<User, 'username' | 'provider_id' | 'id'>;
   category: Category;
   published_at: NonNullable<Advertisement['published_at']>;
@@ -20,12 +21,14 @@ export interface UserPublishedAdvertisement
       'uid' | 'id' | 'title' | 'description' | 'price' | 'currency'
     >
   > {
+  images: string[];
   category: Category;
   published_at: NonNullable<Advertisement['published_at']>;
 }
 
 export interface UserDraftAdvertisement
   extends Omit<UserPublishedAdvertisement, 'published_at' | 'category'> {
+  images: string[];
   category: UserPublishedAdvertisement['category'] | null;
 }
 
@@ -76,6 +79,7 @@ export interface FilteredAdvertisement {
 
 export default interface AdvertisementRepository {
   get(uid: string): Promise<DetailedAdvertisement | null>;
+  getId(uid: string): Promise<number | null>;
   getFiltered(filter: AdvertisementFilter): Promise<FilteredAdvertisement[]>;
   getPublished(): Promise<PublicAdvertisement[]>;
   getPublishedByUser(userId: number): Promise<UserPublishedAdvertisement[]>;

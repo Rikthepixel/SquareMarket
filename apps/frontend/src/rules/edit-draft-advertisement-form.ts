@@ -7,9 +7,12 @@ const editDraftAdvertisementSchema = z.object({
   price: z.coerce.number().optional(),
   currency: z.enum(VALID_CURRENCIES).or(z.literal('none')).optional(),
   category: z.string().uuid().or(z.literal('none')).optional(),
-  options: z.record(z.object({
-    value: z.string().uuid().or(z.literal('none')).optional(),
-  })),
+  options: z.record(
+    z.object({
+      value: z.string().uuid().or(z.literal('none')).optional(),
+    }),
+  ),
+  images: z.string().array(),
   published: z.literal(false),
 });
 
