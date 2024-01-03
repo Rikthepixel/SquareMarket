@@ -1,10 +1,10 @@
 export interface PutAdvertisementRequest {
-  title?: string | undefined;
-  description?: string | undefined;
-  price?: number | undefined;
-  currency?: string | undefined;
-  category?: string | undefined;
-  published?: boolean | undefined;
-  propertyValues?: Record<string, string> | undefined;
+  title?: string | undefined | null;
+  description?: string | undefined | null;
+  price?: number | undefined | null;
+  currency?: string | undefined | null;
+  category?: string | undefined | null;
+  published?: boolean | undefined | null;
+  propertyValues?: Record<string, string> | undefined | null;
   images: string[];
 }

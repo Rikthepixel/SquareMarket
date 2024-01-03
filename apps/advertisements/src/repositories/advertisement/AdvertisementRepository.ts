@@ -54,8 +54,15 @@ export interface UpdatableAdvertisement {
 export interface DetailedAdvertisement extends Advertisement {
   category?: Category;
   images: string[];
+  user: {
+    id: number;
+    uid: string;
+    name: string;
+  };
   propertyValues: {
     uid: string;
+    property_name: string;
+    option_name: string;
     category_property_uid: string;
     category_property_option_uid: string;
   }[];

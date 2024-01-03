@@ -37,25 +37,42 @@ export default class KnexAdvertisementRepository
           castUidOrId(uidOrId, trx.fn.uuidToBin),
         )
         .leftJoin('categories as cat', 'ads.category_id', '=', 'cat.id')
+        .leftJoin('users', 'ads.user_id', '=', 'users.id')
         .select(
           'ads.*',
+          'users.id as user_id',
+          'users.provider_id as user_uid',
+          'users.username as user_username',
           'cat.id as category_id',
           'cat.uid as category_uid',
           'cat.name as category_name',
         )
         .first<
-          | UidsToBuffers<
+          | (UidsToBuffers<
               Advertisement & SnakeCasedProperties<Prefix<Category, 'category'>>
-            >
+            > & {
+              user_id: number;
+              user_uid: string;
+              user_username: string;
+            })
           | undefined
         >()
         .then((ad) => {
           if (!ad) return null;
-          const { category_id, category_uid, category_name, ...entry } = ad;
+          const {
+            category_id,
+            category_uid,
+            category_name,
+            user_id,
+            user_uid,
+            user_username,
+            ...entry
+          } = ad;
 
           return {
             ...entry,
             uid: trx.fn.binToUuid(entry.uid),
+            user_id: user_id,
             category: category_uid
               ? {
                   id: category_id,
@@ -63,6 +80,11 @@ export default class KnexAdvertisementRepository
                   name: category_name,
                 }
               : null,
+            user: {
+              id: user_id,
+              uid: user_uid,
+              name: user_username,
+            },
           };
         });
 
@@ -93,11 +115,15 @@ export default class KnexAdvertisementRepository
         .select<UidsToBuffers<DetailedAdvertisement['propertyValues']>>(
           'vals.uid as uid',
           'props.uid as category_property_uid',
+          'props.name as property_name',
           'opts.uid as category_property_option_uid',
+          'opts.name as option_name',
         )
         .then<DetailedAdvertisement['propertyValues']>((vals) =>
           vals.map((val) => ({
             uid: trx.fn.binToUuid(val.uid),
+            property_name: val.property_name,
+            option_name: val.option_name,
             category_property_uid: trx.fn.binToUuid(val.category_property_uid),
             category_property_option_uid: trx.fn.binToUuid(
               val.category_property_option_uid,

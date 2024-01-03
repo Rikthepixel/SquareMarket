@@ -323,7 +323,6 @@ export default function EditAdPage() {
                 {...getInputProps('price')}
                 label="Price"
                 placeholder="The price you want to sell the item(s) at"
-                value={10.0}
                 fixedDecimalScale
                 decimalScale={2}
                 leftSection={

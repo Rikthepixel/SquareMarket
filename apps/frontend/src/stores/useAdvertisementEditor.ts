@@ -31,11 +31,11 @@ interface Advertisement {
 }
 
 export interface EditedAdvertisement {
-  title?: string;
-  description?: string;
-  price?: number;
-  currency?: string;
-  category?: string;
+  title?: string | null;
+  description?: string | null;
+  price?: number | null;
+  currency?: string | null;
+  category?: string | null;
   published?: boolean;
   propertyValues?: Record<string, string>;
 

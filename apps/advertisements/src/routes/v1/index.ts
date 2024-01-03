@@ -4,8 +4,13 @@ import validate from '../../middleware/validate';
 import categoriesRouter from './categories';
 import healthRouter from './health';
 import manageRouter from './manage';
+import NotFoundException from '../../exceptions/common/NotFound';
 
 const v1Router = makeRouter();
+
+v1Router.use(healthRouter.prefix('/health').routes());
+v1Router.use(manageRouter.prefix('/manage').routes());
+v1Router.use(categoriesRouter.prefix('/categories').routes());
 
 v1Router
   .get(
@@ -34,6 +39,19 @@ v1Router
     },
   )
   .get(
+    'Get public advertisement',
+    '/:uid',
+    validate({ params: z.object({ uid: z.string().uuid() }) }),
+    async (ctx) => {
+      const adService = ctx.container.resolve('AdvertisementService');
+      ctx.status = 200;
+      ctx.body = await adService.get(ctx.validated.params.uid).then((ad) => {
+        if (!ad.published_at) throw new NotFoundException('advertisement');
+        return ad;
+      });
+    },
+  )
+  .get(
     'Get advertisement image',
     '/images/:uid',
     validate({ params: z.object({ uid: z.string().uuid() }) }),
@@ -42,11 +60,8 @@ v1Router
       ctx.status = 200;
       const file = await imageService.getContent(ctx.validated.params.uid);
       ctx.body = file.content;
-      ctx.set("Content-Type", file.mime);
+      ctx.set('Content-Type', file.mime);
     },
   );
-v1Router.use(healthRouter.prefix('/health').routes());
-v1Router.use(manageRouter.prefix('/manage').routes());
-v1Router.use(categoriesRouter.prefix('/categories').routes());
 
 export default v1Router;

@@ -1,6 +1,7 @@
 import backend from '@/adapters/backend';
 import { FilteredAdvertisementsRequest } from '@/requests/ads/FilteredAdvertisementsRequest';
 import { FilteredAdvertisementsResponse } from '@/responses/ads/FilteredAdvertisementsResponse';
+import { PublicAdvertisementResponse } from '@/responses/ads/PublicAdvertisementResponse';
 
 export async function getFilteredAdvertisements(
   request: FilteredAdvertisementsRequest,
@@ -23,7 +24,7 @@ export async function getFilteredAdvertisements(
   }
 
   const ads = await backend
-    .get(`v1/ads/filter?${params.toString()}`, { signal: signal })
+    .get(`v1/ads/filter?${params.toString()}`, { signal })
     .json();
 
   if (!Array.isArray(ads)) throw Error('ResponseParseFailure');
@@ -32,4 +33,17 @@ export async function getFilteredAdvertisements(
     ...ad,
     published_at: new Date(ad.published_at),
   }));
+}
+
+export async function getPublicAdvertisement(
+  uid: string,
+  signal?: AbortSignal,
+) {
+  return await backend
+    .get(`v1/ads/${uid}`, { signal })
+    .json<any>()
+    .then<PublicAdvertisementResponse>((ad) => ({
+      ...ad,
+      published_at: new Date(ad.published_at),
+    }));
 }

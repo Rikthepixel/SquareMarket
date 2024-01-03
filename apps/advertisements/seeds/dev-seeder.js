@@ -22,7 +22,7 @@ exports.seed = async function (knex) {
      */
     const category = {
       uid: knex.fn.uuidToBin(randomUUID()),
-      name: 'Phones',
+      name: 'Computers',
     };
     const [category_id] = await trx('categories').insert(category);
 
@@ -30,14 +30,32 @@ exports.seed = async function (knex) {
       {
         uid: knex.fn.uuidToBin(randomUUID()),
         category_id: category_id,
+        name: 'Processor',
+        options: ['Intel i3', 'Intel i5', 'Intel i7', 'Intel i9'],
+      },
+      {
+        uid: knex.fn.uuidToBin(randomUUID()),
+        category_id: category_id,
         name: 'Brand',
-        options: ['Samsung', 'Apple', 'OnePlus', 'Oppo'],
+        options: ['Dell', 'HP', 'Lenovo', 'Custom'],
+      },
+      {
+        uid: knex.fn.uuidToBin(randomUUID()),
+        category_id: category_id,
+        name: 'Storage Type',
+        options: ['SSD', 'HDD', 'SSD + HDD'],
       },
       {
         uid: knex.fn.uuidToBin(randomUUID()),
         category_id: category_id,
         name: 'Storage',
-        options: ['32GB', '64GB', '128GB', '256GB'],
+        options: ['256GB', '512GB', '1TB', '2TB'],
+      },
+      {
+        uid: knex.fn.uuidToBin(randomUUID()),
+        category_id: category_id,
+        name: 'Memory (RAM)',
+        options: ['2GB', '4GB', '8GB', '16GB', '32GB'],
       },
     ];
 
@@ -67,110 +85,12 @@ exports.seed = async function (knex) {
       })
       .flatMap((ol) => ol);
 
-    const optionIds = await trx('category_property_options')
+    await trx('category_property_options')
       .insert(options)
       .then(([firstOptId]) =>
         trx('category_property_options as opt')
           .select('opt.id', 'opt.uid', 'opt.name', 'opt.category_property_id')
           .where('opt.id', '>=', firstOptId),
       );
-
-    const ads = [
-      {
-        uid: knex.fn.uuidToBin(randomUUID()),
-        user_id,
-        category_id,
-        title: 'Samsung S22',
-        price: 450.0,
-        currency: 'EUR',
-        description: 'A Samsung',
-        published_at: new Date(),
-        draft: false,
-
-        propValues: [
-          {
-            propId: propIds[0].id,
-            optId: optionIds.find((opt) => opt.name === 'Samsung').id,
-          },
-          {
-            propId: propIds[1].id,
-            optId: optionIds.find((opt) => opt.name === '256GB').id,
-          },
-        ],
-      },
-      {
-        uid: knex.fn.uuidToBin(randomUUID()),
-        user_id,
-        category_id,
-        title: 'Samsung S23',
-        price: 600.0,
-        currency: 'EUR',
-        description: 'A Samsung',
-        published_at: new Date(),
-        draft: false,
-
-        propValues: [
-          {
-            propId: propIds[0].id,
-            optId: optionIds.find((opt) => opt.name === 'Samsung').id,
-          },
-          {
-            propId: propIds[1].id,
-            optId: optionIds.find((opt) => opt.name === '128GB').id,
-          },
-        ],
-      },
-      {
-        uid: knex.fn.uuidToBin(randomUUID()),
-        user_id,
-        category_id,
-        title: 'Iphone 12',
-        price: 400.0,
-        currency: 'EUR',
-        description: 'An Iphone',
-        draft: true,
-
-        propValues: [
-          {
-            propId: propIds[0].id,
-            optId: optionIds.find((opt) => opt.name === 'Apple').id,
-          },
-          {
-            propId: propIds[1].id,
-            optId: optionIds.find((opt) => opt.name === '256GB').id,
-          },
-        ],
-      },
-    ];
-
-    const adIds = await trx('advertisements')
-      .insert(ads.map(({ propValues: _propValues, ...ad }) => ({ ...ad })))
-      .then(([firstAdId]) =>
-        trx('advertisements as ads')
-          .select('ads.id', 'ads.uid')
-          .where('ads.id', '>=', firstAdId),
-      );
-
-    const optValues = adIds
-      .map(({ id, uid }) => {
-        const ad = ads.find((ad) => ad.uid.compare(uid) === 0);
-        return ad.propValues.map(({ optId }) => ({
-          uid: trx.fn.uuidToBin(randomUUID()),
-          // category_property_id: propId,
-          category_property_option_id: optId,
-          advertisement_id: id,
-        }));
-      })
-      .flatMap((v) => v);
-
-    await trx('category_property_option_values').insert(optValues);
-
-    await trx('images').insert(
-      adIds.map(({ id }) => ({
-        uid: trx.fn.uuidToBin(randomUUID()),
-        advertisement_id: id,
-        mime: 'image/png',
-      })),
-    );
   });
 };

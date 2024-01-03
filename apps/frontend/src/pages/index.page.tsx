@@ -1,93 +1,21 @@
 import {
-  AspectRatio,
-  Badge,
   Button,
-  Card,
   Collapse,
   Grid,
   Group,
-  Image,
   Select,
   Stack,
-  Text,
   TextInput,
 } from '@mantine/core';
 import { useEffect, useMemo } from 'react';
 import { MdFilterAlt, MdSearch } from 'react-icons/md';
 import PageContainer from '@/components/page/Container';
 import useAdvertisements from '@/stores/useAdvertisements';
-import { Carousel } from '@mantine/carousel';
-import { getImageUrl } from '@/apis/ads/images';
 import { useDisclosure } from '@mantine/hooks';
 import useCategories from '@/stores/useCategories';
 import { useForm, zodResolver } from '@mantine/form';
 import { z } from 'zod';
-
-interface AdvertisementCardProps {
-  title: string;
-  description: string;
-  currency: string;
-  price: number;
-  images: string[];
-}
-
-function AdvertisementCard({
-  images,
-  title,
-  description,
-  price,
-  currency,
-}: AdvertisementCardProps) {
-  const currencyFormatter = useMemo(
-    () =>
-      new Intl.NumberFormat(undefined, {
-        style: 'currency',
-        currency: currency,
-        notation: 'standard',
-      }),
-    [currency],
-  );
-
-  return (
-    <Card component="article" radius="xl" shadow="sm" withBorder>
-      <Card.Section>
-        <Carousel
-          w="100%"
-          slideSize="100%"
-          align="start"
-          withControls
-          withIndicators
-        >
-          {images.map((image, idx) => {
-            return (
-              <Carousel.Slide key={idx}>
-                <AspectRatio ratio={4 / 3}>
-                  <Image
-                    key={idx}
-                    src={getImageUrl(image)}
-                    fallbackSrc="/placeholder-ad-img.webp"
-                    radius="lg"
-                  />
-                </AspectRatio>
-              </Carousel.Slide>
-            );
-          })}
-        </Carousel>
-      </Card.Section>
-      <Stack gap="xs">
-        <Group mt="md" gap="xs">
-          <Badge variant="light">
-            <Text>{currencyFormatter.format(price)}</Text>
-          </Badge>
-          <Text fz="lg">{title}</Text>
-        </Group>
-        <Text>
-          {description.substring(0, Math.min(description.length, 300))}
-        </Text>
-      </Stack>
-    </Card>
-  );
-}
+import AdvertisementCard from './components/AdvertisementCard';
 
 const filterSchema = z.object({
   search: z.string().optional(),
@@ -105,7 +33,7 @@ const filterSchema = z.object({
 export default function FrontPage() {
   const [isFilterOpen, { toggle: toggleFilter }] = useDisclosure(false);
   const { advertisements, getAdvertisementsWithFilter } = useAdvertisements();
-  const { loadCategories, categories, loadCategory, category } =
+  const { loadCategories, categories, loadCategory, resetCategory, category } =
     useCategories();
 
   const {
@@ -124,9 +52,13 @@ export default function FrontPage() {
   }, [getAdvertisementsWithFilter, loadCategories]);
 
   useEffect(() => {
-    if (!selectedCategory || selectedCategory === 'none') return;
+    if (!selectedCategory || selectedCategory === 'none') {
+      resetCategory();
+      setValues({ options: [] });
+      return;
+    }
     loadCategory(selectedCategory);
-  }, [selectedCategory]);
+  }, [selectedCategory, resetCategory]);
 
   useEffect(() => {
     category.map((category) =>
@@ -156,7 +88,8 @@ export default function FrontPage() {
       onSubmit(
         (data) => {
           getAdvertisementsWithFilter({
-            ...data,
+            search: data.search,
+            category: data.category !== 'none' ? data.category : undefined,
             property_options: data.options
               ?.map((opt) => opt.value)
               .filter((opt) => opt !== 'none'),
@@ -174,14 +107,28 @@ export default function FrontPage() {
       <Group justify="center">
         <TextInput
           {...getInputProps('search')}
+          w={{ xs: '100%', sm: 'auto' }}
+          style={{ flex: 1 }}
           size="md"
           placeholder="Search on title and description"
           rightSection={<MdSearch />}
         />
-        <Button size="md" rightSection={<MdFilterAlt />} onClick={toggleFilter}>
+        <Button
+          size="md"
+          w={{ xs: 'auto' }}
+          rightSection={<MdFilterAlt />}
+          onClick={toggleFilter}
+          fullWidth
+        >
           Filters
         </Button>
-        <Button size="md" rightSection={<MdSearch />} onClick={handleSubmit}>
+        <Button
+          size="md"
+          w={{ xs: 'auto' }}
+          rightSection={<MdSearch />}
+          onClick={handleSubmit}
+          fullWidth
+        >
           Search
         </Button>
       </Group>
@@ -231,7 +178,7 @@ export default function FrontPage() {
             value.length === 0
               ? 'There are no advertisements yet, be the first to place one!'
               : value.map((ad) => (
-                  <Grid.Col key={ad.uid} span={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
+                  <Grid.Col key={ad.uid} span={{ xs: 12, sm: 6, lg: 4 }}>
                     <AdvertisementCard {...ad} />
                   </Grid.Col>
                 )),

@@ -1,5 +1,6 @@
 import { getImageUrl } from '@/apis/ads/images';
 import { deleteAdvertisement, unpublishAdvertisement } from '@/apis/ads/manage';
+import useCurrencyFormatter from '@/hooks/useCurrencyFormatter';
 import {
   Badge,
   Image,
@@ -10,9 +11,8 @@ import {
   SimpleGrid,
   Stack,
 } from '@mantine/core';
-import { useMemo } from 'react';
 import { IoMdCalendar } from 'react-icons/io';
-import { MdDelete, MdDownload, MdEdit, MdPublish } from 'react-icons/md';
+import { MdDelete, MdDownload, MdEdit } from 'react-icons/md';
 import { Link } from 'wouter';
 
 interface Advertisement {
@@ -36,13 +36,7 @@ export default function AdvertisementCard({
   onUnpublished?: () => void;
   onDeleted: () => void;
 }) {
-  const currencyFormatter = ad.currency
-    ? new Intl.NumberFormat(undefined, {
-        style: 'currency',
-        currency: ad.currency,
-        notation: 'standard',
-      })
-    : null;
+  const currencyFormatter = useCurrencyFormatter(ad.currency ?? 'EUR');
 
   const unpublishAd = () => unpublishAdvertisement(ad.uid).then(onDeleted);
   const deleteAd = () => deleteAdvertisement(ad.uid).then(onUnpublished);
@@ -72,7 +66,7 @@ export default function AdvertisementCard({
           style={{ aspectRatio: 4 / 3 }}
         />
         <Stack py="md" gap="xs">
-          {currencyFormatter && ad.price && (
+          {ad.currency && ad.price && (
             <Badge variant="light">
               <Text>{currencyFormatter.format(ad.price)}</Text>
             </Badge>
