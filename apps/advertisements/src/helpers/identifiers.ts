@@ -25,7 +25,8 @@ export function getType<TUidOrId extends UidOrId>(
 
 export type UidsToBuffers<T extends object> = {
   [TKey in keyof T]: TKey extends string
-    ? TKey extends `${infer _TPrefix}uid`
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ? TKey extends `${infer _}uid`
       ? T[TKey] extends string
         ? Buffer
         : T[TKey]
