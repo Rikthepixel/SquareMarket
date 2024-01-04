@@ -55,5 +55,5 @@ spec:
   ports:
     - name: http
       protocol: TCP
-      port: 80
-      targetPort: 8001
+      port: 8080
+      targetPort: 80

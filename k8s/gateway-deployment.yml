@@ -2,21 +2,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gateway
+  name: gateway-pod
   labels:
-    app: gateway
+    app: gateway-pod
 spec:
   selector:
     matchLabels:
-      app: gateway
+      app: gateway-pod
   replicas: 1
   template:
     metadata:
       labels:
-        app: gateway
+        app: gateway-pod
     spec:
       containers:
-        - name: gateway
+        - name: gateway-container
           image: squaremarketacr.azurecr.io/squaremarket-gateway
           imagePullPolicy: Always
           resources:
@@ -40,20 +40,19 @@ spec:
               value: "80"
           ports:
             - containerPort: 80
-              name: gateway
       restartPolicy: Always
 ---
 # https://kubernetes.io/docs/concepts/services-networking/service/
 apiVersion: v1
 kind: Service
 metadata:
-  name: gateway
+  name: gateway-service
 spec:
   selector:
-    app: gateway
+    app: gateway-pod
   type: ClusterIP
   ports:
     - name: http
       protocol: TCP
-      port: 80
+      port: 8080
       targetPort: 80
