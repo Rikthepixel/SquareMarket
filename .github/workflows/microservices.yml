@@ -33,6 +33,8 @@ jobs:
               - "apps/advertisements/**"
             gateway:
               - "apps/gateway/**"
+
+      - run: echo ${{ steps.filter.outputs.changes }}
   lint:
     runs-on: ubuntu-latest
     needs: changes
