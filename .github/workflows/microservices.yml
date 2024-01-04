@@ -1,0 +1,126 @@
+name: CI/CD Microservices
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+    branches: [main, development]
+  release:
+    types: [created]
+
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      apps: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            accounts:
+              - "apps/accounts/**"
+            gateway:
+              - "apps/gateway/**"
+  lint:
+    runs-on: ubuntu-latest
+    needs: changes
+    strategy:
+      matrix:
+        app: ${{ fromJSON(needs.changes.outputs.apps) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Node.js dependencies
+        run: npm ci -w apps/${{ matrix.app }}
+
+      - name: Run linters ${{ matrix.app }}
+        run: npm run lint -w apps/${{ matrix.app }} --if-present
+
+  test:
+    runs-on: ubuntu-latest
+    needs: changes
+    strategy:
+      matrix:
+        app: ${{ fromJSON(needs.changes.outputs.apps) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Node.js dependencies
+        run: npm ci -w apps/${{ matrix.app }}
+
+      - name: Run Tests ${{ matrix.app }}
+        run: npm run test -w apps/${{ matrix.app }} --if-present
+
+  build:
+    needs: [changes, lint, test]
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    environment: production
+    strategy:
+      matrix:
+        app: ${{ fromJSON(needs.changes.outputs.apps) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Build image on ACR
+        uses: azure/CLI@v1
+        with:
+          inlineScript: |
+            az configure --defaults acr=${{ vars.AZURE_CONTAINER_REGISTRY }}
+            az acr build -t ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-${{ matrix.app }}:latest -r ${{ vars.AZURE_CONTAINER_REGISTRY }} ./apps/${{ matrix.app }}/
+
+  deploy:
+    needs: build
+    if: github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        id: login
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Gets K8s context
+        id: context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ vars.AZURE_RESOURCE_GROUP }}
+          cluster-name: ${{ vars.AZURE_CLUSTER_NAME }}
+
+      - name: Deploys application
+        uses: Azure/k8s-deploy@v4
+        with:
+          manifests: |
+            k8s/gateway-ingress.yml
+            k8s/gateway-deployment.yml
+            k8s/account-deployment.yml
+          images: |
+            ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-gateway:latest
+            ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-accounts:latest
+          imagepullsecrets: |
+            ${{ vars.PROJECT_NAME }}

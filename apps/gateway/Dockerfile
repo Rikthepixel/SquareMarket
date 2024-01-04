@@ -7,6 +7,7 @@ COPY ./package.json package.json
 RUN npm i
 
 COPY ./src ./src
+COPY ./tsconfig.json tsconfig.json
 
 RUN npm run build
 

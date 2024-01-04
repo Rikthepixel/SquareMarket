@@ -1,0 +1,53 @@
+name: CI/CD Frontend
+
+on:
+  push:
+    branches: [main, development]
+    paths:
+      - "apps/frontend/**"
+  pull_request:
+    branches: [main, development]
+    paths:
+      - "apps/frontend/**"
+  release:
+    types: [created]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Node.js dependencies
+        run: npm ci -w apps/frontend
+
+      - name: Run linters frontend
+        run: npm run lint -w apps/frontend --if-present
+
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: mcr.microsoft.com/playwright:v1.39.0-jammy
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Node.js dependencies
+        run: npm ci -w apps/frontend
+
+      - name: Run Playwright tests
+        run: HOME=/root npm run test -w apps/frontend
+
+      - uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: playwright-report
+          path: apps/frontend/playwright-report/
+          retention-days: 30

@@ -1,0 +1,58 @@
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-pod
+  labels:
+    app: gateway-pod
+spec:
+  selector:
+    matchLabels:
+      app: gateway-pod
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: gateway-pod
+    spec:
+      containers:
+        - name: gateway-container
+          image: squaremarketacr.azurecr.io/squaremarket-gateway
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /services.json
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+          env:
+            - name: SERVER_PORT
+              value: "80"
+          ports:
+            - containerPort: 80
+      restartPolicy: Always
+---
+# https://kubernetes.io/docs/concepts/services-networking/service/
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-service
+spec:
+  selector:
+    app: gateway-pod
+  type: ClusterIP
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8081
+      targetPort: 80

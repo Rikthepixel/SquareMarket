@@ -16,11 +16,13 @@ export interface RateLimiterOptions extends Options {
 const rateLimiter = (opts?: Partial<RateLimiterOptions>) => {
   const limiter = rateLimit(opts);
   return (req: RestanaRequest<Protocol.HTTP>, res: Response, next: NextFunction) => {
+    if (req.complete) return next();
+
     const strappedRequest = req as unknown as Request;
     strappedRequest.ip = requestIp.getClientIp(req) as string | undefined;
 
     strappedRequest.app = {} as Request["app"];
-    strappedRequest.app.get = ((key: string): any => {
+    strappedRequest.app.get = ((key: string) => {
       if (key === "trust proxy") {
         return Boolean(opts?.trustProxy)
       }
