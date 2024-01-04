@@ -58,7 +58,7 @@ export default function FrontPage() {
       return;
     }
     loadCategory(selectedCategory);
-  }, [selectedCategory, resetCategory]);
+  }, [selectedCategory, resetCategory, loadCategory, setValues]);
 
   useEffect(() => {
     category.map((category) =>
@@ -80,7 +80,7 @@ export default function FrontPage() {
         },
         ...cats.map((cat) => ({ label: cat.name, value: cat.uid })),
       ]),
-    [categories, getInputProps],
+    [categories],
   );
 
   const handleSubmit = useMemo(
@@ -99,7 +99,7 @@ export default function FrontPage() {
           console.log(errors);
         },
       ),
-    [onSubmit],
+    [onSubmit, getAdvertisementsWithFilter],
   );
 
   return (

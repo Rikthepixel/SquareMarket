@@ -2,7 +2,7 @@ import { useMemo } from 'react';
 import { useParams } from 'wouter';
 import { z } from 'zod';
 
-export default function useTypedParams<TSchema extends z.ZodObject<{}>>(
+export default function useTypedParams<TSchema extends z.ZodObject<object>>(
   schema: TSchema,
 ): z.infer<typeof schema> | null {
   const params = useParams();

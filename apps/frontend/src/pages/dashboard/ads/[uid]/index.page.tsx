@@ -91,7 +91,7 @@ export default function EditAdPage() {
     if (!uid) return;
     loadAdvertisement(uid);
     loadCategories();
-  }, [loadAdvertisement, loadCategories]);
+  }, [uid, loadAdvertisement, loadCategories]);
 
   useEffect(() => {
     advertisement.map((ad) => {
@@ -127,7 +127,7 @@ export default function EditAdPage() {
         images: ad.images,
       } as EditAdvertisementSchema);
     });
-  }, [setValues, advertisement]);
+  }, [setValues, advertisement, resetEdited, setEdited, loadCategory]);
 
   useEffect(() => {
     const ad = advertisement.unwrapValue();
@@ -147,7 +147,7 @@ export default function EditAdPage() {
         ]),
       ),
     });
-  }, [category, advertisement]);
+  }, [category, advertisement, setValues]);
 
   useEffect(() => {
     if (values.category && values.category !== 'none') {
@@ -161,7 +161,7 @@ export default function EditAdPage() {
     } else {
       resetCategory();
     }
-  }, [values.category, advertisement, loadCategory, resetCategory]);
+  }, [values.category, advertisement, loadCategory, resetCategory, setEdited]);
 
   useEffect(() => {
     setValues({
