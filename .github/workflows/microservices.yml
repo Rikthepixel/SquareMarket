@@ -24,9 +24,12 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
+          token: ${{ github.token }}
           filters: |
             accounts:
               - "apps/accounts/**"
+            advertisements:
+              - "apps/advertisements/**"
             gateway:
               - "apps/gateway/**"
   lint:
