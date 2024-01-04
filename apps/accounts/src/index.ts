@@ -1,42 +1,44 @@
-import Koa from 'koa';
-import router from './routes';
-import { bodyParser } from '@koa/bodyparser';
 import { config as loadEnv } from 'dotenv';
-
 loadEnv();
+
+import Koa from 'koa';
+
+import injector from 'koa-tioc';
+import { bodyParser } from '@koa/bodyparser';
+
+import depenencyProvider from './providers/di';
+
+import router from './routes';
+import errorHandling from './middleware/errorHandling';
+import requestLogger from './middleware/requestLogger';
+import IoCContainer from 'tioc';
 
 const PORT: number = parseInt(process.env.SERVER_PORT ?? '8001');
 
-const app = new Koa();
+const app = new Koa()
+  .use(injector(depenencyProvider))
+  .use(errorHandling())
+  .use(requestLogger())
+  .use(
+    bodyParser({
+      encoding: 'utf-8',
+      onError: (_err, ctx) => ctx.throw(422, 'body parse error'),
+    }),
+  );
 
-app.use(
-  bodyParser({
-    encoding: 'utf-8',
-    onError: (_err, ctx) => ctx.throw(422, 'body parse error'),
-  }),
-);
+export type AppContext = (typeof app)['context'];
 
-app.use(router.routes());
+const initContainer = depenencyProvider(new IoCContainer());
+initContainer.resolve('broker').then(() => {
+  console.log('Broker started');
+});
 
 app
-  .on('error', (err: Error, ctx: Koa.Context) => {
-    //TODO: add logger instead of console.error
-    console.error(
-      `${new Date().toUTCString()} Server error on path ${ctx.method}:${
-        ctx.path
-      }`,
-      err,
-    );
-  })
-  .listen(PORT, '0.0.0.0', () => {
-    const routes = router.stack
-      .filter((r) => r.methods.length > 0)
-      .map((r) => r.methods.join(', ') + ' @ ' + r.path);
-
-    //TODO: change to logger
+  .use(router.routes())
+  .listen(PORT, '0.0.0.0', () =>
     console.log(
-      `${new Date().toUTCString()} Server started with routes:\n\t- ${routes.join(
-        '\n\t- ',
-      )}`,
-    );
-  });
+      `Server "${process.env.SERVER_NAME}" started on localhost:${PORT}`,
+    ),
+  );
+
+export default app;

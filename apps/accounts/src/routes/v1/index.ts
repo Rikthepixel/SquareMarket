@@ -1,8 +1,10 @@
-import KoaRouter from "@koa/router";
-import healthRouter from "./health";
+import makeAppRouter from '../../helpers/router';
+import healthRouter from './health';
+import selfRouter from './self';
 
-const v1Router = new KoaRouter();
+const v1Router = makeAppRouter();
 
+v1Router.use(selfRouter.prefix("/self").routes());
 v1Router.use(healthRouter.prefix("/health").routes());
 
 export default v1Router;

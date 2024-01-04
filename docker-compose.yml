@@ -10,6 +10,17 @@ services:
     env_file:
       - ./apps/accounts/.env
 
+  advertisements:
+    build:
+      context: ./apps/advertisements
+      dockerfile: Dockerfile
+    expose:
+      - 8002
+    ports:
+      - 8002:8002
+    env_file:
+      - ./apps/advertisements/.env
+
   gateway:
     build:
       context: ./apps/gateway

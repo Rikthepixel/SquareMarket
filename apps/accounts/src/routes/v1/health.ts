@@ -1,20 +1,17 @@
-import validate from '../../middleware/validate';
-import KoaRouter from '@koa/router';
-import { z } from 'zod';
+import makeAppRouter from "../../helpers/router";
+import validate from "../../middleware/validate";
+import { healthResponseSchema } from "../../responses/health/HealthResponse";
 
-const healthRouter = new KoaRouter();
+const healthRouter = makeAppRouter();
 
 healthRouter.get(
   'Health',
   '/',
   validate({
-    response: z.object({
-      online: z.boolean(),
-      status: z.string(),
-    }),
+    response: healthResponseSchema,
   }),
   async (ctx) => {
-    console.log("Test")
+    ctx.status = 200;
     ctx.body = {
       online: true,
       status: 'available',

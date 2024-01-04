@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint . --ext ts --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write .",
-    "dev": "concurrently -c \"blue,red\" \"tsc --watch\" \"node --watch ./dist/index.js\"",
+    "dev": "nodemon -e ts --exec \"tsc && node ./dist/index.js\"",
     "build": "tsc --b ./tsconfig.json",
     "start": "node ./dist/index.js"
   },
@@ -21,6 +21,7 @@
     "@typescript-eslint/parser": "^6.10.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.53.0",
+    "nodemon": "^3.0.1",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },

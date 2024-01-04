@@ -1,8 +1,8 @@
-import { createTheme } from "@mantine/core";
+import { createTheme } from '@mantine/core';
 
 const theme = createTheme({
-  defaultRadius: "xl",
-  primaryColor: "red"
+  defaultRadius: 'lg',
+  primaryColor: 'red',
 });
 
 export default theme;

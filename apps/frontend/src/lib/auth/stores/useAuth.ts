@@ -6,19 +6,21 @@ import AuthenticatedUser from '../models/authenticated-user';
 
 interface AuthState {
   user: AuthenticatedUser<Auth0User> | null;
+  loaded: boolean;
 
-  getToken: () => Promise<string | null>
+  getToken: () => Promise<string | null>;
   login: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const useAuth = create<AuthState>((set, get) => ({
   user: null,
+  loaded: false,
 
   async getToken() {
-    const user = get().user
+    const user = get().user;
     if (!user) return null;
-    return await auth.getTokenSilently()
+    return await auth.getTokenSilently();
   },
 
   async login() {

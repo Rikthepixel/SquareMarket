@@ -15,7 +15,7 @@ const circuitBreaker = (opts?: CircuitBreaker.Options): Handler => {
     });
   }, opts);
 
-  breaker.fallback(([res]: [Response], err: unknown) => {
+  breaker.fallback((res: Response, err: unknown) => {
     if (
       !err ||
       typeof err !== 'object' ||
@@ -31,9 +31,9 @@ const circuitBreaker = (opts?: CircuitBreaker.Options): Handler => {
     res.end();
   });
 
-  return (_req, res, next) => {
+  return async (_req, res, next) => {
     breaker.fire(res);
-    next();
+    await next();
   };
 };
 

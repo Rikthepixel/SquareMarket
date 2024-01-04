@@ -1,102 +1,190 @@
 import {
-  AspectRatio,
-  Badge,
   Button,
-  Card,
+  Collapse,
   Grid,
   Group,
-  Image,
+  Select,
   Stack,
-  Text,
   TextInput,
 } from '@mantine/core';
-import { useMemo } from 'react';
-import { MdFilterAlt, MdLocationOn, MdSearch } from 'react-icons/md';
+import { useEffect, useMemo } from 'react';
+import { MdFilterAlt, MdSearch } from 'react-icons/md';
 import PageContainer from '@/components/page/Container';
+import useAdvertisements from '@/stores/useAdvertisements';
+import { useDisclosure } from '@mantine/hooks';
+import useCategories from '@/stores/useCategories';
+import { useForm, zodResolver } from '@mantine/form';
+import { z } from 'zod';
+import AdvertisementCard from './components/AdvertisementCard';
 
-interface Advertisement {
-  uid: string;
-  title: string;
-  description: string;
-  pictures: [string, ...string[]];
-  price: number;
-  currency: string;
-  location: string;
-}
-
-function AdvertisementCard({ ad }: { ad: Advertisement }) {
-  const firstPicture = ad.pictures[0];
-
-  const currencyFormatter = useMemo(
-    () =>
-      new Intl.NumberFormat(undefined, {
-        style: 'currency',
-        currency: ad.currency,
-        notation: 'standard',
+const filterSchema = z.object({
+  search: z.string().optional(),
+  category: z.string().optional(),
+  options: z
+    .array(
+      z.object({
+        name: z.string(),
+        value: z.string(),
       }),
-    [ad.currency],
-  );
-
-  return (
-    <Card component="article" radius="xl" shadow="sm" withBorder>
-      <Card.Section>
-        <AspectRatio ratio={4 / 3}>
-          <Image src={firstPicture} alt="Ad picture" />
-        </AspectRatio>
-      </Card.Section>
-      <Stack gap="xs">
-        <Group mt="md" gap="xs">
-          <Badge variant="light">
-            <Text>{currencyFormatter.format(ad.price)}</Text>
-          </Badge>
-          <Text fz="lg">{ad.title}</Text>
-        </Group>
-        <Text fz="sm">{ad.location}</Text>
-        <Text>{ad.description}</Text>
-      </Stack>
-    </Card>
-  );
-}
+    )
+    .optional(),
+});
 
 export default function FrontPage() {
-  const ads: Advertisement[] = Array(20)
-    .fill(1)
-    .map((_, idx) => {
-      return {
-        uid: String(idx),
-        title: 'Sample',
-        description: 'Sample',
-        pictures: ['/some-pic.jpg'],
-        price: Math.round(Math.random() * 10000) * 0.01,
-        currency: 'EUR',
-        location: 'Gorinchem, Gelderland, Netherlands',
-      };
-    });
+  const [isFilterOpen, { toggle: toggleFilter }] = useDisclosure(false);
+  const { advertisements, getAdvertisementsWithFilter } = useAdvertisements();
+  const { loadCategories, categories, loadCategory, resetCategory, category } =
+    useCategories();
+
+  const {
+    getInputProps,
+    onSubmit,
+    setValues,
+    values: { category: selectedCategory },
+  } = useForm<z.infer<typeof filterSchema>>({
+    validate: zodResolver(filterSchema),
+    validateInputOnChange: true,
+  });
+
+  useEffect(() => {
+    getAdvertisementsWithFilter({});
+    loadCategories();
+  }, [getAdvertisementsWithFilter, loadCategories]);
+
+  useEffect(() => {
+    if (!selectedCategory || selectedCategory === 'none') {
+      resetCategory();
+      setValues({ options: [] });
+      return;
+    }
+    loadCategory(selectedCategory);
+  }, [selectedCategory, resetCategory, loadCategory, setValues]);
+
+  useEffect(() => {
+    category.map((category) =>
+      setValues({
+        options: category.properties.map((prop) => ({
+          name: prop.name,
+          value: 'none',
+        })),
+      }),
+    );
+  }, [category, setValues]);
+
+  const categoryOptions = useMemo(
+    () =>
+      categories.map((cats) => [
+        {
+          label: 'None',
+          value: 'none',
+        },
+        ...cats.map((cat) => ({ label: cat.name, value: cat.uid })),
+      ]),
+    [categories],
+  );
+
+  const handleSubmit = useMemo(
+    () =>
+      onSubmit(
+        (data) => {
+          getAdvertisementsWithFilter({
+            search: data.search,
+            category: data.category !== 'none' ? data.category : undefined,
+            property_options: data.options
+              ?.map((opt) => opt.value)
+              .filter((opt) => opt !== 'none'),
+          });
+        },
+        (errors) => {
+          console.log(errors);
+        },
+      ),
+    [onSubmit, getAdvertisementsWithFilter],
+  );
 
   return (
     <PageContainer>
       <Group justify="center">
         <TextInput
+          {...getInputProps('search')}
+          w={{ xs: '100%', sm: 'auto' }}
+          style={{ flex: 1 }}
           size="md"
           placeholder="Search on title and description"
           rightSection={<MdSearch />}
         />
-        <Button size="md" rightSection={<MdLocationOn />}>
-          Location
-        </Button>
-        <Button size="md" rightSection={<MdFilterAlt />}>
+        <Button
+          size="md"
+          w={{ xs: 'auto' }}
+          rightSection={<MdFilterAlt />}
+          onClick={toggleFilter}
+          fullWidth
+        >
           Filters
         </Button>
-        <Button size="md" rightSection={<MdSearch />}>
+        <Button
+          size="md"
+          w={{ xs: 'auto' }}
+          rightSection={<MdSearch />}
+          onClick={handleSubmit}
+          fullWidth
+        >
           Search
         </Button>
       </Group>
-      <Grid mt="md">
-        {ads.map((ad) => (
-          <Grid.Col key={ad.uid} span={{ xs: 12, sm: 6, md: 4, lg: 3 }}>
-            <AdvertisementCard ad={ad} />
-          </Grid.Col>
-        ))}
+      <Collapse in={isFilterOpen}>
+        {categoryOptions
+          .map((options) => (
+            <Select
+              {...getInputProps('category')}
+              label="Category"
+              defaultValue="none"
+              data={options}
+            />
+          ))
+          .catch((e) => e.message)
+          .pending(() => 'Loading categories...')
+          .unwrap()}
+        {category
+          .map((cat) => (
+            <Stack>
+              {cat.properties.map((prop, idx) => (
+                <Select
+                  key={prop.uid}
+                  label={prop.name}
+                  defaultValue="none"
+                  data={[
+                    {
+                      label: 'None',
+                      value: 'none',
+                    },
+                    ...prop.options.map((opt) => ({
+                      label: opt.name,
+                      value: opt.uid,
+                    })),
+                  ]}
+                  {...getInputProps(`options.${idx}.value`)}
+                />
+              ))}
+            </Stack>
+          ))
+          .catch((e) => e.message)
+          .loading(() => 'Loading category properties...')
+          .unwrap()}
+      </Collapse>
+      <Grid mt="md" pb="md">
+        {advertisements
+          .map((value) =>
+            value.length === 0
+              ? 'There are no advertisements yet, be the first to place one!'
+              : value.map((ad) => (
+                  <Grid.Col key={ad.uid} span={{ xs: 12, sm: 6, lg: 4 }}>
+                    <AdvertisementCard {...ad} />
+                  </Grid.Col>
+                )),
+          )
+          .catch((e) => e.message)
+          .unwrap()}
       </Grid>
     </PageContainer>
   );

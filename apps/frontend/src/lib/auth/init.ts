@@ -9,7 +9,7 @@ export const auth = new Auth0Client({
   clientId: import.meta.env.VITE_AUTH_CLIENT_ID,
   authorizationParams: {
     redirect_uri: window.location.origin,
-    audience: import.meta.env.VITE_BACKEND_URL
+    audience: import.meta.env.VITE_BACKEND_URL,
   },
 });
 
@@ -29,5 +29,8 @@ window.addEventListener('load', async () => {
   }
 
   const user = await auth.getUser();
-  useAuth.setState({ user: user ? AuthenticatedUser.fromAuth0(user) : null });
+  useAuth.setState({
+    loaded: true,
+    user: user ? AuthenticatedUser.fromAuth0(user) : null,
+  });
 });

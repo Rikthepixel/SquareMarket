@@ -1,0 +1,21 @@
+# Deps
+node_modules
+
+# Build
+dist
+
+# Database
+/db/data
+/db/.env
+
+# Storage
+/storage
+
+# ENV
+/.env
+/.env.local
+/.env.test
+/db/.env
+/db/.env.local
+/db/.env.test
+

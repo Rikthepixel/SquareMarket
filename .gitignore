@@ -5,5 +5,8 @@ node_modules
 terraform.tfstate
 terraform.tfstate.backup
 
+# Docker volumes
+docker
+
 # Env
 **/.env

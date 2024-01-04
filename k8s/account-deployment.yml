@@ -39,7 +39,7 @@ spec:
             - name: SERVER_PORT
               value: "80"
           ports:
-            - containerPort: 8082
+            - containerPort: 80
               name: accounts
       restartPolicy: Always
 ---
@@ -55,5 +55,5 @@ spec:
   ports:
     - name: http
       protocol: TCP
-      port: 8082
+      port: 8080
       targetPort: 80

@@ -24,15 +24,18 @@ jobs:
       - uses: dorny/paths-filter@v2
         id: filter
         with:
+          token: ${{ github.token }}
           filters: |
             accounts:
               - "apps/accounts/**"
+            advertisements:
+              - "apps/advertisements/**"
             gateway:
               - "apps/gateway/**"
   lint:
     runs-on: ubuntu-latest
     needs: changes
-    if: needs.changes.outputs.app == '[]'
+    if: needs.changes.outputs.app != '[]'
     strategy:
       matrix:
         app: ${{ fromJSON(needs.changes.outputs.apps) }}
@@ -52,7 +55,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     needs: changes
-    if: needs.changes.outputs.app == '[]'
+    if: needs.changes.outputs.app != '[]'
     strategy:
       matrix:
         app: ${{ fromJSON(needs.changes.outputs.apps) }}
@@ -71,7 +74,7 @@ jobs:
 
   build:
     needs: [changes, lint, test]
-    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true && needs.changes.outputs.app == '[]'
+    if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.changes.outputs.app != '[]'
     runs-on: ubuntu-latest
     environment: production
     strategy:
