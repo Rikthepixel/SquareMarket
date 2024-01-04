@@ -25,6 +25,7 @@ jobs:
         id: filter
         with:
           token: ${{ github.token }}
+          base: ${{ github.ref }}
           filters: |
             accounts:
               - "apps/accounts/**"
