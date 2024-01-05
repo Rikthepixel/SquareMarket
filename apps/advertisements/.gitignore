@@ -4,10 +4,6 @@ node_modules
 # Build
 dist
 
-# Database
-/db/data
-/db/.env
-
 # Storage
 /storage
 
@@ -15,7 +11,4 @@ dist
 /.env
 /.env.local
 /.env.test
-/db/.env
-/db/.env.local
-/db/.env.test
 

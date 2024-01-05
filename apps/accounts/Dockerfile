@@ -8,7 +8,7 @@ RUN npm i
 
 COPY ./src ./src
 COPY ./tsconfig.json tsconfig.json
-COPY ./knexfile.ts knexfile.ts
+COPY ./knexfile.js knexfile.js
 
 RUN npm run build
 

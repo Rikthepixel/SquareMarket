@@ -1,12 +1,12 @@
 import makeCors, { CorsOptions as MakeCorsOptions } from 'cors';
 
 export interface CorsOptions extends Omit<MakeCorsOptions, 'origin'> {
-  origin?: string | string[];
+  origin?: string | (string | undefined)[];
 }
 
 const cors = ({ origin, ...opts }: CorsOptions = {}) => {
   const whitelistedOrigins = Array.isArray(origin)
-    ? origin
+    ? (origin.filter((org) => Boolean(org)) as string[])
     : typeof origin === 'string'
       ? [origin]
       : undefined;

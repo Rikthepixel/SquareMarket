@@ -5,6 +5,7 @@ import rateLimiter from './middleware/rate-limiter';
 import cors from './middleware/cors';
 import { wrapWithCircuitBreaker } from './middleware/circuit-breaker';
 import { wrapWithAuth, AuthOptions } from './middleware/auth';
+import requestLogger from './middleware/requestLogger';
 
 loadEnv();
 const PORT: number = parseInt(process.env.SERVER_PORT ?? '8080');
@@ -22,9 +23,11 @@ const SERVICES = {
 
 gateway({
   middlewares: [
+    requestLogger(),
     cors({
       credentials: true,
       origin: [
+        process.env.ALLOWED_ORIGIN,
         'http://localhost:5200',
         'http://127.0.0.1:5200',
         'http://localhost:8080',
