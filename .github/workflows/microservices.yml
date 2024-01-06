@@ -1,8 +1,6 @@
 name: CI/CD Microservices
 
 on:
-  push:
-    branches: [main, development]
   pull_request:
     types:
       - "opened"
@@ -43,7 +41,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
-      configs: ${{ steps.filter.outputs.configs }}
+      changes: ${{ steps.filter.outputs.changes }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v2
@@ -51,9 +49,11 @@ jobs:
         with:
           token: ${{ github.token }}
           filters: |
-            configs:
+            k8s:
               - "k8s/**"
+            workflows:
               - ".github/workflows/**"
+            terraform:
               - "main.tf"
 
   lint:
@@ -96,18 +96,9 @@ jobs:
       - name: Run Tests ${{ matrix.app }}
         run: npm run test -w apps/${{ matrix.app }} --if-present
 
-  print:
-    needs: changes
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print
-        run: |
-          echo ${{ github.event_name }}
-          echo ${{ github.event.pull_request.merged }}
-
   build:
     needs: [changes, config-changes, lint, test]
-    if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.changes.outputs.apps != '[]' || needs.config-changes.outputs.configs == 'true')
+    if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.changes.outputs.apps != '[]' || needs.config-changes.outputs.configs != '[]')
     runs-on: ubuntu-latest
     environment: production
     strategy:
@@ -130,7 +121,6 @@ jobs:
 
   deploy:
     needs: build
-    if: github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
     environment: production
     steps:
