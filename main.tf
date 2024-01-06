@@ -11,6 +11,9 @@ provider "azurerm" {
   features {}
 }
 
+variable "db_admin_user" {}
+variable "db_admin_password" {}
+
 resource "azurerm_resource_group" "squaremarket-group" {
   name     = "squaremarket-group"
   location = "North Europe"
@@ -87,5 +90,74 @@ resource "azurerm_storage_container" "storage-container" {
   name                  = "storage-container"
   storage_account_name  = azurerm_storage_account.storage-account.name
   container_access_type = "private"
+}
+
+resource "azurerm_mysql_server" "accounts-db-server" {
+  name                = "accounts-db-server"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+  location            = azurerm_resource_group.squaremarket-group.location
+  version             = "8.0"
+
+  sku_name = "B_Gen5_2"
+  storage_mb = 5120
+
+  administrator_login          = var.db_admin_user
+  administrator_login_password = var.db_admin_password
+
+  public_network_access_enabled     = false
+  ssl_enforcement_enabled           = true
+  ssl_minimal_tls_version_enforced  = "TLS1_2"
+
+  tags = {
+    "environment" = "production"
+    "source"      = "terraform"
+  }
+}
+
+# output "accounts_db_connection_string" {
+#   value = azurerm_mysql_server.accounts-db-server.connection_strings[0].value
+# }
+
+resource "azurerm_mysql_server" "advertisements-db-server" {
+  name                = "advertisements-db-server"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+  location            = azurerm_resource_group.squaremarket-group.location
+  version             = "8.0"
+
+  sku_name = "B_Gen5_2"
+  storage_mb = 5120
+
+  administrator_login          = var.db_admin_user
+  administrator_login_password = var.db_admin_password
+
+  public_network_access_enabled     = false
+  ssl_enforcement_enabled           = true
+  ssl_minimal_tls_version_enforced  = "TLS1_2"
+
+
+  tags = {
+    "environment" = "production"
+    "source"      = "terraform"
+  }
+}
+
+# output "advertisements_db_connection_string" {
+#   value = azurerm_mysql_server.advertisements-db-server.connection_strings[0].value
+# }
+
+resource "azurerm_mysql_database" "accounts-db" {
+  name                = "accounts-db"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+  server_name         = azurerm_mysql_server.accounts-db-server.name
+  charset             = "utf8"
+  collation           = "utf8_unicode_ci"
+}
+
+resource "azurerm_mysql_database" "advertisements-db" {
+  name                = "advertisements-db"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+  server_name         = azurerm_mysql_server.advertisements-db-server.name
+  charset             = "utf8"
+  collation           = "utf8_unicode_ci"
 }
 

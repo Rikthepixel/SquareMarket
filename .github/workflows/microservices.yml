@@ -72,6 +72,16 @@ jobs:
       - name: Run Tests ${{ matrix.app }}
         run: npm run test -w apps/${{ matrix.app }} --if-present
 
+  print:
+    needs: changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print
+        run: |
+          echo ${{ github.event_name }}
+          echo ${{ github.event.pull_request.merged }}
+          echo ${{ needs.changes.outputs.app }}
+
   build:
     needs: [changes, lint, test]
     if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.changes.outputs.app != '[]'
@@ -110,6 +120,20 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@1
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Apply
+        run: |
+          terraform apply -auto-approve \
+            -var="db_admin_user=${{ secrets.DB_ADMIN_USER }}"
+            -var="db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}"
+
       - name: Gets K8s context
         id: context
         uses: azure/aks-set-context@v3
@@ -120,16 +144,10 @@ jobs:
       - name: Set secrets
         run: |
           kubectl create secret generic advertisement-service-secrets \
-            --from-literal=DATABASE_NAME=${{ secrets.ADVERTISEMENTS_DATABASE_NAME }} \
-            --from-literal=DATABASE_USER=${{ secrets.ADVERTISEMENTS_DATABASE_USER }} \
-            --from-literal=DATABASE_PASSWORD=${{ secrets.ADVERTISEMENTS_DATABASE_PASSWORD }} \
-            --from-literal-DATABASE_HOST=${{ secrets.ADVERTISEMENTS_DATABASE_HOST }}
+            --from-literal=DATABASE_CONNECTION_STRING="$(terraform output advertisements_db_connection_string)"
 
           kubectl create secret generic account-service-secrets \
-            --from-literal=DATABASE_NAME=${{ secrets.ACCOUNTS_DATABASE_NAME }} \
-            --from-literal=DATABASE_USER=${{ secrets.ACCOUNTS_DATABASE_USER }} \
-            --from-literal=DATABASE_PASSWORD=${{ secrets.ACCOUNTS_DATABASE_PASSWORD }} \
-            --from-literal-DATABASE_HOST=${{ secrets.ACCOUNTS_DATABASE_HOST }}
+            --from-literal=DATABASE_CONNECTION_STRING="$(terraform output accounts_db_connection_string)"
 
       - name: Deploys application
         uses: Azure/k8s-deploy@v4
