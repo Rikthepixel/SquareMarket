@@ -97,7 +97,7 @@ jobs:
         run: npm run test -w apps/${{ matrix.app }} --if-present
 
   print:
-    needs: changes
+    needs: [changes, config-changes]
     runs-on: ubuntu-latest
     steps:
       - name: Print
