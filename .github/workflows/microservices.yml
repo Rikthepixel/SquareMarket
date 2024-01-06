@@ -38,7 +38,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
-      : ${{ steps.filter.outputs.changes }}
+      configs: ${{ steps.filter.outputs.configs }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v2
