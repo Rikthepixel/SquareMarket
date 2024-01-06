@@ -4,6 +4,11 @@ on:
   push:
     branches: [main, development]
   pull_request:
+    types:
+      - "opened"
+      - "reopened"
+      - "synchronize"
+      - "closed"
     branches: [main, development]
   release:
     types: [created]
@@ -92,17 +97,17 @@ jobs:
         run: npm run test -w apps/${{ matrix.app }} --if-present
 
   print:
-    needs: [changes, config-changes]
+    needs: changes
     runs-on: ubuntu-latest
     steps:
       - name: Print
         run: |
           echo ${{ github.event_name }}
-          echo ${{ toJSON(github.event) }}
+          echo ${{ github.event.pull_request.merged }}
 
   build:
     needs: [changes, config-changes, lint, test]
-    if: (github.event_name == 'release' || github.event_name == 'push') && (needs.changes.outputs.apps != '[]' || needs.config-changes.outputs.configs == 'true')
+    if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.changes.outputs.apps != '[]' || needs.config-changes.outputs.configs == 'true')
     runs-on: ubuntu-latest
     environment: production
     strategy:
@@ -125,7 +130,7 @@ jobs:
 
   deploy:
     needs: build
-    if: github.event_name == 'release' || github.event_name == 'push'
+    if: github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     runs-on: ubuntu-latest
     environment: production
     steps:
