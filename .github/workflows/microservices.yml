@@ -32,6 +32,24 @@ jobs:
               - "apps/advertisements/**"
             gateway:
               - "apps/gateway/**"
+
+  config-changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      : ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          token: ${{ github.token }}
+          filters: |
+            configs:
+              - "k8s/**"
+              - "main.tf"
+
   lint:
     runs-on: ubuntu-latest
     needs: changes
@@ -80,11 +98,11 @@ jobs:
         run: |
           echo ${{ github.event_name }}
           echo ${{ github.event.pull_request.merged }}
-          echo ${{ needs.changes.outputs.app }}
+          echo ${{ needs.changes.outputs.app == '[]' }}
 
   build:
-    needs: [changes, lint, test]
-    if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && needs.changes.outputs.app != '[]'
+    needs: [changes, config-changes, lint, test]
+    if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.changes.outputs.apps != '[]' || needs.config-changes.outputs.configs == 'true')
     runs-on: ubuntu-latest
     environment: production
     strategy:
