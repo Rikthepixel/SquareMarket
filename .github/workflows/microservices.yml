@@ -117,6 +117,20 @@ jobs:
           resource-group: ${{ vars.AZURE_RESOURCE_GROUP }}
           cluster-name: ${{ vars.AZURE_CLUSTER_NAME }}
 
+      - name: Set secrets
+        run: |
+          kubectl create secret generic advertisement-service-secrets \
+            --from-literal=DATABASE_NAME=${{ secrets.ADVERTISEMENTS_DATABASE_NAME }} \
+            --from-literal=DATABASE_USER=${{ secrets.ADVERTISEMENTS_DATABASE_USER }} \
+            --from-literal=DATABASE_PASSWORD=${{ secrets.ADVERTISEMENTS_DATABASE_PASSWORD }} \
+            --from-literal-DATABASE_HOST=${{ secrets.ADVERTISEMENTS_DATABASE_HOST }}
+
+          kubectl create secret generic account-service-secrets \
+            --from-literal=DATABASE_NAME=${{ secrets.ACCOUNTS_DATABASE_NAME }} \
+            --from-literal=DATABASE_USER=${{ secrets.ACCOUNTS_DATABASE_USER }} \
+            --from-literal=DATABASE_PASSWORD=${{ secrets.ACCOUNTS_DATABASE_PASSWORD }} \
+            --from-literal-DATABASE_HOST=${{ secrets.ACCOUNTS_DATABASE_HOST }}
+
       - name: Deploys application
         uses: Azure/k8s-deploy@v4
         with:
@@ -124,8 +138,11 @@ jobs:
             k8s/gateway-ingress.yml
             k8s/gateway-deployment.yml
             k8s/account-deployment.yml
+            k8s/advertisement-deployment.yml
+            k8s/message-queue-deployment.yml
           images: |
             ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-gateway:latest
             ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-accounts:latest
+            ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-advertisements:latest
           imagepullsecrets: |
             ${{ vars.PROJECT_NAME }}

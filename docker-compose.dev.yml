@@ -11,27 +11,11 @@ services:
       - ./docker/mq/log/:/var/log/rabbitmq
 
   accounts_db:
-    image: mysql:latest
-    volumes:
-      - ./apps/accounts/db/data:/var/lib/mysql:delegated
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 5s
-      retries: 3
-    ports:
-      - 3401:3306
-    env_file:
-      - ./apps/accounts/db/.env
+    extends:
+      file: docker-compose.db.yml
+      service: accounts_db
 
-  advertisements_db:
-    image: mysql:latest
-    volumes:
-      - ./apps/advertisements/db/data:/var/lib/mysql:delegated
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 5s
-      retries: 3
-    ports:
-      - 3402:3306
-    env_file:
-      - ./apps/advertisements/db/.env
+  advertisement_db:
+    extends:
+      file: docker-compose.db.yml
+      service: advertisement_db

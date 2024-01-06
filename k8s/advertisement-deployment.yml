@@ -1,23 +1,23 @@
-# https://kubernetes.io/docs/concepts/workloaccounts/controllers/deployment/
+# https://kubernetes.io/docs/concepts/workloadvertisements/controllers/deployment/
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: accounts-pod
+  name: advertisements-pod
   labels:
-    app: accounts-pod
+    app: advertisements-pod
 spec:
   selector:
     matchLabels:
-      app: accounts-pod
+      app: advertisements-pod
   replicas: 1
   template:
     metadata:
       labels:
-        app: accounts-pod
+        app: advertisements-pod
     spec:
       containers:
-        - name: accounts-container
-          image: squaremarketacr.azurecr.io/squaremarket-accounts
+        - name: advertisements-container
+          image: squaremarketacr.azurecr.io/squaremarket-advertisements
           imagePullPolicy: Always
           resources:
             requests:
@@ -37,7 +37,7 @@ spec:
             periodSeconds: 10
           env:
             - name: SERVER_NAME
-              value: "Accounts"
+              value: "Advertisements"
             - name: SERVER_PORT
               value: "80"
             - name: MQ_CONNECTION_STRING
@@ -45,22 +45,22 @@ spec:
             - name: DATABASE_NAME
               valueFrom:
                 secretKeyRef:
-                  name: account-service-secrets
+                  name: advertisement-service-secrets
                   key: DATABASE_NAME
             - name: DATABASE_USER
               valueFrom:
                 secretKeyRef:
-                  name: account-service-secrets
+                  name: advertisement-service-secrets
                   key: DATABASE_USER
             - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: account-service-secrets
+                  name: advertisement-service-secrets
                   key: DATABASE_PASSWORD
             - name: DATABASE_HOST
               valueFrom:
                 secretKeyRef:
-                  name: account-service-secrets
+                  name: advertisement-service-secrets
                   key: DATABASE_HOST
           ports:
             - containerPort: 80
@@ -70,10 +70,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: accounts-service
+  name: advertisements-service
 spec:
   selector:
-    app: accounts-pod
+    app: advertisements-pod
   type: ClusterIP
   ports:
     - protocol: TCP

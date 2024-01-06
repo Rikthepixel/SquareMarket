@@ -2,22 +2,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gateway-pod
+  name: message-queue-pod
   labels:
-    app: gateway-pod
+    app: message-queue-pod
 spec:
   selector:
     matchLabels:
-      app: gateway-pod
+      app: message-queue-pod
   replicas: 1
   template:
     metadata:
       labels:
-        app: gateway-pod
+        app: message-queue-pod
     spec:
       containers:
-        - name: gateway-container
-          image: squaremarketacr.azurecr.io/squaremarket-gateway
+        - name: message-queue-container
+          image: rabbitmq:3.12-alpine
           imagePullPolicy: Always
           resources:
             requests:
@@ -27,37 +27,30 @@ spec:
               cpu: 100m
               memory: 256Mi
           readinessProbe:
-            httpGet:
-              path: /services.json
-              port: 80
+            exec:
+              command:
+                - rabbitmq-diagnostics
+                - -q
+                - ping
             initialDelaySeconds: 5
             timeoutSeconds: 2
             successThreshold: 1
             failureThreshold: 3
             periodSeconds: 10
-          env:
-            - name: SERVER_NAME
-              value: "Gateway"
-            - name: SERVER_PORT
-              value: "80"
-            - name: ACCOUNTS_SERVICE_URL
-              value: http://accounts-service:8080
-            - name: ADVERTISEMENTS_SERVICE_URL
-              value: http://advertisements-service:8080
           ports:
-            - containerPort: 80
+            - containerPort: 5672
       restartPolicy: Always
 ---
 # https://kubernetes.io/docs/concepts/services-networking/service/
 apiVersion: v1
 kind: Service
 metadata:
-  name: gateway-service
+  name: message-queue
 spec:
   selector:
-    app: gateway-pod
+    app: message-queue-pod
   type: ClusterIP
   ports:
     - protocol: TCP
-      port: 8080
-      targetPort: 80
+      port: 5672
+      targetPort: 5672
