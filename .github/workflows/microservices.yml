@@ -48,6 +48,7 @@ jobs:
           filters: |
             configs:
               - "k8s/**"
+              - ".github/workflows/**"
               - "main.tf"
 
   lint:
@@ -97,13 +98,11 @@ jobs:
       - name: Print
         run: |
           echo ${{ github.event_name }}
-          echo ${{ github.event.pull_request.merged }}
-          echo ${{ needs.changes.outputs.apps != '[]' }}
-          echo ${{ needs.config-changes.outputs.configs == 'true' }}
+          echo ${{ toJSON(github.event) }}
 
   build:
     needs: [changes, config-changes, lint, test]
-    if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.changes.outputs.apps != '[]' || needs.config-changes.outputs.configs == 'true')
+    if: (github.event_name == 'release' || github.event_name == 'push') && (needs.changes.outputs.apps != '[]' || needs.config-changes.outputs.configs == 'true')
     runs-on: ubuntu-latest
     environment: production
     strategy:
@@ -126,7 +125,7 @@ jobs:
 
   deploy:
     needs: build
-    if: github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    if: github.event_name == 'release' || github.event_name == 'push') .pull_request.merged == true)
     runs-on: ubuntu-latest
     environment: production
     steps:
