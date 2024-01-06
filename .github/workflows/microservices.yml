@@ -4,6 +4,11 @@ on:
   push:
     branches: [main, development]
   pull_request:
+    types:
+      - "opened"
+      - "reopened"
+      - "synchronize"
+      - "closed"
     branches: [main, development]
   release:
     types: [created]
@@ -48,6 +53,7 @@ jobs:
           filters: |
             configs:
               - "k8s/**"
+              - ".github/workflows/**"
               - "main.tf"
 
   lint:
@@ -91,15 +97,13 @@ jobs:
         run: npm run test -w apps/${{ matrix.app }} --if-present
 
   print:
-    needs: [changes, config-changes]
+    needs: changes
     runs-on: ubuntu-latest
     steps:
       - name: Print
         run: |
           echo ${{ github.event_name }}
           echo ${{ github.event.pull_request.merged }}
-          echo ${{ needs.changes.outputs.apps != '[]' }}
-          echo ${{ needs.config-changes.outputs.configs == 'true' }}
 
   build:
     needs: [changes, config-changes, lint, test]
