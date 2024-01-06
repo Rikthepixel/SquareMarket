@@ -103,8 +103,7 @@ jobs:
           echo ${{ github.event_name }}
           echo ${{ (github.event_name == 'pull_request' && github.event.pull_request.merged == true) }}
           echo ${{ (needs.changes.outputs.apps != '[]' || needs.config-changes.outputs.configs == 'true') }}
-          echo ${{ needs.changes.outputs.apps }}
-          echo ${{ needs.config-changes.outputs.configs == 'true' }}
+          echo ${{ needs.config-changes.outputs.configs }}
 
   build:
     needs: [changes, config-changes, lint, test]
