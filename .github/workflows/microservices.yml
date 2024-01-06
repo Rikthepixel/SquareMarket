@@ -41,7 +41,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
-      configs: ${{ steps.filter.outputs.configs }}
+      changes: ${{ steps.filter.outputs.changes }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v2
@@ -49,9 +49,11 @@ jobs:
         with:
           token: ${{ github.token }}
           filters: |
-            configs:
+            k8s:
               - "k8s/**"
+            workflows:
               - ".github/workflows/**"
+            terraform:
               - "main.tf"
 
   lint:
@@ -102,8 +104,8 @@ jobs:
         run: |
           echo ${{ github.event_name }}
           echo ${{ (github.event_name == 'pull_request' && github.event.pull_request.merged == true) }}
-          echo ${{ (needs.changes.outputs.apps != '[]' || needs.config-changes.outputs.configs == 'true') }}
-          echo ${{ needs.config-changes.outputs.configs }}
+          echo ${{ (needs.changes.outputs.apps != '[]' || needs.config-changes.outputs.changes == '[]') }}
+          echo ${{ needs.config-changes.outputs.changes }}
 
   build:
     needs: [changes, config-changes, lint, test]
