@@ -12,7 +12,7 @@ on:
     types: [created]
 
 concurrency:
-  group: ${{ github.head_ref || github.sha }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -157,11 +157,19 @@ jobs:
 
       - name: Set secrets
         run: |
-          kubectl create secret generic advertisement-service-secrets \
-            --from-literal=DATABASE_CONNECTION_STRING="$(terraform output advertisements_db_connection_string)"
-
           kubectl create secret generic account-service-secrets \
-            --from-literal=DATABASE_CONNECTION_STRING="$(terraform output accounts_db_connection_string)"
+            --from-literal=DATABASE_HOST="$(terraform output -raw accounts_database_host)" \
+            --from-literal=DATABASE_NAME="$(terraform output -raw accounts_database_name)" \
+            --from-literal=DATABASE_PASSWORD="$(terraform output -raw accounts_database_password)" \
+            --from-literal=DATABASE_PORT="$(terraform output -raw accounts_database_port)" \
+            --from-literal=DATABASE_USER="$(terraform output -raw accounts_database_user)"
+
+          kubectl create secret generic advertisement-service-secrets \
+            --from-literal=DATABASE_HOST="$(terraform output -raw accounts_database_host)" \
+            --from-literal=DATABASE_NAME="$(terraform output -raw accounts_database_name)" \
+            --from-literal=DATABASE_PASSWORD="$(terraform output -raw accounts_database_password)" \
+            --from-literal=DATABASE_PORT="$(terraform output -raw accounts_database_port)" \
+            --from-literal=DATABASE_USER="$(terraform output -raw accounts_database_user)"
 
       - name: Deploys application
         uses: Azure/k8s-deploy@v4

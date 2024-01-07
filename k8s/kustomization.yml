@@ -18,18 +18,3 @@ images:
   - name: squaremarketacr.azurecr.io/squaremarket-advertisements
     newName: k3d-personal:9800/squaremarket-advertisements
     newTag: latest
-
-secretGenerator:
-  - name: advertisement-service-secrets
-    literals:
-      - DATABASE_NAME=advertisements
-      - DATABASE_USER=myuser
-      - DATABASE_PASSWORD=mypassword
-      - DATABASE_HOST=192.168.48.1:3402
-
-  - name: account-service-secrets
-    literals:
-      - DATABASE_NAME=accounts
-      - DATABASE_USER=myuser
-      - DATABASE_PASSWORD=mypassword
-      - DATABASE_HOST=192.168.48.1:3401
