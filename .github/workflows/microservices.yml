@@ -145,7 +145,7 @@ jobs:
       - name: Terraform Apply
         run: |
           terraform apply -auto-approve -input=false \
-            -var="db_admin_user=${{ secrets.DB_ADMIN_USER }}"
+            -var="db_admin_user=${{ secrets.DB_ADMIN_USER }}" \
             -var="db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}"
 
       - name: Gets K8s context
