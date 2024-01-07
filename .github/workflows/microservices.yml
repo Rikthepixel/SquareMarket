@@ -158,10 +158,10 @@ jobs:
       - name: Set secrets
         run: |
           kubectl create secret generic advertisement-service-secrets \
-            --from-literal=DATABASE_CONNECTION_STRING="$(terraform output advertisements_db_connection_string)"
+            --from-literal=DATABASE_CONNECTION_STRING="$(terraform output -raw advertisements_db_connection_string)"
 
           kubectl create secret generic account-service-secrets \
-            --from-literal=DATABASE_CONNECTION_STRING="$(terraform output accounts_db_connection_string)"
+            --from-literal=DATABASE_CONNECTION_STRING="$(terraform output -raw accounts_db_connection_string)"
 
       - name: Deploys application
         uses: Azure/k8s-deploy@v4

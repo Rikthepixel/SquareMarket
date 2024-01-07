@@ -48,6 +48,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
     name                = "system"
     node_count          = 1
     vm_size             = "Standard_DS2_v2"
+
+    upgrade_settings {
+      max_surge = "10%"
+    }
   }
 
   identity {
@@ -98,13 +102,13 @@ resource "azurerm_mysql_server" "accounts-db-server" {
   location            = azurerm_resource_group.squaremarket-group.location
   version             = "8.0"
 
-  sku_name = "B_Gen5_2"
+  sku_name = "B_Gen5_1"
   storage_mb = 5120
 
   administrator_login          = var.db_admin_user
   administrator_login_password = var.db_admin_password
 
-  public_network_access_enabled     = false
+  public_network_access_enabled     = true
   ssl_enforcement_enabled           = true
   ssl_minimal_tls_version_enforced  = "TLS1_2"
 
@@ -114,9 +118,18 @@ resource "azurerm_mysql_server" "accounts-db-server" {
   }
 }
 
-# output "accounts_db_connection_string" {
-#   value = azurerm_mysql_server.accounts-db-server.connection_strings[0].value
-# }
+resource "azurerm_mysql_database" "accounts-db" {
+  name                = "accounts"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+  server_name         = azurerm_mysql_server.accounts-db-server.name
+  charset             = "utf8"
+  collation           = "utf8_unicode_ci"
+}
+
+output "accounts_db_connection_string" {
+  value = "Server=${azurerm_mysql_server.accounts-db-server.fqdn}; Port=3306; Database=${azurerm_mysql_database.accounts-db.name}; Uid=${var.db_admin_user}@${azurerm_mysql_server.accounts-db-server.name}; Pwd=${var.db_admin_password}; SslMode=Preferred;"
+  sensitive = true
+}
 
 resource "azurerm_mysql_server" "advertisements-db-server" {
   name                = "advertisements-db-server"
@@ -124,13 +137,13 @@ resource "azurerm_mysql_server" "advertisements-db-server" {
   location            = azurerm_resource_group.squaremarket-group.location
   version             = "8.0"
 
-  sku_name = "B_Gen5_2"
+  sku_name = "B_Gen5_1"
   storage_mb = 5120
 
   administrator_login          = var.db_admin_user
   administrator_login_password = var.db_admin_password
 
-  public_network_access_enabled     = false
+  public_network_access_enabled     = true
   ssl_enforcement_enabled           = true
   ssl_minimal_tls_version_enforced  = "TLS1_2"
 
@@ -141,23 +154,15 @@ resource "azurerm_mysql_server" "advertisements-db-server" {
   }
 }
 
-# output "advertisements_db_connection_string" {
-#   value = azurerm_mysql_server.advertisements-db-server.connection_strings[0].value
-# }
-
-resource "azurerm_mysql_database" "accounts-db" {
-  name                = "accounts-db"
-  resource_group_name = azurerm_resource_group.squaremarket-group.name
-  server_name         = azurerm_mysql_server.accounts-db-server.name
-  charset             = "utf8"
-  collation           = "utf8_unicode_ci"
-}
-
 resource "azurerm_mysql_database" "advertisements-db" {
-  name                = "advertisements-db"
+  name                = "advertisements"
   resource_group_name = azurerm_resource_group.squaremarket-group.name
   server_name         = azurerm_mysql_server.advertisements-db-server.name
   charset             = "utf8"
   collation           = "utf8_unicode_ci"
 }
 
+output "advertisements_db_connection_string" {
+  value = "Server=${azurerm_mysql_server.advertisements-db-server.fqdn}; Port=3306; Database=${azurerm_mysql_database.advertisements-db.name}; Uid=${var.db_admin_user}@${azurerm_mysql_server.advertisements-db-server.name}; Pwd=${var.db_admin_password}; SslMode=Preferred;"
+  sensitive = true
+}
