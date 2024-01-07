@@ -118,6 +118,14 @@ resource "azurerm_mysql_server" "accounts-db-server" {
   }
 }
 
+resource "azurerm_mysql_firewall_rule" "accounts-db-to-server" {
+  name                = "server"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+  server_name         = azurerm_mysql_server.accounts-db-server.name
+  start_ip_address    = "0.0.0.0"
+  end_ip_address      = "255.255.255.255"
+}
+
 resource "azurerm_mysql_database" "accounts-db" {
   name                = "accounts"
   resource_group_name = azurerm_resource_group.squaremarket-group.name
@@ -126,9 +134,25 @@ resource "azurerm_mysql_database" "accounts-db" {
   collation           = "utf8_unicode_ci"
 }
 
-output "accounts_db_connection_string" {
-  value = "Server=${azurerm_mysql_server.accounts-db-server.fqdn}; Port=3306; Database=${azurerm_mysql_database.accounts-db.name}; Uid=${var.db_admin_user}@${azurerm_mysql_server.accounts-db-server.name}; Pwd=${var.db_admin_password}; SslMode=Preferred;"
+output "accounts_database_name" {
+  value = azurerm_mysql_database.accounts-db.name
+}
+
+output "accounts_database_user" {
+  value = "${var.db_admin_user}@${azurerm_mysql_server.accounts-db-server.fqdn}"
+}
+
+output "accounts_database_password" {
+  value = var.db_admin_password
   sensitive = true
+}
+
+output "accounts_database_host" {
+  value = azurerm_mysql_server.accounts-db-server.fqdn
+}
+
+output "accounts_database_port" {
+  value = 3306
 }
 
 resource "azurerm_mysql_server" "advertisements-db-server" {
@@ -147,11 +171,18 @@ resource "azurerm_mysql_server" "advertisements-db-server" {
   ssl_enforcement_enabled           = true
   ssl_minimal_tls_version_enforced  = "TLS1_2"
 
-
   tags = {
     "environment" = "production"
     "source"      = "terraform"
   }
+}
+
+resource "azurerm_mysql_firewall_rule" "advertisements-db-to-server" {
+  name                = "server"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+  server_name         = azurerm_mysql_server.advertisements-db-server.name
+  start_ip_address    = "0.0.0.0"
+  end_ip_address      = "255.255.255.255"
 }
 
 resource "azurerm_mysql_database" "advertisements-db" {
@@ -162,7 +193,23 @@ resource "azurerm_mysql_database" "advertisements-db" {
   collation           = "utf8_unicode_ci"
 }
 
-output "advertisements_db_connection_string" {
-  value = "Server=${azurerm_mysql_server.advertisements-db-server.fqdn}; Port=3306; Database=${azurerm_mysql_database.advertisements-db.name}; Uid=${var.db_admin_user}@${azurerm_mysql_server.advertisements-db-server.name}; Pwd=${var.db_admin_password}; SslMode=Preferred;"
+output "advertisements_database_name" {
+  value = azurerm_mysql_database.advertisements-db.name
+}
+
+output "advertisements_database_user" {
+  value = "${var.db_admin_user}@${azurerm_mysql_server.advertisements-db-server.fqdn}"
+}
+
+output "advertisements_database_password" {
+  value = var.db_admin_password
   sensitive = true
+}
+
+output "advertisements_database_host" {
+  value = azurerm_mysql_server.advertisements-db-server.fqdn
+}
+
+output "advertisements_database_port" {
+  value = 3306
 }
