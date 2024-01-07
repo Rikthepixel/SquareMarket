@@ -96,16 +96,6 @@ jobs:
       - name: Run Tests ${{ matrix.app }}
         run: npm run test -w apps/${{ matrix.app }} --if-present
 
-  print:
-    needs: [changes, config-changes]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Print
-        run: |
-          echo ${{ github.event_name }}
-          echo ${{ github.event.pull_request.merged == true }}
-          echo ${{(github.event_name == 'pull_request' && github.event.pull_request.merged == true) && (needs.changes.outputs.apps != '[]' || needs.config-changes.outputs.changes != '[]') }}
-
   build:
     needs: [changes, config-changes, lint, test]
     if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.changes.outputs.apps != '[]' || needs.config-changes.outputs.configs != '[]')
