@@ -143,12 +143,6 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      # - name: Terraform Apply
-      #   run: |
-      #     terraform apply -auto-approve -input=false \
-      #       -var="db_admin_user=${{ secrets.DB_ADMIN_USER }}" \
-      #       -var="db_admin_password=${{ secrets.DB_ADMIN_PASSWORD }}"
-
       - name: Gets K8s context
         id: context
         uses: azure/aks-set-context@v3
@@ -158,14 +152,16 @@ jobs:
 
       - name: Set secrets
         run: |
-          kubectl create secret generic account-service-secrets \
+          kubectl create secret generic account-service-secrets 2> /dev/null
+          kubectl edit secret account-service-secrets \
             --from-literal=DATABASE_HOST="$(terraform output -raw accounts_database_host)" \
             --from-literal=DATABASE_NAME="$(terraform output -raw accounts_database_name)" \
             --from-literal=DATABASE_PASSWORD="$(terraform output -raw accounts_database_password)" \
             --from-literal=DATABASE_PORT="$(terraform output -raw accounts_database_port)" \
             --from-literal=DATABASE_USER="$(terraform output -raw accounts_database_user)"
 
-          kubectl create secret generic advertisement-service-secrets \
+          kubectl create secret generic advertisement-service-secrets 2> /dev/null
+          kubectl edit secret advertisement-service-secrets \
             --from-literal=DATABASE_HOST="$(terraform output -raw accounts_database_host)" \
             --from-literal=DATABASE_NAME="$(terraform output -raw accounts_database_name)" \
             --from-literal=DATABASE_PASSWORD="$(terraform output -raw accounts_database_password)" \
