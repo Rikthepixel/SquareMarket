@@ -105,15 +105,16 @@ jobs:
         run: |
           echo ${{ (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) }}
           echo ${{ (needs.changes.outputs.apps != '[]' || vars.BUILD_ALL == 'true' || github.event_name == 'release') }}
+          echo ${{ (vars.BUILD_ALL == 'true' || github.event_name == 'release') && fromJSON('["advertisements", "accounts", "gateway"]') || fromJSON(needs.changes.outputs.apps) }}
 
   build:
-    needs: [changes, config-changes, lint, test]
-    if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.changes.outputs.apps != '[]' || vars.BUILD_ALL == 'true' || github.event_name == 'release')
+    needs: [lint, test]
+    if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true))
     runs-on: ubuntu-latest
     environment: production
     strategy:
       matrix:
-        app: ${{ (vars.BUILD_ALL == 'true' || github.event_name == 'release') && fromJSON('["advertisements", "accounts", "gateway"]') || fromJSON(needs.changes.outputs.apps) }}
+        app: [advertisements, accounts, gateway]
     steps:
       - uses: actions/checkout@v4
 
