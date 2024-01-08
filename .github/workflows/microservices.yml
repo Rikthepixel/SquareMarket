@@ -96,6 +96,17 @@ jobs:
       - name: Run Tests ${{ matrix.app }}
         run: npm run test -w apps/${{ matrix.app }} --if-present
 
+  print:
+    needs:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name:
+        run: |
+          echo ${{ needs.changes.outputs.apps != '[]' }}
+          echo ${{ vars.BUILD_ALL == 'true' }}
+          echo ${{ github.event_name == 'release' }}
+
   build:
     needs: [changes, config-changes, lint, test]
     if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.changes.outputs.apps != '[]' || vars.BUILD_ALL == 'true' || github.event_name == 'release')
