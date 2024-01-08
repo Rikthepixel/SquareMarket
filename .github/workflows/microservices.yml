@@ -98,7 +98,7 @@ jobs:
 
   build:
     needs: [changes, config-changes, lint, test]
-    if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.changes.outputs.apps != '[]' || vars.BUILD_ALL || github.event_name == 'release')
+    if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.changes.outputs.apps != '[]' || vars.BUILD_ALL == 'true' || github.event_name == 'release')
     runs-on: ubuntu-latest
     environment: production
     strategy:
@@ -143,16 +143,16 @@ jobs:
 
       - name: Set secrets
         run: |
-          kubectl create secret generic account-service-secrets 2> /dev/null
-          kubectl edit secret account-service-secrets \
+          kubectl delete secret account-service-secrets 2> /dev/null
+          kubectl create secret generic account-service-secrets \
             --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}" \
             --from-literal=DATABASE_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}" \
             --from-literal=DATABASE_HOST="${{ vars.ACCOUNTS_DB_HOST }}" \
             --from-literal=DATABASE_PORT="3306" \
             --from-literal=DATABASE_NAME="accounts"
 
-          kubectl create secret generic advertisement-service-secrets 2> /dev/null
-          kubectl edit secret advertisement-service-secrets \
+          kubectl delete secret advertisement-service-secrets 2> /dev/null
+          kubectl create secret generic advertisement-service-secrets \
             --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}" \
             --from-literal=DATABASE_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}" \
             --from-literal=DATABASE_HOST="${{ vars.ADVERTISEMENTS_DB_HOST }}" \

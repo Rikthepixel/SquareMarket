@@ -97,7 +97,7 @@ resource "azurerm_storage_container" "storage-container" {
 }
 
 resource "azurerm_mysql_server" "accounts-db-server" {
-  name                = "accounts-db-server"
+  name                = "squaremarket-accounts"
   resource_group_name = azurerm_resource_group.squaremarket-group.name
   location            = azurerm_resource_group.squaremarket-group.location
   version             = "8.0"
@@ -135,7 +135,7 @@ resource "azurerm_mysql_database" "accounts-db" {
 }
 
 resource "azurerm_mysql_server" "advertisements-db-server" {
-  name                = "advertisements-db-server"
+  name                = "squaremarket-advertisements"
   resource_group_name = azurerm_resource_group.squaremarket-group.name
   location            = azurerm_resource_group.squaremarket-group.location
   version             = "8.0"
