@@ -97,7 +97,7 @@ jobs:
         run: npm run test -w apps/${{ matrix.app }} --if-present
 
   print:
-    needs:
+    needs: [changes]
     runs-on: ubuntu-latest
     environment: production
     steps:
