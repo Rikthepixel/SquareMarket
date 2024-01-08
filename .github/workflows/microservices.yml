@@ -147,7 +147,7 @@ jobs:
           kubectl edit secret account-service-secrets \
             --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}" \
             --from-literal=DATABASE_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}" \
-            --from-literal=DATABASE_HOST="${{ vars.ACCOUNTS_DB_HOST || "" }}" \
+            --from-literal=DATABASE_HOST="${{ vars.ACCOUNTS_DB_HOST }}" \
             --from-literal=DATABASE_PORT="3306" \
             --from-literal=DATABASE_NAME="accounts"
 
@@ -155,7 +155,7 @@ jobs:
           kubectl edit secret advertisement-service-secrets \
             --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}" \
             --from-literal=DATABASE_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}" \
-            --from-literal=DATABASE_HOST="${{ vars.ADVERTISEMENTS_DB_HOST || "" }}" \
+            --from-literal=DATABASE_HOST="${{ vars.ADVERTISEMENTS_DB_HOST }}" \
             --from-literal=DATABASE_PORT="3306" \
             --from-literal=DATABASE_NAME="advertisements"
 
