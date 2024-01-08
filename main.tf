@@ -134,27 +134,6 @@ resource "azurerm_mysql_database" "accounts-db" {
   collation           = "utf8_unicode_ci"
 }
 
-output "accounts_database_name" {
-  value = azurerm_mysql_database.accounts-db.name
-}
-
-output "accounts_database_user" {
-  value = "${var.db_admin_user}@${azurerm_mysql_server.accounts-db-server.fqdn}"
-}
-
-output "accounts_database_password" {
-  value = var.db_admin_password
-  sensitive = true
-}
-
-output "accounts_database_host" {
-  value = azurerm_mysql_server.accounts-db-server.fqdn
-}
-
-output "accounts_database_port" {
-  value = 3306
-}
-
 resource "azurerm_mysql_server" "advertisements-db-server" {
   name                = "advertisements-db-server"
   resource_group_name = azurerm_resource_group.squaremarket-group.name
@@ -191,25 +170,4 @@ resource "azurerm_mysql_database" "advertisements-db" {
   server_name         = azurerm_mysql_server.advertisements-db-server.name
   charset             = "utf8"
   collation           = "utf8_unicode_ci"
-}
-
-output "advertisements_database_name" {
-  value = azurerm_mysql_database.advertisements-db.name
-}
-
-output "advertisements_database_user" {
-  value = "${var.db_admin_user}@${azurerm_mysql_server.advertisements-db-server.fqdn}"
-}
-
-output "advertisements_database_password" {
-  value = var.db_admin_password
-  sensitive = true
-}
-
-output "advertisements_database_host" {
-  value = azurerm_mysql_server.advertisements-db-server.fqdn
-}
-
-output "advertisements_database_port" {
-  value = 3306
 }
