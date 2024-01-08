@@ -103,9 +103,8 @@ jobs:
     steps:
       - name:
         run: |
-          echo ${{ needs.changes.outputs.apps != '[]' }}
-          echo ${{ vars.BUILD_ALL == 'true' }}
-          echo ${{ github.event_name == 'release' }}
+          echo ${{ (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) }}
+          echo ${{ (needs.changes.outputs.apps != '[]' || vars.BUILD_ALL == 'true' || github.event_name == 'release') }}
 
   build:
     needs: [changes, config-changes, lint, test]
