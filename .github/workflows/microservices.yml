@@ -98,19 +98,18 @@ jobs:
 
   build:
     needs: [changes, config-changes, lint, test]
-    if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.changes.outputs.apps != '[]')
+    if: (github.event_name == 'release' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)) && (needs.changes.outputs.apps != '[]' || vars.BUILD_ALL || github.event_name == 'release')
     runs-on: ubuntu-latest
     environment: production
     strategy:
       matrix:
-        app: ${{ fromJSON(needs.changes.outputs.apps) }}
+        app: ${{ (vars.BUILD_ALL == 'true' || github.event_name === 'release') && ['advertisements', 'accounts', 'gateway'] || fromJSON(needs.changes.outputs.apps) }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Azure Login
         uses: azure/login@v1
         with:
-
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           enable-AzPSSession: true
 
@@ -120,33 +119,6 @@ jobs:
           inlineScript: |
             az configure --defaults acr=${{ vars.AZURE_CONTAINER_REGISTRY }}
             az acr build -t ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-${{ matrix.app }}:latest -r ${{ vars.AZURE_CONTAINER_REGISTRY }} ./apps/${{ matrix.app }}/
-
-
-  print:
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Azure Login
-        uses: azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.6.6
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Refresh
-        run: terraform refresh
-
-      - name: Print host
-        run: echo terraform output -raw accounts_database_host
 
   deploy:
     needs: build
@@ -162,17 +134,6 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.6.6
-
-      - name: Terraform Init
-        run: terraform init
-
-      - name: Terraform Refresh
-        run: terraform refresh -input=false
-
       - name: Gets K8s context
         id: context
         uses: azure/aks-set-context@v3
@@ -184,19 +145,19 @@ jobs:
         run: |
           kubectl create secret generic account-service-secrets 2> /dev/null
           kubectl edit secret account-service-secrets \
-            --from-literal=DATABASE_HOST="$(terraform output -raw accounts_database_host)" \
-            --from-literal=DATABASE_NAME="$(terraform output -raw accounts_database_name)" \
-            --from-literal=DATABASE_PASSWORD="$(terraform output -raw accounts_database_password)" \
-            --from-literal=DATABASE_PORT="$(terraform output -raw accounts_database_port)" \
-            --from-literal=DATABASE_USER="$(terraform output -raw accounts_database_user)"
+            --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}" \
+            --from-literal=DATABASE_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}" \
+            --from-literal=DATABASE_HOST="${{ vars.ACCOUNTS_DB_HOST || "" }}" \
+            --from-literal=DATABASE_PORT="3306" \
+            --from-literal=DATABASE_NAME="accounts"
 
           kubectl create secret generic advertisement-service-secrets 2> /dev/null
           kubectl edit secret advertisement-service-secrets \
-            --from-literal=DATABASE_HOST="$(terraform output -raw accounts_database_host)" \
-            --from-literal=DATABASE_NAME="$(terraform output -raw accounts_database_name)" \
-            --from-literal=DATABASE_PASSWORD="$(terraform output -raw accounts_database_password)" \
-            --from-literal=DATABASE_PORT="$(terraform output -raw accounts_database_port)" \
-            --from-literal=DATABASE_USER="$(terraform output -raw accounts_database_user)"
+            --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}" \
+            --from-literal=DATABASE_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}" \
+            --from-literal=DATABASE_HOST="${{ vars.ADVERTISEMENTS_DB_HOST || "" }}" \
+            --from-literal=DATABASE_PORT="3306" \
+            --from-literal=DATABASE_NAME="advertisements"
 
       - name: Deploys application
         uses: Azure/k8s-deploy@v4
@@ -208,7 +169,7 @@ jobs:
             k8s/advertisement-deployment.yml
             k8s/message-queue-deployment.yml
           images: |
-            ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-gateway:latest
+            ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-gateway:${{ github.ref }}
             ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-accounts:latest
             ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-advertisements:latest
           imagepullsecrets: |
