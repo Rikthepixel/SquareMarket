@@ -12,7 +12,7 @@ on:
     types: [created]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}-1
   cancel-in-progress: true
 
 jobs:
@@ -171,7 +171,7 @@ jobs:
         run: terraform init
 
       - name: Terraform Refresh
-        run: terraform refresh
+        run: terraform refresh -input=false
 
       - name: Gets K8s context
         id: context
