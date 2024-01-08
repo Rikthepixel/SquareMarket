@@ -103,7 +103,7 @@ jobs:
     environment: production
     strategy:
       matrix:
-        app: ${{ (vars.BUILD_ALL == 'true' || github.event_name === 'release') && ['advertisements', 'accounts', 'gateway'] || fromJSON(needs.changes.outputs.apps) }}
+        app: ${{ (vars.BUILD_ALL == 'true' || github.event_name == 'release') && ['advertisements', 'accounts', 'gateway'] || fromJSON(needs.changes.outputs.apps) }}
     steps:
       - uses: actions/checkout@v4
 
