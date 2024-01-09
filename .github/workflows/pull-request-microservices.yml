@@ -1,0 +1,75 @@
+name: Pull Request Microservices
+
+on:
+  pull_request:
+    types:
+      - "opened"
+      - "reopened"
+      - "synchronize"
+      - "closed"
+    branches: [main, development]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}-2
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      apps: ${{ steps.filter.outputs.changes }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          token: ${{ github.token }}
+          filters: |
+            accounts:
+              - "apps/accounts/**"
+            advertisements:
+              - "apps/advertisements/**"
+            gateway:
+              - "apps/gateway/**"
+
+  lint:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.apps != '[]'
+    strategy:
+      matrix:
+        app: ${{ fromJSON(needs.changes.outputs.apps) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Node.js dependencies
+        run: npm ci -w apps/${{ matrix.app }}
+
+      - name: Run linters ${{ matrix.app }}
+        run: npm run lint -w apps/${{ matrix.app }} --if-present
+
+  test:
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.apps != '[]'
+    strategy:
+      matrix:
+        app: ${{ fromJSON(needs.changes.outputs.apps) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Node.js dependencies
+        run: npm ci -w apps/${{ matrix.app }}
+
+      - name: Run Tests ${{ matrix.app }}
+        run: npm run test -w apps/${{ matrix.app }} --if-present
