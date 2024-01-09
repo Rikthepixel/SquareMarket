@@ -1,0 +1,56 @@
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-queue-pod
+  labels:
+    app: message-queue-pod
+spec:
+  selector:
+    matchLabels:
+      app: message-queue-pod
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: message-queue-pod
+    spec:
+      containers:
+        - name: message-queue-container
+          image: rabbitmq:3.12-alpine
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+          readinessProbe:
+            exec:
+              command:
+                - rabbitmq-diagnostics
+                - -q
+                - ping
+            initialDelaySeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+          ports:
+            - containerPort: 5672
+      restartPolicy: Always
+---
+# https://kubernetes.io/docs/concepts/services-networking/service/
+apiVersion: v1
+kind: Service
+metadata:
+  name: message-queue
+spec:
+  selector:
+    app: message-queue-pod
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 5672
+      targetPort: 5672

@@ -1,0 +1,16 @@
+# Deps
+node_modules
+
+## Env
+.env
+.env.local
+.env.test
+
+# Docker
+Dockerfile
+Dockerfile.dev
+docker-compose.yml
+docker-compose.dev.yml
+
+# Misc
+.prettierrc.json

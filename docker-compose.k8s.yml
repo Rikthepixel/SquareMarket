@@ -1,0 +1,14 @@
+# Docker compose that contains only the databases that the k8s cluster needs.
+
+version: "3.8"
+
+services:
+  accounts_db:
+    extends:
+      file: docker-compose.db.yml
+      service: accounts_db
+
+  advertisements_db:
+    extends:
+      file: docker-compose.db.yml
+      service: advertisements_db

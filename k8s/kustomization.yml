@@ -1,0 +1,20 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - account-deployment.yml
+  - gateway-deployment.yml
+  - advertisement-deployment.yml
+  - message-queue-deployment.yml
+  - gateway-ingress.yml
+
+images:
+  - name: squaremarketacr.azurecr.io/squaremarket-accounts
+    newName: k3d-personal:9800/squaremarket-accounts
+    newTag: latest
+  - name: squaremarketacr.azurecr.io/squaremarket-gateway
+    newName: k3d-personal:9800/squaremarket-gateway
+    newTag: latest
+  - name: squaremarketacr.azurecr.io/squaremarket-advertisements
+    newName: k3d-personal:9800/squaremarket-advertisements
+    newTag: latest

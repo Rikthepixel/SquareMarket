@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  mq:
+    image: rabbitmq:3.12-management-alpine
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ./docker/mq/data/:/var/lib/rabbitmq/
+      - ./docker/mq/log/:/var/log/rabbitmq
+
+  accounts_db:
+    extends:
+      file: docker-compose.db.yml
+      service: accounts_db
+
+  advertisement_db:
+    extends:
+      file: docker-compose.db.yml
+      service: advertisement_db

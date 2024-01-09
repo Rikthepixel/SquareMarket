@@ -1,0 +1,14 @@
+# Deps
+node_modules
+
+# Build
+dist
+
+# Storage
+/storage
+
+# ENV
+/.env
+/.env.local
+/.env.test
+/.env.production

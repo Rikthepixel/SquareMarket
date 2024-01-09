@@ -1,0 +1,7 @@
+.card .info_paper {
+  transition: padding-bottom 250ms ease;
+}
+
+.card:hover .info_paper {
+  padding-bottom: 4rem !important;
+}

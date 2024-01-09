@@ -1,0 +1,81 @@
+# https://kubernetes.io/docs/concepts/workloadvertisements/controllers/deployment/
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: advertisements-pod
+  labels:
+    app: advertisements-pod
+spec:
+  selector:
+    matchLabels:
+      app: advertisements-pod
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: advertisements-pod
+    spec:
+      containers:
+        - name: advertisements-container
+          image: squaremarketacr.azurecr.io/squaremarket-advertisements
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+          readinessProbe:
+            httpGet:
+              path: /v1/health
+              port: 80
+            initialDelaySeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+            periodSeconds: 10
+          env:
+            - name: SERVER_NAME
+              value: "Advertisements"
+            - name: SERVER_PORT
+              value: "80"
+            - name: MQ_CONNECTION_STRING
+              value: "amqp://guest:guest@message-queue:5672"
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: advertisement-service-secrets
+                  key: DATABASE_NAME
+            - name: DATABASE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: advertisement-service-secrets
+                  key: DATABASE_USER
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: advertisement-service-secrets
+                  key: DATABASE_PASSWORD
+            - name: DATABASE_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: advertisement-service-secrets
+                  key: DATABASE_HOST
+          ports:
+            - containerPort: 80
+      restartPolicy: Always
+---
+# https://kubernetes.io/docs/concepts/services-networking/service/
+apiVersion: v1
+kind: Service
+metadata:
+  name: advertisements-service
+spec:
+  selector:
+    app: advertisements-pod
+  type: ClusterIP
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 80
