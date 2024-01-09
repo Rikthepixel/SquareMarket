@@ -40,6 +40,11 @@ spec:
               value: "Gateway"
             - name: SERVER_PORT
               value: "80"
+            - name: ALLOWED_ORIGIN
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secrets
+                  key: ALLOWED_ORIGIN
             - name: ACCOUNTS_SERVICE_URL
               value: http://accounts-service:8080
             - name: ADVERTISEMENTS_SERVICE_URL

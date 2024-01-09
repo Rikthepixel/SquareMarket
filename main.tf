@@ -37,6 +37,16 @@ resource "azurerm_container_registry" "acr" {
   }
 }
 
+resource "azurerm_dns_zone" "frontend" {
+  name                = "sq.rikdenbreejen.nl"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+}
+
+resource "azurerm_dns_zone" "backend" {
+  name                = "sq.api.rikdenbreejen.nl"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+}
+
 resource "azurerm_kubernetes_cluster" "aks" {
   name                = "squaremarket-aks"
   kubernetes_version  = "1.28.0"
@@ -74,6 +84,35 @@ resource "azurerm_role_assignment" "aks_pull_acr" {
   scope                = azurerm_container_registry.acr.id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
+}
+
+resource "azurerm_storage_account" "frontend-account" {
+  name                = "squaremarketfrontend"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+  location            = azurerm_resource_group.squaremarket-group.location
+
+  account_tier             = "Standard"
+  account_replication_type = "GRS"
+
+  static_website {
+    index_document = "index.html"
+  }
+
+  custom_domain {
+    name = "sq.rikdenbreejen.nl"
+    use_subdomain = false
+  }
+
+  tags = {
+    "environment" = "production"
+    "source"      = "terraform"
+  }
+}
+
+resource "azurerm_storage_container" "frontendstorage-container" {
+  name                  = "frontend-storage-container"
+  storage_account_name  = azurerm_storage_account.frontend-account.name
+  container_access_type = "private"
 }
 
 resource "azurerm_storage_account" "storage-account" {

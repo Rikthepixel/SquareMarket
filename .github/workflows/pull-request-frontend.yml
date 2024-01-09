@@ -1,4 +1,4 @@
-name: CI/CD Frontend
+name: Pull Request Frontend
 
 on:
   push:
