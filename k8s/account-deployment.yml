@@ -17,15 +17,15 @@ spec:
     spec:
       containers:
         - name: accounts-container
-          image: squaremarketacr.azurecr.io/squaremarket-accounts
+          image: squaremarketacr.azurecr.io/squaremarket-accounts:v0.1
           imagePullPolicy: Always
           resources:
             requests:
               cpu: 100m
-              memory: 256Mi
+              memory: 512Mi
             limits:
               cpu: 100m
-              memory: 256Mi
+              memory: 512Mi
           readinessProbe:
             httpGet:
               path: /v1/health

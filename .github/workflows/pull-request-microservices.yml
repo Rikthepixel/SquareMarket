@@ -10,7 +10,7 @@ on:
     branches: [main, development]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}-2
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}-pull-requests
   cancel-in-progress: true
 
 jobs:
