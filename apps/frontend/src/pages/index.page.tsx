@@ -54,8 +54,7 @@ export default function FrontPage() {
   useEffect(() => {
     if (!selectedCategory || selectedCategory === 'none') {
       resetCategory();
-      setValues({ options: [] });
-      return;
+      return setValues({ options: [] });
     }
     loadCategory(selectedCategory);
   }, [selectedCategory, resetCategory, loadCategory, setValues]);
@@ -183,6 +182,7 @@ export default function FrontPage() {
             </Grid>
           );
         })
+        .pending(() => 'Loading advertisements...')
         .catch((e) => e.message)
         .unwrap()}
     </PageContainer>
