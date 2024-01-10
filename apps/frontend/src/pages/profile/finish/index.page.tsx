@@ -13,7 +13,6 @@ import {
   Divider,
 } from '@mantine/core';
 import { useForm, zodResolver } from '@mantine/form';
-import { useEffect } from 'react';
 import { MdSave } from 'react-icons/md';
 import { Redirect } from 'wouter';
 
