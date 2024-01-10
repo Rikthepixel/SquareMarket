@@ -28,7 +28,11 @@ const useAuth = create<AuthState>((set, get) => ({
   },
 
   async logout() {
-    await auth.logout();
+    await auth.logout({
+      logoutParams: {
+        returnTo: window.origin
+      }
+    });
     set({ user: null });
   },
 }));
