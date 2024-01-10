@@ -42,6 +42,16 @@ spec:
               value: "80"
             - name: MQ_CONNECTION_STRING
               value: "amqp://guest:guest@message-queue:5672"
+            - name: AUTH_ISSUER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secrets
+                  key: AUTH_ISSUER_URL
+            - name: AUTH_AUDIENCE
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secrets
+                  key: AUTH_AUDIENCE
             - name: DATABASE_NAME
               valueFrom:
                 secretKeyRef:
@@ -62,6 +72,16 @@ spec:
                 secretKeyRef:
                   name: advertisement-service-secrets
                   key: DATABASE_HOST
+            - name: STORAGE_DRIVER
+              valueFrom:
+                secretKeyRef:
+                  name: advertisement-service-secrets
+                  key: STORAGE_DRIVER
+            - name: STORAGE_AZURE_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: advertisement-service-secrets
+                  key: STORAGE_AZURE_CONNECTION_STRING
           ports:
             - containerPort: 80
       restartPolicy: Always

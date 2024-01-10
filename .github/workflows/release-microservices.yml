@@ -53,6 +53,9 @@ jobs:
           resource-group: ${{ vars.AZURE_RESOURCE_GROUP }}
           cluster-name: ${{ vars.AZURE_CLUSTER_NAME }}
 
+      - name: Delete auth secrets
+        continue-on-error: true
+        run: kubectl delete secret auth-secrets
       - name: Delete gateway secrets
         continue-on-error: true
         run: kubectl delete secret gateway-secrets
@@ -65,6 +68,10 @@ jobs:
 
       - name: Set secrets
         run: |
+          kubectl create secret generic auth-secrets \
+            --from-literal=AUTH_AUDIENCE="https://sq.api.rikdenbreejen.nl" \
+            --from-literal=AUTH_ISSUER_URL="https://square-market.eu.auth0.com/"
+
           kubectl create secret generic gateway-secrets \
             --from-literal=ALLOWED_ORIGIN="https://sq.rikdenbreejen.nl"
 
@@ -81,6 +88,8 @@ jobs:
             --from-literal=DATABASE_HOST="${{ vars.ADVERTISEMENTS_DB_HOST }}" \
             --from-literal=DATABASE_PORT="3306" \
             --from-literal=DATABASE_NAME="advertisements"
+            --from-literal=STORAGE_DRIVER="azure"
+            --from-literal=STORAGE_AZURE_CONNECTION_STRING="$(az storage account show-connection-string --name squaremarketblobstorage -o tsv)"
 
       - name: Deploys application
         uses: Azure/k8s-deploy@v4
