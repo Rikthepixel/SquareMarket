@@ -19,5 +19,7 @@ images:
     newName: k3d-personal:9800/squaremarket-advertisements
     newTag: latest
 
+secretGenerator:
   - name: gateway-secrets
-     - az storage account show -n <storage-account-name> -g <resource-group-name> --query "primaryEndpoints.web" --output tsv
+    literals:
+      - ALLOWED_ORIGIN=http://localhost:5200
