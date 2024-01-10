@@ -89,7 +89,7 @@ jobs:
             --from-literal=DATABASE_PORT="3306" \
             --from-literal=DATABASE_NAME="advertisements"
             --from-literal=STORAGE_DRIVER="azure"
-            --from-literal=STORAGE_AZURE_CONNECTION_STRING="$(az storage account show-connection-string --name ${{ ADVERTISEMENTS_AZURE_STORAGE_ACCOUNT }} -o tsv)"
+            --from-literal=STORAGE_AZURE_CONNECTION_STRING="$(az storage account show-connection-string --name ${{ vars.ADVERTISEMENTS_AZURE_STORAGE_ACCOUNT }} -o tsv)"
 
       - name: Deploys application
         uses: Azure/k8s-deploy@v4
