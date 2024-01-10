@@ -51,7 +51,7 @@ gateway({
             target: SERVICES.accounts,
           },
           {
-            prefix: '/v1/ads/manage',
+            prefix: '/v1/posts/manage',
             prefixRewrite: '/v1/manage',
             target: SERVICES.ads,
           },
@@ -59,7 +59,7 @@ gateway({
         AUTH_CONFIG,
       ),
       {
-        prefix: '/v1/ads',
+        prefix: '/v1/posts',
         prefixRewrite: '/v1',
         target: SERVICES.ads,
       },
