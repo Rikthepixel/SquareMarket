@@ -16,6 +16,8 @@ const AUTH_CONFIG: AuthOptions = {
   tokenSigningAlg: 'RS256',
 };
 
+console.log(process.env)
+
 const SERVICES = {
   accounts: process.env.ACCOUNTS_SERVICE_URL ?? 'http://localhost:8001',
   ads: process.env.ADVERTISEMENTS_SERVICE_URL ?? 'http://localhost:8002',
