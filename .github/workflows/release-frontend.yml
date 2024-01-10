@@ -26,9 +26,9 @@ jobs:
 
       - name: Set env variables
         run: |
-          echo "VITE_BACKEND_URL=https://sq.api.rikdenbreejen.nl" >> ./apps/frontend/.env
-          echo "VITE_AUTH_DOMAIN_URL=https://square-market.eu.auth0.com" >> ./apps/frontend.env
-          echo "VITE_AUTH_CLIENT_ID=PObklfrWNeQzWTEsWP6mTkRuSCPgZn7r" >> ./apps/frontend/.env
+          echo "VITE_BACKEND_URL=${{ vars.BACKEND_URL }}" >> ./apps/frontend/.env
+          echo "VITE_AUTH_DOMAIN_URL=${{ vars.AUTH_ISSUER_URL }}" >> ./apps/frontend.env
+          echo "VITE_AUTH_CLIENT_ID=${{ vars.AUTH_CLIENT_ID }}" >> ./apps/frontend/.env
 
       - name: Build application
         run: npm run build -w apps/frontend
@@ -41,12 +41,12 @@ jobs:
       - name: Clear current deployment azure
         run: |
           az storage blob delete-batch \
-            --account-name="squaremarketfrontend" \
+            --account-name="${{ vars.AZURE_FRONTEND_STORAGE_ACCOUNT }}" \
             --source='$web'
 
       - name: Deploy to azure
         run: |
           az storage blob upload-batch \
-            --account-name="squaremarketfrontend" \
+            --account-name="${{ vars.AZURE_FRONTEND_STORAGE_ACCOUNT }}" \
             --source="./apps/frontend/dist" \
             --destination='$web'

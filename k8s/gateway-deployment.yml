@@ -40,6 +40,16 @@ spec:
               value: "Gateway"
             - name: SERVER_PORT
               value: "80"
+            - name: AUTH_ISSUER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secrets
+                  key: AUTH_ISSUER_URL
+            - name: AUTH_AUDIENCE
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secrets
+                  key: AUTH_AUDIENCE
             - name: ALLOWED_ORIGIN
               valueFrom:
                 secretKeyRef:
