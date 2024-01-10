@@ -69,27 +69,27 @@ jobs:
       - name: Set secrets
         run: |
           kubectl create secret generic auth-secrets \
-            --from-literal=AUTH_AUDIENCE="https://sq.api.rikdenbreejen.nl" \
-            --from-literal=AUTH_ISSUER_URL="https://square-market.eu.auth0.com/"
+            --from-literal=AUTH_AUDIENCE="${{ vars.BACKEND_URL }}" \
+            --from-literal=AUTH_ISSUER_URL="${{ vars.AUTH_ISSUER_URL }}"
 
           kubectl create secret generic gateway-secrets \
-            --from-literal=ALLOWED_ORIGIN="https://sq.rikdenbreejen.nl"
+            --from-literal=ALLOWED_ORIGIN="${{ vars.FRONTEND_URL }}"
 
           kubectl create secret generic account-service-secrets \
-            --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}@squaremarket-accounts" \
+            --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}@${{ vars.ACCOUNTS_AZURE_DB_NAME }}" \
             --from-literal=DATABASE_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}" \
-            --from-literal=DATABASE_HOST="${{ vars.ACCOUNTS_DB_HOST }}" \
+            --from-literal=DATABASE_HOST="${{ vars.ACCOUNTS_AZURE_DB_NAME }}.mysql.database.azure.com" \
             --from-literal=DATABASE_PORT="3306" \
             --from-literal=DATABASE_NAME="accounts"
 
           kubectl create secret generic advertisement-service-secrets \
-            --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}@squaremarket-advertisements" \
+            --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}@${{ vars.ADVERTISEMENTS_AZURE_DB_NAME }}" \
             --from-literal=DATABASE_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}" \
-            --from-literal=DATABASE_HOST="${{ vars.ADVERTISEMENTS_DB_HOST }}" \
+            --from-literal=DATABASE_HOST="${{ vars.ADVERTISEMENTS_AZURE_DB_NAME }}.mysql.database.azure.com" \
             --from-literal=DATABASE_PORT="3306" \
             --from-literal=DATABASE_NAME="advertisements"
             --from-literal=STORAGE_DRIVER="azure"
-            --from-literal=STORAGE_AZURE_CONNECTION_STRING="$(az storage account show-connection-string --name squaremarketblobstorage -o tsv)"
+            --from-literal=STORAGE_AZURE_CONNECTION_STRING="$(az storage account show-connection-string --name ${{ ADVERTISEMENTS_AZURE_STORAGE_ACCOUNT }} -o tsv)"
 
       - name: Deploys application
         uses: Azure/k8s-deploy@v4
