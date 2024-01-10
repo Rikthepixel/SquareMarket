@@ -8,7 +8,10 @@ const dbConfig: Knex.Config = {
     database: process.env.DATABASE_NAME,
     user: process.env.DATABASE_USER,
     password: process.env.DATABASE_PASSWORD,
+    ssl: {
+      rejectUnauthorized: false,
+    },
   },
 };
 
-export default dbConfig
+export default dbConfig;
