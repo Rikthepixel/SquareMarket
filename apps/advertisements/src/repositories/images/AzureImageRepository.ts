@@ -1,14 +1,14 @@
 import { Knex } from 'knex';
-import fs from 'fs/promises';
-import { createReadStream, existsSync } from 'fs';
+import { ContainerClient } from '@azure/storage-blob';
+
 import { UidOrId, castUidOrId, getType, isId } from '../../helpers/identifiers';
 import ImageRepository, { UploadableImage } from './ImageRepository';
-import path from 'path';
+import { Readable } from 'stream';
 
-export default class FileImageRepository implements ImageRepository {
+export default class AzureImageRepository implements ImageRepository {
   constructor(
     private db: Knex,
-    private basePath: string,
+    private blobStorage: ContainerClient,
   ) {}
 
   async upload(
@@ -24,9 +24,11 @@ export default class FileImageRepository implements ImageRepository {
             mime: img.mime,
           })),
         ),
-        ...images.map(async (img) =>
-          fs.writeFile(path.join(this.basePath, img.uid), img.content),
-        ),
+        ...images.map(async (img) => {
+          return this.blobStorage
+            .getBlockBlobClient(img.uid)
+            .uploadData(img.content);
+        }),
       ]);
     });
   }
@@ -58,9 +60,9 @@ export default class FileImageRepository implements ImageRepository {
 
       await Promise.all(
         images.map(async (img) => {
-          const imagePath = path.join(this.basePath, trx.fn.binToUuid(img.uid));
-          if (!existsSync(imagePath)) return null;
-          await fs.unlink(imagePath);
+          return this.blobStorage
+            .getBlockBlobClient(trx.fn.binToUuid(img.uid))
+            .deleteIfExists();
         }),
       );
     });
@@ -97,9 +99,9 @@ export default class FileImageRepository implements ImageRepository {
 
       await Promise.all(
         images.map(async (img) => {
-          const imagePath = path.join(this.basePath, trx.fn.binToUuid(img.uid));
-          if (!existsSync(imagePath)) return null;
-          await fs.unlink(imagePath);
+          return this.blobStorage
+            .getBlockBlobClient(trx.fn.binToUuid(img.uid))
+            .deleteIfExists();
         }),
       );
     });
@@ -117,15 +119,16 @@ export default class FileImageRepository implements ImageRepository {
 
     if (!image) return null;
 
-    const imagePath = path.join(this.basePath, this.db.fn.binToUuid(image.uid));
-    if (!existsSync(imagePath)) return null;
+    const blobClient = this.blobStorage.getBlockBlobClient(
+      this.db.fn.binToUuid(image.uid),
+    );
 
-    const fileStream = createReadStream(imagePath).on('error', (error) => {
-      throw error;
-    });
+    if (!(await blobClient.exists())) return null;
 
     return {
-      content: fileStream,
+      content: await blobClient
+        .download()
+        .then((res) => new Readable().wrap(res.readableStreamBody!)),
       mime: image.mime,
     };
   }
