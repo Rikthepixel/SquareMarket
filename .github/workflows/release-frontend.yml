@@ -1,0 +1,51 @@
+name: Release Frontend
+
+on:
+  release:
+    types:
+      - "released"
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.sha }}-release
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install Node.js dependencies
+        run: npm ci -w apps/frontend
+
+      - name: Set env variables
+        run: |
+          echo "VITE_BACKEND_URL=sq.api.rikdenbreejen.nl" >> ./.env
+          echo "VITE_AUTH_DOMAIN_URL=https://square-market.eu.auth0.com" >> ./env
+          echo "VITE_AUTH_CLIENT_ID=PObklfrWNeQzWTEsWP6mTkRuSCPgZn7r" >> ./env
+
+      - name: Build application
+        run: npm run build -w apps/frontend
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Clear current deployment azure
+        run: |
+          az storage blob delete-batch \
+            --account-name="squaremarketfrontend" \
+            --source='$web'
+
+      - name: Deploy to azure
+        run: |
+          az storage blob upload-batch \
+            --account-name="squaremarketfrontend" \
+            --source="./apps/frontend/dist" \
+            --destination='$web' ./

@@ -18,3 +18,8 @@ images:
   - name: squaremarketacr.azurecr.io/squaremarket-advertisements
     newName: k3d-personal:9800/squaremarket-advertisements
     newTag: latest
+
+secretGenerator:
+  - name: gateway-secrets
+    literals:
+      - ALLOWED_ORIGIN=http://localhost:5200

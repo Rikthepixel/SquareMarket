@@ -19,19 +19,12 @@ spec:
         - name: message-queue-container
           image: rabbitmq:3.12-alpine
           imagePullPolicy: Always
-          resources:
-            requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              cpu: 100m
-              memory: 256Mi
-          readinessProbe:
+          livenessProbe:
             exec:
               command:
                 - rabbitmq-diagnostics
                 - -q
-                - ping
+                - check_port_connectivity
             initialDelaySeconds: 5
             timeoutSeconds: 2
             successThreshold: 1

@@ -37,6 +37,12 @@ resource "azurerm_container_registry" "acr" {
   }
 }
 
+
+resource "azurerm_dns_zone" "backend" {
+  name                = "sq.api.rikdenbreejen.nl"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+}
+
 resource "azurerm_kubernetes_cluster" "aks" {
   name                = "squaremarket-aks"
   kubernetes_version  = "1.28.0"
@@ -74,6 +80,113 @@ resource "azurerm_role_assignment" "aks_pull_acr" {
   scope                = azurerm_container_registry.acr.id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_kubernetes_cluster.aks.kubelet_identity[0].object_id
+}
+
+resource "azurerm_dns_zone" "frontend" {
+  name                = "sq.rikdenbreejen.nl"
+    resource_group_name = azurerm_resource_group.squaremarket-group.name
+}
+
+resource "azurerm_frontdoor" "frontdoor" {
+  name = "squaremarket-frontdoor"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+
+  frontend_endpoint {
+    name = "main-frontend"
+    host_name = "${azurerm_dns_zone.frontend.name}"
+  }
+
+  frontend_endpoint {
+    name = "main-frontdoor"
+    host_name = "squaremarket-frontdoor.azurefd.net"
+  }
+
+  backend_pool {
+    name = "main-backend"
+
+    backend {
+      host_header = "${azurerm_storage_account.frontend-account.primary_web_host}"
+        address = "${azurerm_storage_account.frontend-account.primary_web_host}"
+        http_port = 80
+        https_port = 443
+    }
+
+    load_balancing_name = "load-balancing"
+    health_probe_name = "health-probe"
+  }
+
+  routing_rule {
+    name = "https-frontend"
+    accepted_protocols = ["Https"]
+    patterns_to_match = ["/*"]
+    frontend_endpoints = ["main-frontend"]
+    forwarding_configuration {
+      forwarding_protocol = "HttpsOnly"
+      backend_pool_name = "main-backend"
+    }
+  }
+
+  routing_rule {
+    name = "https-redirect-frontend"
+    accepted_protocols = ["Http"]
+    patterns_to_match = ["/*"]
+    frontend_endpoints = ["main-frontend"]
+    redirect_configuration {
+      redirect_protocol = "HttpsOnly"
+      redirect_type = "Moved"
+    }
+  }
+
+  backend_pool_settings {
+    enforce_backend_pools_certificate_name_check = false
+  }
+
+  backend_pool_load_balancing {
+    name = "load-balancing"
+  }
+
+  backend_pool_health_probe {
+    name = "health-probe"
+    protocol = "Https"
+  }
+
+}
+
+resource "azurerm_frontdoor_custom_https_configuration" "frontend-https" {
+  frontend_endpoint_id              = azurerm_frontdoor.frontdoor.frontend_endpoints["main-frontend"]
+  custom_https_provisioning_enabled = true
+  custom_https_configuration {
+    certificate_source = "FrontDoor"
+  }
+}
+
+resource "azurerm_storage_account" "frontend-account" {
+  name                = "squaremarketfrontend"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+  location            = azurerm_resource_group.squaremarket-group.location
+
+  account_tier             = "Standard"
+  account_replication_type = "GRS"
+
+  static_website {
+    index_document = "index.html"
+  }
+
+  custom_domain {
+    name = "sq.rikdenbreejen.nl"
+    use_subdomain = false
+  }
+
+  tags = {
+    "environment" = "production"
+    "source"      = "terraform"
+  }
+}
+
+resource "azurerm_storage_container" "frontendstorage-container" {
+  name                  = "frontend-storage-container"
+  storage_account_name  = azurerm_storage_account.frontend-account.name
+  container_access_type = "private"
 }
 
 resource "azurerm_storage_account" "storage-account" {

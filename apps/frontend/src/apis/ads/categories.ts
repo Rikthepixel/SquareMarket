@@ -1,4 +1,5 @@
 import backend from '@/adapters/backend';
+import { CategoryResponse } from '@/responses/ads/categories/CategoryResponse';
 import { GetCategoriesResponse } from '@/responses/ads/categories/GetCategoriesResponse';
 
 export function getCategories(signal?: AbortSignal) {
