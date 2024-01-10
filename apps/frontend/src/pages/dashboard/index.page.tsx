@@ -1,4 +1,4 @@
-import { Button, Stack, Tabs, Text } from '@mantine/core';
+import { Button, Skeleton, Stack, Tabs, Text } from '@mantine/core';
 import { useCallback, useEffect, useState } from 'react';
 import { MdAdd, MdEdit, MdFolder } from 'react-icons/md';
 import PageContainer from '@/components/page/Container';
@@ -55,40 +55,68 @@ export default function Dashboard() {
 
             <Tabs.Panel value="ads">
               {publishedAds
-                .map((ads) => (
+                .map((ads) => {
+                  if (ads.length === 0) {
+                    return "You don't have any published advertisements yet";
+                  }
+
+                  return (
+                    <Stack gap="md">
+                      {ads.map((ad) => (
+                        <AdvertisementCard
+                          key={ad.uid}
+                          ad={ad}
+                          draft={false}
+                          onUnpublished={reloadTab}
+                          onDeleted={reloadTab}
+                        />
+                      ))}
+                    </Stack>
+                  );
+                })
+                .pending(() => (
                   <Stack gap="md">
-                    {ads.map((ad) => (
-                      <AdvertisementCard
-                        key={ad.uid}
-                        ad={ad}
-                        draft={false}
-                        onUnpublished={reloadTab}
-                        onDeleted={reloadTab}
-                      />
-                    ))}
+                    {Array(10)
+                      .fill(true)
+                      .map((_, idx) => (
+                        <Skeleton key={idx} height="12rem" />
+                      ))}
                   </Stack>
                 ))
-                .pending(() => 'Loading published advertisements...')
-                .catch(() => 'Error')
+                .catch((err) => err.message)
                 .unwrap()}
             </Tabs.Panel>
 
             <Tabs.Panel value="drafts">
               {draftAds
-                .map((ads) => (
+                .map((ads) => {
+                  if (ads.length === 0) {
+                    return "You don't have any draft advertisements yet ";
+                  }
+
+                  return (
+                    <Stack gap="md">
+                      {ads.map((ad) => (
+                        <AdvertisementCard
+                          key={ad.uid}
+                          ad={ad}
+                          draft={true}
+                          onDeleted={reloadTab}
+                        />
+                      ))}
+                    </Stack>
+                  );
+                })
+                .pending(() => (
                   <Stack gap="md">
-                    {ads.map((ad) => (
-                      <AdvertisementCard
-                        key={ad.uid}
-                        ad={ad}
-                        draft={true}
-                        onDeleted={reloadTab}
-                      />
-                    ))}
+                    {Array(10)
+                      .fill(true)
+                      .map((_, idx) => (
+                        <Skeleton key={idx} height="12rem" />
+                      ))}
                   </Stack>
                 ))
-                .pending(() => 'Loading drafts...')
-                .catch(() => 'Error')
+                .catch((err) => err.message)
                 .unwrap()}
             </Tabs.Panel>
           </Stack>
