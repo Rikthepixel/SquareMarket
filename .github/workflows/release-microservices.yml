@@ -69,14 +69,14 @@ jobs:
             --from-literal=ALLOWED_ORIGIN="sq.rikdenbreejen.nl"
 
           kubectl create secret generic account-service-secrets \
-            --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}" \
+            --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}@squaremarket-accounts" \
             --from-literal=DATABASE_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}" \
             --from-literal=DATABASE_HOST="${{ vars.ACCOUNTS_DB_HOST }}" \
             --from-literal=DATABASE_PORT="3306" \
             --from-literal=DATABASE_NAME="accounts"
 
           kubectl create secret generic advertisement-service-secrets \
-            --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}" \
+            --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}@squaremarket-advertisements" \
             --from-literal=DATABASE_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}" \
             --from-literal=DATABASE_HOST="${{ vars.ADVERTISEMENTS_DB_HOST }}" \
             --from-literal=DATABASE_PORT="3306" \
