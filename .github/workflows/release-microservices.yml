@@ -53,12 +53,15 @@ jobs:
           resource-group: ${{ vars.AZURE_RESOURCE_GROUP }}
           cluster-name: ${{ vars.AZURE_CLUSTER_NAME }}
 
-      - name: Delete secrets
+      - name: Delete gateway secrets
         continue-on-error: true
-        run: |
-          kubectl delete secret gateway-secrets 2> /dev/null
-          kubectl delete secret account-service-secrets 2> /dev/null
-          kubectl delete secret advertisement-service-secrets 2> /dev/null
+        run: kubectl delete secret gateway-secrets
+      - name: Delete accounts secrets
+        continue-on-error: true
+        run: kubectl delete secret account-service-secrets
+      - name: Delete advertisements secrets
+        continue-on-error: true
+        run: kubectl delete secret advertisement-service-secrets
 
       - name: Set secrets
         run: |
