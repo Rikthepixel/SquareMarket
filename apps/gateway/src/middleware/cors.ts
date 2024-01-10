@@ -6,9 +6,9 @@ export interface CorsOptions extends Omit<MakeCorsOptions, 'origin'> {
 
 const cors = ({ origin, ...opts }: CorsOptions = {}) => {
   const whitelistedOrigins = Array.isArray(origin)
-    ? (origin.filter((org) => Boolean(org)) as string[])
+    ? (origin.filter((org) => Boolean(org)) as string[]).map((org) => org.trim())
     : typeof origin === 'string'
-      ? [origin]
+      ? [origin.trim()]
       : undefined;
 
   return makeCors({
@@ -16,7 +16,7 @@ const cors = ({ origin, ...opts }: CorsOptions = {}) => {
       const verdict =
         whitelistedOrigins &&
         reqOrigin &&
-        whitelistedOrigins.includes(reqOrigin);
+        whitelistedOrigins.includes(reqOrigin.trim());
 
       callback(null, verdict);
     },
