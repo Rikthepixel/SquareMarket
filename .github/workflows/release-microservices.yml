@@ -87,8 +87,8 @@ jobs:
             --from-literal=DATABASE_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}" \
             --from-literal=DATABASE_HOST="${{ vars.ADVERTISEMENTS_AZURE_DB_NAME }}.mysql.database.azure.com" \
             --from-literal=DATABASE_PORT="3306" \
-            --from-literal=DATABASE_NAME="advertisements"
-            --from-literal=STORAGE_DRIVER="azure"
+            --from-literal=DATABASE_NAME="advertisements" \
+            --from-literal=STORAGE_DRIVER="azure" \
             --from-literal=STORAGE_AZURE_CONNECTION_STRING="$(az storage account show-connection-string --name ${{ vars.ADVERTISEMENTS_AZURE_STORAGE_ACCOUNT }} -o tsv)"
 
       - name: Deploys application
