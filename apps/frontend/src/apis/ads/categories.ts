@@ -4,12 +4,12 @@ import { GetCategoriesResponse } from '@/responses/ads/categories/GetCategoriesR
 
 export function getCategories(signal?: AbortSignal) {
   return backend
-    .get(`v1/ads/categories`, { signal })
+    .get(`v1/posts/categories`, { signal })
     .json<GetCategoriesResponse>();
 }
 
 export function getCategory(uid: string, signal?: AbortSignal) {
   return backend
-    .get(`v1/ads/categories/${uid}`, { signal })
+    .get(`v1/posts/categories/${uid}`, { signal })
     .json<CategoryResponse>();
 }

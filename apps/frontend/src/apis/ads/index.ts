@@ -24,7 +24,7 @@ export async function getFilteredAdvertisements(
   }
 
   const ads = await backend
-    .get(`v1/ads/filter?${params.toString()}`, { signal })
+    .get(`v1/posts/filter?${params.toString()}`, { signal })
     .json();
 
   if (!Array.isArray(ads)) throw Error('ResponseParseFailure');
@@ -40,7 +40,7 @@ export async function getPublicAdvertisement(
   signal?: AbortSignal,
 ) {
   return await backend
-    .get(`v1/ads/${uid}`, { signal })
+    .get(`v1/posts/${uid}`, { signal })
     .json<any>()
     .then<PublicAdvertisementResponse>((ad) => ({
       ...ad,
