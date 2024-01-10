@@ -105,10 +105,10 @@ resource "azurerm_frontdoor" "frontdoor" {
     name = "main-backend"
 
     backend {
-      host_header = "${azurerm_storage_account.frontend-account.primary_web_host}"
-        address = "${azurerm_storage_account.frontend-account.primary_web_host}"
-        http_port = 80
-        https_port = 443
+      host_header = azurerm_storage_account.frontend-account.primary_web_host
+      address = azurerm_storage_account.frontend-account.primary_web_host
+      http_port = 80
+      https_port = 443
     }
 
     load_balancing_name = "load-balancing"
@@ -170,6 +170,7 @@ resource "azurerm_storage_account" "frontend-account" {
 
   static_website {
     index_document = "index.html"
+    error_404_document = "index.html"
   }
 
   custom_domain {
