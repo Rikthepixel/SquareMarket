@@ -54,8 +54,7 @@ export default function FrontPage() {
   useEffect(() => {
     if (!selectedCategory || selectedCategory === 'none') {
       resetCategory();
-      setValues({ options: [] });
-      return;
+      return setValues({ options: [] });
     }
     loadCategory(selectedCategory);
   }, [selectedCategory, resetCategory, loadCategory, setValues]);
@@ -85,20 +84,15 @@ export default function FrontPage() {
 
   const handleSubmit = useMemo(
     () =>
-      onSubmit(
-        (data) => {
-          getAdvertisementsWithFilter({
-            search: data.search,
-            category: data.category !== 'none' ? data.category : undefined,
-            property_options: data.options
-              ?.map((opt) => opt.value)
-              .filter((opt) => opt !== 'none'),
-          });
-        },
-        (errors) => {
-          console.log(errors);
-        },
-      ),
+      onSubmit((data) => {
+        getAdvertisementsWithFilter({
+          search: data.search,
+          category: data.category !== 'none' ? data.category : undefined,
+          property_options: data.options
+            ?.map((opt) => opt.value)
+            .filter((opt) => opt !== 'none'),
+        });
+      }),
     [onSubmit, getAdvertisementsWithFilter],
   );
 
@@ -172,20 +166,25 @@ export default function FrontPage() {
           .loading(() => 'Loading category properties...')
           .unwrap()}
       </Collapse>
-      <Grid mt="md" pb="md">
-        {advertisements
-          .map((value) =>
-            value.length === 0
-              ? 'There are no advertisements yet, be the first to place one!'
-              : value.map((ad) => (
-                  <Grid.Col key={ad.uid} span={{ xs: 12, sm: 6, lg: 4 }}>
-                    <AdvertisementCard {...ad} />
-                  </Grid.Col>
-                )),
-          )
-          .catch((e) => e.message)
-          .unwrap()}
-      </Grid>
+      {advertisements
+        .map((value) => {
+          if (value.length === 0) {
+            return 'There are no advertisements yet, be the first to place one!';
+          }
+
+          return (
+            <Grid mt="md" pb="md">
+              {value.map((ad) => (
+                <Grid.Col key={ad.uid} span={{ xs: 12, sm: 6, lg: 4 }}>
+                  <AdvertisementCard {...ad} />
+                </Grid.Col>
+              ))}
+            </Grid>
+          );
+        })
+        .pending(() => 'Loading advertisements...')
+        .catch((e) => e.message)
+        .unwrap()}
     </PageContainer>
   );
 }
