@@ -63,7 +63,7 @@ jobs:
       - name: Set secrets
         run: |
           kubectl create secret generic gateway-secrets \
-            --from-literal=FRONTEND_URL="$(az storage account show -n squaremarketfrontend -g squaremarket-group --query "primaryEndpoints.web" --output tsv)"
+            --from-literal=ALLOWED_ORIGIN="sq.rikdenbreejen.nl"
 
           kubectl create secret generic account-service-secrets \
             --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}" \
