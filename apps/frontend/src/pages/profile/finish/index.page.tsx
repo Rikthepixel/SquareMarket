@@ -15,21 +15,19 @@ import {
 import { useForm, zodResolver } from '@mantine/form';
 import { useEffect } from 'react';
 import { MdSave } from 'react-icons/md';
-import { useLocation } from 'wouter';
+import { Redirect } from 'wouter';
 
 export default function FinishProfilePage() {
   const { status, finish, getStatus } = useProfile();
-  const [, setLocation] = useLocation();
 
   const { getInputProps, onSubmit } = useForm<FinishProfileRequest>({
     validate: zodResolver(finishProfileRequestSchema),
     validateInputOnChange: true,
   });
 
-  useEffect(() => {
-    if (status !== 'complete') return;
-    setLocation('/', { replace: true });
-  }, [status, setLocation]);
+  if (status === 'complete') {
+    return <Redirect to="/" replace />;
+  }
 
   return (
     <Card
