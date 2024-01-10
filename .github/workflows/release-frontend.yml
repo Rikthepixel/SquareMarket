@@ -26,9 +26,9 @@ jobs:
 
       - name: Set env variables
         run: |
-          echo "VITE_BACKEND_URL=sq.api.rikdenbreejen.nl" >> ./.env
-          echo "VITE_AUTH_DOMAIN_URL=https://square-market.eu.auth0.com" >> ./env
-          echo "VITE_AUTH_CLIENT_ID=PObklfrWNeQzWTEsWP6mTkRuSCPgZn7r" >> ./env
+          echo "VITE_BACKEND_URL=sq.api.rikdenbreejen.nl" >> ./apps/frontend/.env
+          echo "VITE_AUTH_DOMAIN_URL=https://square-market.eu.auth0.com" >> ./apps/frontend.env
+          echo "VITE_AUTH_CLIENT_ID=PObklfrWNeQzWTEsWP6mTkRuSCPgZn7r" >> ./apps/frontend/.env
 
       - name: Build application
         run: npm run build -w apps/frontend

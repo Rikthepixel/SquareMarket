@@ -183,12 +183,6 @@ resource "azurerm_storage_account" "frontend-account" {
   }
 }
 
-resource "azurerm_storage_container" "frontendstorage-container" {
-  name                  = "frontend-storage-container"
-  storage_account_name  = azurerm_storage_account.frontend-account.name
-  container_access_type = "private"
-}
-
 resource "azurerm_storage_account" "storage-account" {
   name                = "squaremarketblobstorage"
   resource_group_name = azurerm_resource_group.squaremarket-group.name
@@ -204,7 +198,7 @@ resource "azurerm_storage_account" "storage-account" {
 }
 
 resource "azurerm_storage_container" "storage-container" {
-  name                  = "storage-container"
+  name                  = "advertisement-images"
   storage_account_name  = azurerm_storage_account.storage-account.name
   container_access_type = "private"
 }
