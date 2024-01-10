@@ -29,7 +29,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     reloadTab();
-  }, [tab, reloadTab]);
+  }, [reloadTab]);
 
   return (
     <PageContainer maw="1280px">
