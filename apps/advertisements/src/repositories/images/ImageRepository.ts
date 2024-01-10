@@ -1,5 +1,5 @@
-import { ReadStream } from 'fs';
 import { UidOrId } from '../../helpers/identifiers';
+import { Readable } from 'stream';
 
 export interface UploadableImage {
   uid: string;
@@ -16,5 +16,5 @@ export default interface ImageRepository {
 
   getContent(
     uidOrId: UidOrId,
-  ): Promise<{ content: ReadStream; mime: string } | null>;
+  ): Promise<{ content: Readable; mime: string } | null>;
 }
