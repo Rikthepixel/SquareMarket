@@ -49,4 +49,4 @@ jobs:
           az storage blob upload-batch \
             --account-name="squaremarketfrontend" \
             --source="./apps/frontend/dist" \
-            --destination='$web' ./
+            --destination='$web'
