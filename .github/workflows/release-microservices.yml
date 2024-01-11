@@ -16,7 +16,7 @@ jobs:
     environment: production
     strategy:
       matrix:
-        app: [advertisements, accounts, gateway]
+        app: [advertisements, accounts, messages, gateway]
     steps:
       - uses: actions/checkout@v4
 
@@ -65,6 +65,9 @@ jobs:
       - name: Delete advertisements secrets
         continue-on-error: true
         run: kubectl delete secret advertisement-service-secrets
+      - name: Delete messages secrets
+        continue-on-error: true
+        run: kubectl delete secret messaging-service-secrets
 
       - name: Set secrets
         run: |
@@ -90,6 +93,15 @@ jobs:
             --from-literal=DATABASE_NAME="advertisements" \
             --from-literal=STORAGE_DRIVER="azure" \
             --from-literal=STORAGE_AZURE_CONNECTION_STRING="$(az storage account show-connection-string --name ${{ vars.ADVERTISEMENTS_AZURE_STORAGE_ACCOUNT }} -o tsv)"
+
+          kubectl create secret generic messaging-service-secrets \
+            --from-literal=DATABASE_USER="${{ secrets.DB_ADMIN_USER }}@${{ vars.MESSAGES_AZURE_DB_NAME }}" \
+            --from-literal=DATABASE_PASSWORD="${{ secrets.DB_ADMIN_PASSWORD }}" \
+            --from-literal=DATABASE_HOST="${{ vars.MESSAGES_AZURE_DB_NAME }}.mysql.database.azure.com" \
+            --from-literal=DATABASE_PORT="3306" \
+            --from-literal=DATABASE_NAME="messages" \
+            --from-literal=STORAGE_DRIVER="azure" \
+            --from-literal=STORAGE_AZURE_CONNECTION_STRING="$(az storage account show-connection-string --name ${{ vars.MESSAGES_AZURE_STORAGE_ACCOUNT }} -o tsv)"
 
       - name: Deploys application
         uses: Azure/k8s-deploy@v4

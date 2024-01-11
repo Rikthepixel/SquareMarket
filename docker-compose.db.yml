@@ -31,4 +31,21 @@ services:
       - MYSQL_USER=username
       - MYSQL_PASSWORD=password
       - MYSQL_ROOT_PASSWORD=root_password
-      - MYSQL_DATABASE=accounts
+      - MYSQL_DATABASE=advertisements
+
+
+  messages_db:
+    image: mysql:latest
+    volumes:
+      - ./docker/messages_db:/var/lib/mysql:delegated
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 5s
+      retries: 3
+    ports:
+      - 3403:3306
+    environment:
+      - MYSQL_USER=username
+      - MYSQL_PASSWORD=password
+      - MYSQL_ROOT_PASSWORD=root_password
+      - MYSQL_DATABASE=messages

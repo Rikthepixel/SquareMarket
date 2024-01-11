@@ -1,23 +1,23 @@
-# https://kubernetes.io/docs/concepts/workloaccounts/controllers/deployment/
+# https://kubernetes.io/docs/concepts/workloadvertisements/controllers/deployment/
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: accounts-pod
+  name: messages-pod
   labels:
-    app: accounts-pod
+    app: messages-pod
 spec:
   selector:
     matchLabels:
-      app: accounts-pod
+      app: messages-pod
   replicas: 1
   template:
     metadata:
       labels:
-        app: accounts-pod
+        app: messages-pod
     spec:
       containers:
-        - name: accounts-container
-          image: squaremarketacr.azurecr.io/squaremarket-accounts:v0.4
+        - name: messages-container
+          image: squaremarketacr.azurecr.io/squaremarket-messages:v0.4
           imagePullPolicy: Always
           # resources:
           #   requests:
@@ -37,7 +37,7 @@ spec:
             periodSeconds: 10
           env:
             - name: SERVER_NAME
-              value: "Accounts"
+              value: "messages"
             - name: SERVER_PORT
               value: "80"
             - name: MQ_CONNECTION_STRING
@@ -55,23 +55,33 @@ spec:
             - name: DATABASE_NAME
               valueFrom:
                 secretKeyRef:
-                  name: account-service-secrets
+                  name: messaging-service-secrets
                   key: DATABASE_NAME
             - name: DATABASE_USER
               valueFrom:
                 secretKeyRef:
-                  name: account-service-secrets
+                  name: messaging-service-secrets
                   key: DATABASE_USER
             - name: DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: account-service-secrets
+                  name: messaging-service-secrets
                   key: DATABASE_PASSWORD
             - name: DATABASE_HOST
               valueFrom:
                 secretKeyRef:
-                  name: account-service-secrets
+                  name: messaging-service-secrets
                   key: DATABASE_HOST
+            - name: STORAGE_DRIVER
+              valueFrom:
+                secretKeyRef:
+                  name: messaging-service-secrets
+                  key: STORAGE_DRIVER
+            - name: STORAGE_AZURE_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: messaging-service-secrets
+                  key: STORAGE_AZURE_CONNECTION_STRING
           ports:
             - containerPort: 80
       restartPolicy: Always
@@ -80,10 +90,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: accounts-service
+  name: messages-service
 spec:
   selector:
-    app: accounts-pod
+    app: messages-pod
   type: ClusterIP
   ports:
     - protocol: TCP

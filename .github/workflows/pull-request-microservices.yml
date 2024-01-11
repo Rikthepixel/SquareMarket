@@ -31,6 +31,8 @@ jobs:
               - "apps/accounts/**"
             advertisements:
               - "apps/advertisements/**"
+            messages:
+              - "apps/messages/**"
             gateway:
               - "apps/gateway/**"
 

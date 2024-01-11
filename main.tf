@@ -279,3 +279,42 @@ resource "azurerm_mysql_database" "advertisements-db" {
   charset             = "utf8"
   collation           = "utf8_unicode_ci"
 }
+
+
+resource "azurerm_mysql_server" "messages-db-server" {
+  name                = "squaremarket-messages"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+  location            = azurerm_resource_group.squaremarket-group.location
+  version             = "8.0"
+
+  sku_name = "B_Gen5_1"
+  storage_mb = 5120
+
+  administrator_login          = var.db_admin_user
+  administrator_login_password = var.db_admin_password
+
+  public_network_access_enabled     = true
+  ssl_enforcement_enabled           = true
+  ssl_minimal_tls_version_enforced  = "TLS1_2"
+
+  tags = {
+    "environment" = "production"
+    "source"      = "terraform"
+  }
+}
+
+resource "azurerm_mysql_firewall_rule" "messages-db-to-server" {
+  name                = "server"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+  server_name         = azurerm_mysql_server.messages-db-server.name
+  start_ip_address    = "0.0.0.0"
+  end_ip_address      = "255.255.255.255"
+}
+
+resource "azurerm_mysql_database" "messages-db" {
+  name                = "messages"
+  resource_group_name = azurerm_resource_group.squaremarket-group.name
+  server_name         = azurerm_mysql_server.messages-db-server.name
+  charset             = "utf8"
+  collation           = "utf8_unicode_ci"
+}
