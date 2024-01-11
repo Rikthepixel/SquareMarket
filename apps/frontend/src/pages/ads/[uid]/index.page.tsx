@@ -13,6 +13,7 @@ import {
   Stack,
   Group,
   SimpleGrid,
+  Skeleton,
 } from '@mantine/core';
 import { useEffect } from 'react';
 import { MdPerson } from 'react-icons/md';
@@ -105,7 +106,38 @@ export default function AdPage() {
             </Stack>
           </Stack>
         ))
-        .pending(() => 'Loading advertisement...')
+        .pending(() => (
+          <Stack gap="md">
+            <Carousel
+              w="100%"
+              slideSize={{ base: '100%', sm: '50%' }}
+              slideGap={{ base: 0, sm: 'md' }}
+              align="start"
+            >
+              {Array(3)
+                .fill(true)
+                .map((_, idx) => (
+                  <Carousel.Slide key={idx}>
+                    <AspectRatio ratio={4 / 3}>
+                      <Skeleton height="100%" />
+                    </AspectRatio>
+                  </Carousel.Slide>
+                ))}
+            </Carousel>
+            <Stack gap="sm">
+              <Skeleton height="1.5em" />
+              <Skeleton width="15%" />
+            </Stack>
+            <Stack gap="sm">
+              <Skeleton width="15%" />
+              <Skeleton height="10rem" />
+            </Stack>
+            <Stack gap="sm">
+              <Skeleton width="15%" />
+              <Skeleton height="15rem" />
+            </Stack>
+          </Stack>
+        ))
         .catch((err) => err.message)
         .unwrap()}
     </PageContainer>
