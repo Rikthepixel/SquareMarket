@@ -24,7 +24,7 @@ interface AdvertisementsState {
   advertisement: Resource<PublicAdvertisementResponse>;
 
   getAdvertisementsWithFilter(filter: SearchFilter): Promise<void>;
-  getAdvertisement(uid: string): Promise<void>
+  getAdvertisement(uid: string): Promise<void>;
 }
 
 const useAdvertisements = create<AdvertisementsState>((set, get) => ({
@@ -32,24 +32,20 @@ const useAdvertisements = create<AdvertisementsState>((set, get) => ({
   advertisement: Resource.idle(),
 
   async getAdvertisementsWithFilter(filter = {}) {
-    const advertisements = get().advertisements.abort().reload();
-    set({ advertisements });
-    set({
-      advertisements: await Resource.wrapPromise(
-        getFilteredAdvertisements(filter, advertisements.signal()),
-      ),
-    });
+    const resource = get().advertisements.abort().reload();
+    set({ advertisements: resource });
+    Resource.wrapPromise(
+      getFilteredAdvertisements(filter, resource.signal()),
+    ).then((res) => set({ advertisements: res }));
   },
 
   async getAdvertisement(uid: string) {
-    const advertisement = get().advertisement.abort().reload();
-    set({ advertisement });
-    set({
-      advertisement: await Resource.wrapPromise(
-        getPublicAdvertisement(uid, advertisement.signal()),
-      ),
-    });
-  }
+    const resource = get().advertisement.abort().reload();
+    set({ advertisement: resource });
+    Resource.wrapPromise(getPublicAdvertisement(uid, resource.signal())).then(
+      (res) => set({ advertisement: res }),
+    );
+  },
 }));
 
 export default useAdvertisements;

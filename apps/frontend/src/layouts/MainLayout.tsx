@@ -67,11 +67,11 @@ export default function MainLayout({ children }: React.PropsWithChildren) {
               icon: IoMdPricetag,
               text: `Dashboard`,
             },
-            {
-              action: '/profile',
-              icon: MdPerson,
-              text: 'Profile',
-            },
+            // {
+            //   action: '/profile',
+            //   icon: MdPerson,
+            //   text: 'Profile',
+            // },
             {
               action: auth.logout,
               icon: MdLogout,

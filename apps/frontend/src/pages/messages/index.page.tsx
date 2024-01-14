@@ -107,8 +107,8 @@ export default function MessagesPage() {
       .pending(() =>
         Array(5)
           .fill(true)
-          .map(() => {
-            return <Skeleton width="100%" height="4rem" />;
+          .map((_, idx) => {
+            return <Skeleton key={idx} width="100%" height="4rem" />;
           }),
       )
       .unwrap();
