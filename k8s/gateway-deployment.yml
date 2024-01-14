@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: gateway-container
-          image: squaremarketacr.azurecr.io/squaremarket-gateway:v0.1
+          image: squaremarketacr.azurecr.io/squaremarket-gateway:v0.4
           imagePullPolicy: Always
           # resources:
           #   requests:
@@ -59,6 +59,8 @@ spec:
               value: http://accounts-service:8080
             - name: ADVERTISEMENTS_SERVICE_URL
               value: http://advertisements-service:8080
+            - name: MESSAGES_SERVICE_URL
+              value: http://messages-service:8080
           ports:
             - containerPort: 80
       restartPolicy: Always

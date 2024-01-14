@@ -188,7 +188,7 @@ export default function FrontPage() {
           </Collapse>
         ))
         .catch((e) => e.message)
-        .pending(() => 'Loading categories...')
+        .pending(() => null)
         .unwrap()}
       {advertisements
         .map((value) => {

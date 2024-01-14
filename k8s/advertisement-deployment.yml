@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: advertisements-container
-          image: squaremarketacr.azurecr.io/squaremarket-advertisements:v0.1
+          image: squaremarketacr.azurecr.io/squaremarket-advertisements:v0.4
           imagePullPolicy: Always
           # resources:
           #   requests:

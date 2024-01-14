@@ -4,6 +4,7 @@ kind: Kustomization
 resources:
   - account-deployment.yml
   - gateway-deployment.yml
+  - messaging-deployment.yml
   - advertisement-deployment.yml
   - message-queue-deployment.yml
   - gateway-ingress.yml
@@ -17,6 +18,9 @@ images:
     newTag: latest
   - name: squaremarketacr.azurecr.io/squaremarket-advertisements
     newName: k3d-personal:9800/squaremarket-advertisements
+    newTag: latest
+  - name: squaremarketacr.azurecr.io/squaremarket-messages
+    newName: k3d-personal:9800/squaremarket-messages
     newTag: latest
 
 secretGenerator:

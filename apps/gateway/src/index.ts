@@ -19,6 +19,7 @@ const AUTH_CONFIG: AuthOptions = {
 const SERVICES = {
   accounts: process.env.ACCOUNTS_SERVICE_URL ?? 'http://localhost:8001',
   ads: process.env.ADVERTISEMENTS_SERVICE_URL ?? 'http://localhost:8002',
+  messages: process.env.MESSAGES_SERVICE_URL ?? 'http://localhost:8003',
 } as const;
 
 gateway({
@@ -58,6 +59,16 @@ gateway({
         ],
         AUTH_CONFIG,
       ),
+      {
+        prefix: '/v1/chats/',
+        prefixRewrite: '/v1',
+        target: SERVICES.messages,
+      },
+      {
+        proxyType: 'websocket',
+        prefix: '/v1/chats/*',
+        target: SERVICES.messages.replace('http', 'ws'),
+      },
       {
         prefix: '/v1/posts',
         prefixRewrite: '/v1',
