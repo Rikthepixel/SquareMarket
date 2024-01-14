@@ -59,6 +59,8 @@ spec:
               value: http://accounts-service:8080
             - name: ADVERTISEMENTS_SERVICE_URL
               value: http://advertisements-service:8080
+            - name: MESSAGES_SERVICE_URL
+              value: http://messages-service:8080
           ports:
             - containerPort: 80
       restartPolicy: Always

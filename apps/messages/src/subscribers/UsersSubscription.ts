@@ -23,10 +23,9 @@ export default class UsersSubscription extends BaseSubscription {
         await userService.createOrUpdate({
           provider_id: content.provider_id,
           username: content.username,
-          default_currency: content.default_currency,
         });
-        ack()
+        ack();
       },
-    )
+    );
   }
 }

@@ -64,6 +64,13 @@ resource "azurerm_kubernetes_cluster" "api" {
     network_policy = "calico"
   }
 
+  addon_profile {
+    web_app_routing {
+      enabled = true
+      dns_zone_resource_id = azurerm_dns_zone.example.id
+    }
+  }
+
   tags = {
     "environment" = "production"
     "source"      = "terraform"
@@ -84,6 +91,10 @@ resource "azurerm_dns_zone" "frontend" {
 resource "azurerm_dns_zone" "api" {
   name                = "sq.api.rikdenbreejen.nl"
   resource_group_name = azurerm_resource_group.squaremarket-group.name
+}
+
+output "api_fqdn" {
+      value = azurerm_kubernetes_cluster.api.fqdn
 }
 
 resource "azurerm_frontdoor" "frontdoor" {
@@ -119,19 +130,19 @@ resource "azurerm_frontdoor" "frontdoor" {
     health_probe_name = "frontend"
   }
 
-  # backend_pool {
-  #   name = "api"
-  #
-  #   backend {
-  #     host_header = azurerm_kubernetes_cluster.api.fqdn
-  #     address = azurerm_kubernetes_cluster.api.fqdn
-  #     http_port = 80
-  #     https_port = 443
-  #   }
-  #
-  #   load_balancing_name = "api"
-  #   health_probe_name = "api"
-  # }
+  backend_pool {
+    name = "api"
+
+    backend {
+      host_header = azurerm_dns_zone.api.name
+      address = azurerm_kubernetes_cluster.api.fqdn
+      http_port = 80
+      https_port = 443
+    }
+
+    load_balancing_name = "api"
+    health_probe_name = "api"
+  }
 
   routing_rule {
     name = "https-frontend"
@@ -144,23 +155,22 @@ resource "azurerm_frontdoor" "frontdoor" {
     }
   }
 
-  # routing_rule {
-  #   name = "https-api"
-  #   accepted_protocols = ["Https"]
-  #   patterns_to_match = ["/*"]
-  #   frontend_endpoints = ["api"]
-  #   forwarding_configuration {
-  #     forwarding_protocol = "HttpsOnly"
-  #     backend_pool_name = "api"
-  #   }
-  # }
+  routing_rule {
+    name = "https-api"
+    accepted_protocols = ["Https"]
+    patterns_to_match = ["/*"]
+    frontend_endpoints = ["api"]
+    forwarding_configuration {
+      forwarding_protocol = "HttpsOnly"
+      backend_pool_name = "api"
+    }
+  }
 
   routing_rule {
     name = "https-redirect"
     accepted_protocols = ["Http"]
     patterns_to_match = ["/*"]
-    frontend_endpoints = ["frontend"]
-#, "api"]
+    frontend_endpoints = ["frontend", "api"]
     redirect_configuration {
       redirect_protocol = "HttpsOnly"
       redirect_type = "Moved"
@@ -180,14 +190,16 @@ resource "azurerm_frontdoor" "frontdoor" {
     protocol = "Https"
   }
 
-  # backend_pool_load_balancing {
-  #   name = "api"
-  # }
-  #
-  # backend_pool_health_probe {
-  #   name = "api"
-  #   protocol = "Https"
-  # }
+  backend_pool_load_balancing {
+    name = "api"
+  }
+
+  backend_pool_health_probe {
+    name = "api"
+    path = "/services.json"
+    protocol = "Https"
+    probe_method = "HEAD"
+  }
 }
 
 resource "azurerm_frontdoor_custom_https_configuration" "frontend-https" {
@@ -198,13 +210,13 @@ resource "azurerm_frontdoor_custom_https_configuration" "frontend-https" {
   }
 }
 
-resource "azurerm_frontdoor_custom_https_configuration" "api-https" {
-  frontend_endpoint_id              = azurerm_frontdoor.frontdoor.frontend_endpoints.api
-  custom_https_provisioning_enabled = true
-  custom_https_configuration {
-    certificate_source = "FrontDoor"
-  }
-}
+# resource "azurerm_frontdoor_custom_https_configuration" "api-https" {
+#   frontend_endpoint_id              = azurerm_frontdoor.frontdoor.frontend_endpoints.api
+#   custom_https_provisioning_enabled = true
+#   custom_https_configuration {
+#     certificate_source = "FrontDoor"
+#   }
+# }
 
 resource "azurerm_storage_account" "frontend-account" {
   name                = "squaremarketfrontend"

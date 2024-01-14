@@ -1,4 +1,3 @@
-import { User } from '../entities/User';
 import UserRepository from '../repositories/user/UserRepository';
 
 export interface SyncUserProps {

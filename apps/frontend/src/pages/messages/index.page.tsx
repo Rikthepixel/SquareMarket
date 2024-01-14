@@ -1,13 +1,8 @@
 import PageContainer from '@/components/page/Container';
-import {
-  Center,
-  Group,
-  Paper,
-  Stack,
-  Text,
-  TextInput,
-} from '@mantine/core';
+import useChats from '@/stores/useChats';
+import { Center, Group, Paper, Stack, Text, TextInput } from '@mantine/core';
 import { useHover } from '@mantine/hooks';
+import { useEffect } from 'react';
 import { MdChevronRight, MdSearch } from 'react-icons/md';
 import { Link } from 'wouter';
 
@@ -20,6 +15,7 @@ interface Conversation {
 
 function ConversationRow({ conversation }: { conversation: Conversation }) {
   const { ref, hovered } = useHover();
+
   return (
     <Link {...({ ref } as object)} href={`/messages/${conversation.uid}`}>
       <Paper component="a" c={hovered ? 'red' : 'dark'} p="md" withBorder>
@@ -43,6 +39,12 @@ function ConversationRow({ conversation }: { conversation: Conversation }) {
 }
 
 export default function MessagesPage() {
+  const { connectToChat } = useChats();
+
+  useEffect(() => {
+    connectToChat('9f783b23-b243-11ee-abb1-0242ac130002');
+  }, [connectToChat]);
+
   const conversations = Array(10)
     .fill(1)
     .map<Conversation>((_, idx) => {

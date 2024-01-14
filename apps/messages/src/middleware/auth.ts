@@ -5,6 +5,7 @@ import jwt from 'koa-jwt';
 export interface AuthOptions {
   issuerUrl: string;
   audience: string;
+  getToken?(ctx: Koa.Context, opts: jwt.Options): string | null;
 }
 
 interface DecodedJwt {
@@ -25,6 +26,7 @@ export interface AuthState {
 export default function auth({
   issuerUrl,
   audience,
+  getToken,
 }: AuthOptions): Koa.Middleware<AuthState> {
   const middleware = jwt({
     secret: JwksRsa.koaJwtSecret({
@@ -33,6 +35,7 @@ export default function auth({
       jwksRequestsPerMinute: 5,
       jwksUri: `${issuerUrl}.well-known/jwks.json`,
     }),
+    getToken: getToken,
     audience,
     issuer: issuerUrl,
     algorithms: ['RS256'],
