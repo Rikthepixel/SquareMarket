@@ -32,14 +32,18 @@ const initContainer = depenencyProvider(new IoCContainer());
 initContainer.resolve('broker').then(async () => {
   console.log('Broker started');
   initContainer.resolve('UsersSubscription').then((s) => s.listen());
+  initContainer.resolve('MessagesSubscription').then((s) => s.listen());
 });
 
-app
+const server = app
   .use(router.routes())
   .listen(PORT, '0.0.0.0', () =>
     console.log(
       `Server "${process.env.SERVER_NAME}" started on localhost:${PORT}`,
     ),
-  );
+  )
+;
+server.requestTimeout = 0;
+server.headersTimeout = 0;
 
 export default app;

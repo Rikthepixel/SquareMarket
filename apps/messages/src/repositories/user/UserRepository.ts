@@ -5,5 +5,6 @@ export interface InsertableUser
 
 export default interface UserRepository {
   get: (providerIdOrId: string | number) => Promise<User | null>;
+  getMultiple(uidsOrIds: (string | number)[]): Promise<User[]>;
   createOrUpdate: (user: InsertableUser) => Promise<void>;
 }

@@ -1,4 +1,7 @@
+import { randomUUID } from 'crypto';
 import { withDefaultConfig } from 'rascal';
+
+const uid = randomUUID();
 
 const brokerConfig = withDefaultConfig({
   vhosts: {
@@ -11,8 +14,20 @@ const brokerConfig = withDefaultConfig({
           assert: true,
           type: 'topic',
         },
+        messages_ex: {
+          assert: true,
+          type: 'topic',
+        },
       },
-      queues: ['messages_user_queue'],
+      queues: {
+        messages_user_queue: {},
+        ['messages_message_queue' + uid]: {
+          options: {
+            durable: false,
+            exclusive: true,
+          },
+        },
+      },
       bindings: {
         'accounts_ex-accounts_queue': {
           source: 'accounts_ex',
@@ -20,11 +35,25 @@ const brokerConfig = withDefaultConfig({
           destinationType: 'queue',
           bindingKey: 'users.*',
         },
+        'messages_ex-message_queue': {
+          source: 'messages_ex',
+          destination: 'messages_message_queue' + uid,
+          destinationType: 'queue',
+          bindingKey: 'chats.messages.*',
+        },
       },
-      publications: {},
+      publications: {
+        message_send: {
+          exchange: 'messages_ex',
+          routingKey: 'chats.messages.send',
+        },
+      },
       subscriptions: {
         users_sub: {
           queue: 'messages_user_queue',
+        },
+        messages_sub: {
+          queue: 'messages_message_queue' + uid,
         },
       },
     },

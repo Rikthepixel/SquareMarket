@@ -49,8 +49,8 @@ exports.up = async function (knex) {
         .references('chats.id')
         .onDelete('cascade');
       table.text('content');
-      table.date('seen_at').nullable();
-      table.date('sent_at');
+      table.datetime('seen_at').nullable();
+      table.datetime('sent_at');
     });
 };
 

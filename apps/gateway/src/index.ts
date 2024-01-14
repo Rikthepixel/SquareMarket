@@ -60,9 +60,14 @@ gateway({
         AUTH_CONFIG,
       ),
       {
+        prefix: '/v1/chats/',
+        prefixRewrite: '/v1',
+        target: SERVICES.messages,
+      },
+      {
         proxyType: 'websocket',
         prefix: '/v1/chats/*',
-        target: SERVICES.messages.replace("http", "ws"),
+        target: SERVICES.messages.replace('http', 'ws'),
       },
       {
         prefix: '/v1/posts',

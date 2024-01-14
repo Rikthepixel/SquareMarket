@@ -12,12 +12,22 @@ export default class KnexUserRepository implements UserRepository {
         `users.${typeof providerIdOrId === 'number' ? 'id' : 'provider_id'}`,
         providerIdOrId,
       )
-      .first<User | null>(
-        'users.id',
-        'users.provider_id',
-        'users.username',
-        'users.default_currency',
-      );
+      .first<User | null>('users.id', 'users.provider_id', 'users.username');
+  }
+
+  async getMultiple(uidsOrIds: (string | number)[]): Promise<User[]> {
+    const uids = uidsOrIds.filter(
+      (uidOrId) => typeof uidOrId !== 'number',
+    ) as string[];
+    const ids = uidsOrIds.filter(
+      (uidOrId) => typeof uidOrId === 'number',
+    ) as number[];
+
+    return await this.db
+      .table('users')
+      .whereIn('users.id', ids)
+      .orWhereIn('users.provider_id', uids)
+      .select<User[]>('users.id', 'users.provider_id', 'users.username');
   }
 
   async createOrUpdate(user: InsertableUser) {

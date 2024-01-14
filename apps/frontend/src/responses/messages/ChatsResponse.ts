@@ -3,10 +3,12 @@ import { z } from 'zod';
 export const chatsResponseSchema = z
   .object({
     uid: z.string(),
-    user: z.object({
-      uid: z.string(),
-      username: z.string(),
-    }),
+    users: z
+      .object({
+        provider_id: z.string(),
+        username: z.string(),
+      })
+      .array(),
   })
   .array();
 

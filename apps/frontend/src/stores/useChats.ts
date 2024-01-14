@@ -1,18 +1,23 @@
-import { getChats, startChat } from '@/apis/messages/chats';
+import {
+  ChatConnection,
+  connectToChat,
+  getChats,
+  startChat,
+} from '@/apis/messages/chats';
 import Resource from '@/helpers/Resource';
-import { getToken } from '@/lib/auth';
-import { ChatsResponse } from '@/responses/ads/messages/ChatsResponse';
+import { ChatResponse } from '@/responses/messages/ChatResponse';
+import { ChatsResponse } from '@/responses/messages/ChatsResponse';
 import { create } from 'zustand';
 
 interface ChatsState {
   chats: Resource<ChatsResponse>;
-  chat: Resource<{}>;
+  chat: Resource<[ChatResponse, ChatConnection]>;
 
-  startChat(userUid: string): Promise<void>;
+  startChat(userUid: string): Promise<string>;
   getChats(): Promise<void>;
 
   connectToChat(uid: string): Promise<void>;
-  disconnect(): Promise<void>;
+  disconnect(): void;
 }
 
 const useChats = create<ChatsState>((set, get) => ({
@@ -20,7 +25,7 @@ const useChats = create<ChatsState>((set, get) => ({
   chat: Resource.idle(),
 
   async startChat(userUid) {
-    await startChat(userUid);
+    return await startChat(userUid).then((res) => res.uid);
   },
 
   async getChats() {
@@ -32,36 +37,37 @@ const useChats = create<ChatsState>((set, get) => ({
   },
 
   async connectToChat(uid) {
-    const token = await getToken();
-    if (!token) return;
-
     const resource = get().chat.abort().reload();
     set({ chat: resource });
+    const connection = await connectToChat(uid, resource.signal());
 
-    const url = new URL(import.meta.env.VITE_BACKEND_URL);
-    url.pathname = `v1/chats/${uid}`;
-    url.protocol = url.protocol === 'http:' ? 'ws:' : 'wss:';
-    url.searchParams.set('token', token);
-    // url.port = '8003';
+    connection.addEventListener('chat-init', (event) => {
+      set({ chat: Resource.wrapValue([event.data, connection]) });
+    });
 
-    const socket = new WebSocket(url);
+    connection.addEventListener('chat-message', (event) => {
+      set((state) => ({
+        chat: state.chat.map(([chat, connection]) => [
+          { ...chat, messages: [...chat.messages, event.data] },
+          connection,
+        ]),
+      }));
+    });
 
-    socket.onopen = function (e) {
-      if (resource.signal()?.aborted) return socket.close();
-    };
-
-    socket.onmessage = function (e) {
-      if (resource.signal()?.aborted) return socket.close();
-      const data = JSON.parse(e.data.toString())
-      console.log(data);
-    };
-
-    socket.onclose = function (e) {
-      if (e.code === 1000) return; // Client closed connection
-    }
+    connection.addEventListener('close', (event) => {
+      if (!event.closedByClient) {
+        set({
+          chat: Resource.wrapError(new Error('Server closed the chat')),
+        });
+      }
+      set({ chat: Resource.idle() });
+    });
   },
 
-  async disconnect() {},
+  disconnect() {
+    const state = get();
+    state.chat.abort();
+  },
 }));
 
 export default useChats;

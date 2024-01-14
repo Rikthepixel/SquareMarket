@@ -5,6 +5,7 @@ import { z } from 'zod';
 import UserService from '../services/UserService';
 
 export default class UsersSubscription extends BaseSubscription {
+  public name: string = "users_sub"
   constructor(
     broker: BrokerAsPromised,
     logger: BaseLogger,

@@ -3,27 +3,29 @@ import type { Message } from 'amqplib';
 import BaseLogger from '../loggers/BaseLogger';
 import { z } from 'zod';
 
-type MessageHandler<TSchema extends z.ZodSchema> = (
+export type MessageHandler<TSchema extends z.ZodSchema> = (
   content: z.infer<TSchema>,
   ackOrNack: AckOrNack,
   msg: Message,
 ) => void | Promise<void>;
 
-interface Listener {
+export interface Listener {
   key: string | ((routerKey: string) => boolean);
   schema: z.ZodSchema;
   handler: MessageHandler<z.ZodSchema>;
 }
 
-export default class BaseSubscription {
+export default abstract class BaseSubscription {
   private listeners: Listener[] = [];
+  public abstract name: string;
+
   constructor(
     private broker: BrokerAsPromised,
     private logger: BaseLogger,
   ) {}
 
   async listen() {
-    const session = (await this.broker.subscribe('users_sub'))
+    const session = (await this.broker.subscribe(this.name))
       .on('message', async (msg, content, ackOrNack) => {
         const listener = this.listeners.find((l) => {
           return (
@@ -77,6 +79,6 @@ export default class BaseSubscription {
       schema,
       handler: handler as MessageHandler<z.ZodSchema>,
     });
-    return this
+    return this;
   }
 }
