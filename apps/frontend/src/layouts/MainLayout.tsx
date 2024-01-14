@@ -10,7 +10,6 @@ import {
 } from '@mantine/core';
 import {
   MdClose,
-  MdPerson,
   MdHome,
   MdMessage,
   MdLogin,

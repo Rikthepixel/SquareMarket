@@ -112,7 +112,7 @@ export default function MessagesPage() {
           }),
       )
       .unwrap();
-  }, [chats, user]);
+  }, [chats, user, values.search]);
 
   return (
     <PageContainer>
