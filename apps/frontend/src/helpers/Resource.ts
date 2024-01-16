@@ -50,7 +50,6 @@ export default class Resource<
     return promise
       .then((val) => Resource.wrapValue<TValue, TError, TLoading, TIdle>(val))
       .catch((err: TError) =>{
-        console.log()
         return Resource.wrapError<TValue, TError, TLoading, TIdle>(err);
       });
   }

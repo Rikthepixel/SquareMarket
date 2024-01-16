@@ -115,7 +115,7 @@ manageRouter
       images: [
         {
           field: 'image',
-          types: ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'],
+          types: ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp', "image/avif"],
         },
       ],
     }),

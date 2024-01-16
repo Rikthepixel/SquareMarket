@@ -15,7 +15,8 @@ export default class FileImageRepository implements ImageRepository {
     advertisementId: number,
     images: UploadableImage[],
   ): Promise<void> {
-    this.db.transaction(async (trx) => {
+    if (images.length === 0) return;
+    await this.db.transaction(async (trx) => {
       await Promise.all([
         trx.table('images').insert(
           images.map((img) => ({
