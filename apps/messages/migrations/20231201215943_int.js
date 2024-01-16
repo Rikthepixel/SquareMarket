@@ -35,6 +35,8 @@ exports.up = async function (knex) {
         .unsigned()
         .references('users.id')
         .onDelete('cascade');
+
+      table.unique(['user_1_id', 'user_2_id']);
     })
     .createTable('messages', function (table) {
       addIds(table);

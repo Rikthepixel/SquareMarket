@@ -108,6 +108,27 @@ export default class KnexChatRepository implements ChatRepository {
       });
   }
 
+  async getByUserPair(userIds: [number, number]): Promise<Chat | null> {
+    return await this.db
+      .table('chats')
+      .whereIn('chats.user_1_id', userIds)
+      .andWhere((b) => b.whereIn('chats.user_2_id', userIds))
+      .select<UidsToBuffers<Chat>>(
+        'chats.id',
+        'chats.uid',
+        'chats.user_1_id',
+        'chats.user_2_id',
+      )
+      .first()
+      .then((chat) => {
+        if (!chat) return null;
+        return {
+          ...chat,
+          uid: this.db.fn.binToUuid(chat.uid)
+        };
+      })
+  }
+
   create(chat: CreatableChat): Promise<void> {
     return this.db.table('chats').insert({
       uid: this.db.fn.uuidToBin(chat.uid),

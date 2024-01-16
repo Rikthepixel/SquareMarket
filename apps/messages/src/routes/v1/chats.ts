@@ -29,7 +29,7 @@ chatsRouter.post(
     const chatService = await ctx.container.resolve('ChatService');
     ctx.status = 200;
     ctx.body = {
-      uid: await chatService.startChat(
+      uid: await chatService.startOrGetChat(
         ctx.state.user.sub,
         ctx.validated.body.user,
       ),
@@ -74,6 +74,7 @@ wsChatsRouter.get(
         }),
       );
     });
+
     const emitter = new EventEmitter();
 
     emitter.on('chat-message', async (data) => {
