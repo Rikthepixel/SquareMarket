@@ -28,7 +28,7 @@ export default class ChatService {
     });
   }
 
-  async startChat(initiator: string, reciever: string) {
+  async startOrGetChat(initiator: string, reciever: string) {
     if (initiator === reciever) {
       throw new BadRequestException(
         'User',
@@ -44,8 +44,12 @@ export default class ChatService {
     const user1 = users.at(0)!;
     const user2 = users.at(1)!;
 
-    const chatUid = randomUUID();
+    const chat = await this.chatRespository.getByUserPair([user1.id, user2.id]);
+    if (chat) {
+      return chat.uid;
+    }
 
+    const chatUid = randomUUID();
     await this.chatRespository.create({
       uid: chatUid,
       user_1_id: user1.id,

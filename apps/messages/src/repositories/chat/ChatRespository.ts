@@ -24,5 +24,6 @@ export default interface ChatRepository {
   get(uid: string): Promise<ChatWithUsersAndMessages | null>;
   getId(uid: string): Promise<number | null>
   getByUser(uid: string): Promise<ChatWithUsers[] | null>;
+  getByUserPair(userIds: [number, number]): Promise<Chat | null>
   create(chat: CreatableChat): Promise<void>;
 }
