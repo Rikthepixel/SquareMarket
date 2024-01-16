@@ -47,7 +47,7 @@ resource "azurerm_kubernetes_cluster" "api" {
   default_node_pool {
     name                = "system"
     node_count          = 2
-    vm_size             = "Standard_DS2_v2"
+    vm_size             = "Standard_B2s"
 
     upgrade_settings {
       max_surge = "10%"
@@ -62,13 +62,6 @@ resource "azurerm_kubernetes_cluster" "api" {
     load_balancer_sku = "standard"
     network_plugin    = "kubenet"
     network_policy = "calico"
-  }
-
-  addon_profile {
-    web_app_routing {
-      enabled = true
-      dns_zone_resource_id = azurerm_dns_zone.example.id
-    }
   }
 
   tags = {
