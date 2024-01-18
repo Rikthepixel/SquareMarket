@@ -224,11 +224,6 @@ resource "azurerm_storage_account" "frontend-account" {
     error_404_document = "index.html"
   }
 
-  custom_domain {
-    name = "sq.rikdenbreejen.nl"
-    use_subdomain = false
-  }
-
   tags = {
     "environment" = "production"
     "source"      = "terraform"
