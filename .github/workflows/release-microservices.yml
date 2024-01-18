@@ -121,3 +121,22 @@ jobs:
             ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-advertisements:${{ github.event.release.tag_name }}
           imagepullsecrets: |
             ${{ vars.PROJECT_NAME }}
+
+      - name: "Install azure-frontdoor extension"
+        run: az extension add --name front-door
+
+      - name: "Get AKS public ip"
+        uses: sergeysova/jq-action@v2
+        id: aks-ip
+        with:
+          cmd: "run: kubectl get ingress gateway-ingress -o json | wsl jq -r .status.loadBalancer.ingress[0].ip"
+
+      - name: "Set api ip-address"
+        run: |
+          az network front-door backend-pool backend update \
+            -g squaremarket-group \
+            -f squaremarket-frontdoor \
+            --pool-name api \
+            --index 1 \
+            --backend-host-header ${{ steps.aks-ip.outputs.value }} \
+            --address ${{ steps.aks-ip.outputs.value }}

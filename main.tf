@@ -127,10 +127,10 @@ resource "azurerm_frontdoor" "frontdoor" {
     name = "api"
 
     backend {
-      host_header = azurerm_dns_zone.api.name
+      host_header = azurerm_kubernetes_cluster.api.fqdn
       address = azurerm_kubernetes_cluster.api.fqdn
       http_port = 80
-      https_port = 443
+      https_port = 80
     }
 
     load_balancing_name = "api"
@@ -154,7 +154,7 @@ resource "azurerm_frontdoor" "frontdoor" {
     patterns_to_match = ["/*"]
     frontend_endpoints = ["api"]
     forwarding_configuration {
-      forwarding_protocol = "HttpsOnly"
+      forwarding_protocol = "HttpOnly"
       backend_pool_name = "api"
     }
   }
@@ -203,13 +203,13 @@ resource "azurerm_frontdoor_custom_https_configuration" "frontend-https" {
   }
 }
 
-# resource "azurerm_frontdoor_custom_https_configuration" "api-https" {
-#   frontend_endpoint_id              = azurerm_frontdoor.frontdoor.frontend_endpoints.api
-#   custom_https_provisioning_enabled = true
-#   custom_https_configuration {
-#     certificate_source = "FrontDoor"
-#   }
-# }
+resource "azurerm_frontdoor_custom_https_configuration" "api-https" {
+  frontend_endpoint_id              = azurerm_frontdoor.frontdoor.frontend_endpoints.api
+  custom_https_provisioning_enabled = true
+  custom_https_configuration {
+    certificate_source = "FrontDoor"
+  }
+}
 
 resource "azurerm_storage_account" "frontend-account" {
   name                = "squaremarketfrontend"
