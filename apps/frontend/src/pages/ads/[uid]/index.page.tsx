@@ -102,30 +102,49 @@ export default function AdPage() {
               <Text fz="sm" fw={700}>
                 Description
               </Text>
-              <Text style={{ whiteSpace: 'pre' }}>
+              <Text style={{ whiteSpace: 'pre-wrap' }}>
                 {advertisement.description}
               </Text>
             </Stack>
-            <Stack gap="sm">
-              <Text fz="sm" fw={700}>
-                Properties
-              </Text>
-              <Paper style={{ overflow: 'hidden' }} radius="md" withBorder>
-                {advertisement.propertyValues.map((value, idx) => (
-                  <Paper
-                    key={idx}
-                    bg={idx % 2 === 1 ? 'transparent' : '#eeeeee'}
-                    radius={0}
-                    p="xs"
-                  >
-                    <SimpleGrid cols={2}>
-                      <Text fw={700}>{value.property_name}</Text>
-                      <Text>{value.option_name}</Text>
-                    </SimpleGrid>
+            {advertisement.propertyValues.length > 0 && (
+              <>
+                <Stack gap="sm">
+                  <Text fz="sm" fw={700}>
+                    Properties
+                  </Text>
+                  <Paper style={{ overflow: 'hidden' }} radius="md" withBorder>
+                    {advertisement.propertyValues.map((value, idx) => (
+                      <Paper
+                        key={idx}
+                        bg={idx % 2 === 1 ? 'transparent' : '#eeeeee'}
+                        radius={0}
+                        p="xs"
+                      >
+                        <SimpleGrid cols={2}>
+                          <Text
+                            style={{
+                              whiteSpace: 'break-spaces',
+                              wordBreak: 'break-word',
+                            }}
+                            fw={700}
+                          >
+                            {value.property_name}
+                          </Text>
+                          <Text
+                            style={{
+                              whiteSpace: 'break-spaces',
+                              wordBreak: 'break-word',
+                            }}
+                          >
+                            {value.option_name}
+                          </Text>
+                        </SimpleGrid>
+                      </Paper>
+                    ))}
                   </Paper>
-                ))}
-              </Paper>
-            </Stack>
+                </Stack>
+              </>
+            )}
           </Stack>
         ))
         .pending(() => (

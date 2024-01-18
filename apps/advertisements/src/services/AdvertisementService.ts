@@ -111,7 +111,7 @@ export default class AdvertisementService {
       throw new NotFoundException('advertisement');
     });
 
-    await this.imageRepository.deleteByAdvertisement(advertisementId)
+    await this.imageRepository.deleteByAdvertisement(advertisementId);
     await this.adRepository.delete(advertisementId);
   }
 

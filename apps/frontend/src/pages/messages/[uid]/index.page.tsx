@@ -11,7 +11,7 @@ import {
   Center,
   Paper,
 } from '@mantine/core';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { MdChevronLeft } from 'react-icons/md';
 import { Link } from 'wouter';
 import { z } from 'zod';
@@ -27,7 +27,6 @@ export default function MessagePage() {
   const params = useTypedParams(PARAMS_SCHEMA);
   const { chat, connectToChat, disconnect } = useChats();
   const { user: currentUser } = useAuth();
-  const previousMessagesLength = useRef(0);
 
   useEffect(() => {
     if (!params?.uid) return;
@@ -38,16 +37,6 @@ export default function MessagePage() {
   const user = chat
     .unwrapValue()?.[0]
     ?.users.find((_user) => _user.provider_id !== currentUser?.providerId);
-
-  useEffect(() => {
-    chat.map(([chat]) => {
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        behavior: previousMessagesLength.current === 0 ? 'instant' : 'smooth',
-      });
-      previousMessagesLength.current = chat.messages.length;
-    });
-  }, [chat]);
 
   return (
     <PageContainer display="flex">
@@ -87,7 +76,7 @@ export default function MessagePage() {
                     </Paper>
                   </Center>
                 )}
-                {chat.messages.map((message) => (
+                {chat.messages.map((message, idx, arr) => (
                   <MessageBubble
                     key={message.uid}
                     username={message.user.username}
@@ -96,6 +85,7 @@ export default function MessagePage() {
                     fromSelf={
                       message.user.provider_id === currentUser?.providerId
                     }
+                    latest={idx === arr.length - 1}
                   />
                 ))}
               </Stack>
