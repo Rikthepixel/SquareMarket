@@ -129,7 +129,7 @@ jobs:
         uses: sergeysova/jq-action@v2
         id: aks-ip
         with:
-          cmd: "run: kubectl get ingress gateway-ingress -o json | wsl jq -r .status.loadBalancer.ingress[0].ip"
+          cmd: "run: kubectl get ingress gateway-ingress -o json | jq -r .status.loadBalancer.ingress[0].ip"
 
       - name: "Set api ip-address"
         run: |
