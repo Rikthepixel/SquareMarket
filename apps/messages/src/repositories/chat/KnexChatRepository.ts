@@ -49,6 +49,7 @@ export default class KnexChatRepository implements ChatRepository {
           'users.username as user_username',
           'users.provider_id as user_provider_id',
         )
+        .orderBy('messages.sent_at', 'asc')
         .then<ChatWithUsersAndMessages['messages']>((msgs) =>
           msgs.map((msg) => ({
             ...msg,
@@ -124,9 +125,9 @@ export default class KnexChatRepository implements ChatRepository {
         if (!chat) return null;
         return {
           ...chat,
-          uid: this.db.fn.binToUuid(chat.uid)
+          uid: this.db.fn.binToUuid(chat.uid),
         };
-      })
+      });
   }
 
   create(chat: CreatableChat): Promise<void> {
