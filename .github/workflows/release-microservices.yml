@@ -54,6 +54,7 @@ jobs:
           cluster-name: ${{ vars.AZURE_CLUSTER_NAME }}
 
       - name: "Ensure app routing"
+        continue-on-error: true
         run: az aks approuting enable -g ${{ vars.AZURE_RESOURCE_GROUP }} -n ${{ vars.AZURE_CLUSTER_NAME }}
       - name: Delete auth secrets
         continue-on-error: true
