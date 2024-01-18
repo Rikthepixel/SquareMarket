@@ -44,10 +44,14 @@ export default class Resource<
     TError = Error,
     TLoading = undefined,
     TIdle = undefined,
-  >(promise: Promise<TValue>): Promise<Resource<TValue, TError, TLoading, TIdle>> {
+  >(
+    promise: Promise<TValue>,
+  ): Promise<Resource<TValue, TError, TLoading, TIdle>> {
     return promise
       .then((val) => Resource.wrapValue<TValue, TError, TLoading, TIdle>(val))
-      .catch((err: TError) => Resource.wrapError<TValue, TError, TLoading, TIdle>(err));
+      .catch((err: TError) =>{
+        return Resource.wrapError<TValue, TError, TLoading, TIdle>(err);
+      });
   }
 
   /**

@@ -15,7 +15,12 @@ services:
       file: docker-compose.db.yml
       service: accounts_db
 
-  advertisement_db:
+  advertisements_db:
     extends:
       file: docker-compose.db.yml
-      service: advertisement_db
+      service: advertisements_db
+
+  messages_db:
+    extends:
+      file: docker-compose.db.yml
+      service: messages_db

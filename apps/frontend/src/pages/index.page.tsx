@@ -1,9 +1,11 @@
 import {
   Button,
   Collapse,
+  Divider,
   Grid,
   Group,
   Select,
+  Skeleton,
   Stack,
   TextInput,
 } from '@mantine/core';
@@ -16,6 +18,7 @@ import useCategories from '@/stores/useCategories';
 import { useForm, zodResolver } from '@mantine/form';
 import { z } from 'zod';
 import AdvertisementCard from './components/AdvertisementCard';
+import SkeletonCard from './components/SkeletonCard';
 
 const filterSchema = z.object({
   search: z.string().optional(),
@@ -54,8 +57,7 @@ export default function FrontPage() {
   useEffect(() => {
     if (!selectedCategory || selectedCategory === 'none') {
       resetCategory();
-      setValues({ options: [] });
-      return;
+      return setValues({ options: [] });
     }
     loadCategory(selectedCategory);
   }, [selectedCategory, resetCategory, loadCategory, setValues]);
@@ -85,20 +87,15 @@ export default function FrontPage() {
 
   const handleSubmit = useMemo(
     () =>
-      onSubmit(
-        (data) => {
-          getAdvertisementsWithFilter({
-            search: data.search,
-            category: data.category !== 'none' ? data.category : undefined,
-            property_options: data.options
-              ?.map((opt) => opt.value)
-              .filter((opt) => opt !== 'none'),
-          });
-        },
-        (errors) => {
-          console.log(errors);
-        },
-      ),
+      onSubmit((data) => {
+        getAdvertisementsWithFilter({
+          search: data.search,
+          category: data.category !== 'none' ? data.category : undefined,
+          property_options: data.options
+            ?.map((opt) => opt.value)
+            .filter((opt) => opt !== 'none'),
+        });
+      }),
     [onSubmit, getAdvertisementsWithFilter],
   );
 
@@ -132,60 +129,96 @@ export default function FrontPage() {
           Search
         </Button>
       </Group>
-      <Collapse in={isFilterOpen}>
-        {categoryOptions
-          .map((options) => (
-            <Select
-              {...getInputProps('category')}
-              label="Category"
-              defaultValue="none"
-              data={options}
-            />
-          ))
-          .catch((e) => e.message)
-          .pending(() => 'Loading categories...')
-          .unwrap()}
-        {category
-          .map((cat) => (
-            <Stack>
-              {cat.properties.map((prop, idx) => (
-                <Select
-                  key={prop.uid}
-                  label={prop.name}
-                  defaultValue="none"
-                  data={[
-                    {
-                      label: 'None',
-                      value: 'none',
-                    },
-                    ...prop.options.map((opt) => ({
-                      label: opt.name,
-                      value: opt.uid,
-                    })),
-                  ]}
-                  {...getInputProps(`options.${idx}.value`)}
-                />
-              ))}
+
+      {categoryOptions
+        .map((options) => (
+          <Collapse in={isFilterOpen}>
+            <Stack gap="md" mt="md">
+              <Divider />
+              <Select
+                {...getInputProps('category')}
+                label="Category"
+                defaultValue="none"
+                data={options}
+              />
+              {category
+                .map((cat) => (
+                  <>
+                    <Divider />
+                    <Stack>
+                      {cat.properties.map((prop, idx) => (
+                        <Select
+                          key={prop.uid}
+                          label={prop.name}
+                          defaultValue="none"
+                          data={[
+                            {
+                              label: 'None',
+                              value: 'none',
+                            },
+                            ...prop.options.map((opt) => ({
+                              label: opt.name,
+                              value: opt.uid,
+                            })),
+                          ]}
+                          {...getInputProps(`options.${idx}.value`)}
+                        />
+                      ))}
+                    </Stack>
+                  </>
+                ))
+                .catch((e) => e.message)
+                .loading(() => (
+                  <>
+                    <Divider />
+                    <Stack gap="xl" mt="sm">
+                      {Array(3)
+                        .fill(true)
+                        .map((_, idx) => (
+                          <Stack key={idx}>
+                            <Skeleton width="15%" height="0.65em" />
+                            <Skeleton height="1em" />
+                          </Stack>
+                        ))}
+                    </Stack>
+                  </>
+                ))
+                .unwrap()}
             </Stack>
-          ))
-          .catch((e) => e.message)
-          .loading(() => 'Loading category properties...')
-          .unwrap()}
-      </Collapse>
-      <Grid mt="md" pb="md">
-        {advertisements
-          .map((value) =>
-            value.length === 0
-              ? 'There are no advertisements yet, be the first to place one!'
-              : value.map((ad) => (
-                  <Grid.Col key={ad.uid} span={{ xs: 12, sm: 6, lg: 4 }}>
-                    <AdvertisementCard {...ad} />
-                  </Grid.Col>
-                )),
-          )
-          .catch((e) => e.message)
-          .unwrap()}
-      </Grid>
+          </Collapse>
+        ))
+        .catch((e) => e.message)
+        .pending(() => null)
+        .unwrap()}
+      {advertisements
+        .map((value) => {
+          if (value.length === 0) {
+            return 'There are no advertisements yet, be the first to place one!';
+          }
+
+          return (
+            <Grid mt="md" pb="md">
+              {value.map((ad) => (
+                <Grid.Col key={ad.uid} span={{ xs: 12, sm: 6, lg: 4 }}>
+                  <AdvertisementCard {...ad} />
+                </Grid.Col>
+              ))}
+            </Grid>
+          );
+        })
+        .pending(() => (
+          <Grid mt="md" pb="md">
+            {Array(10)
+              .fill(true)
+              .map((_, idx) => (
+                <Grid.Col key={idx} span={{ xs: 12, sm: 6, lg: 4 }}>
+                  <SkeletonCard />
+                </Grid.Col>
+              ))}
+          </Grid>
+        ))
+        .catch((e) => e.message)
+        .unwrap()}
     </PageContainer>
   );
 }

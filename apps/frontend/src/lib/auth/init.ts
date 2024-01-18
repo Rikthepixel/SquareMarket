@@ -25,7 +25,10 @@ window.addEventListener('load', async () => {
           appState?.returnTo || window.location.pathname,
         );
       })
-      .catch(() => null);
+      .catch((err) => {
+        console.error(err);
+        return null;
+      });
   }
 
   const user = await auth.getUser();

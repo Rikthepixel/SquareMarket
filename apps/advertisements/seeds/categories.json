@@ -1,0 +1,77 @@
+[
+  {
+    "name": "Computers",
+    "properties": [
+      {
+        "name": "Processor",
+        "options": ["Intel i3", "Intel i5", "Intel i7", "Intel i9"]
+      },
+      {
+        "name": "Brand",
+        "options": ["Dell", "HP", "Lenovo", "Custom"]
+      },
+      {
+        "name": "Storage Type",
+        "options": ["SSD", "HDD", "SSD + HDD"]
+      },
+      {
+        "name": "Storage",
+        "options": ["256GB", "512GB", "1TB", "2TB"]
+      },
+      {
+        "name": "Memory (RAM)",
+        "options": ["2GB", "4GB", "8GB", "16GB", "32GB"]
+      }
+    ]
+  },
+  {
+    "name": "Phones",
+    "properties": [
+      {
+        "name": "Brand",
+        "options": ["Iphone", "Samsung", "Oppo", "Fairphone", "One plus"]
+      },
+      {
+        "name": "Storage",
+        "options": ["16GB", "32GB", "64GB", "128GB", "256GB", "512GB"]
+      },
+      {
+        "name": "Screen size",
+        "options": ["4.7\"", "5.5\"", "5.8\"", "6.1\"", "6.5\""]
+      }
+    ]
+  },
+  {
+    "name": "Routers",
+    "properties": [
+      {
+        "name": "Brand",
+        "options": ["Netgear", "Syslink", "Ubiquiti", "TP-Link", "Asus"]
+      },
+      {
+        "name": "Bands",
+        "options": ["5GHz", "2.4GHz", "5GHz + 2.4GHz"]
+      },
+      {
+        "name": "Ethernet ports",
+        "options": ["0", "0 - 4", "5 - 8", "9 - 16"]
+      },
+      {
+        "name": "Certifications",
+        "options": [
+          "Wi-Fi CERTIFIED 6",
+          "Wi-Fi CERTIFIED ac",
+          "Wi-Fi CERTIFIED n",
+          "Wi-Fi Agile Multiband",
+          "Wi-Fi Data Elements",
+          "Protected Management Frames",
+          "WPA2",
+          "WPA3",
+          "Wi-Fi Enhanced Open",
+          "Wi-Fi Protected Setup",
+          "Wi-Fi Direct"
+        ]
+      }
+    ]
+  }
+]

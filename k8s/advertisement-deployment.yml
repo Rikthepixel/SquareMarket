@@ -17,15 +17,15 @@ spec:
     spec:
       containers:
         - name: advertisements-container
-          image: squaremarketacr.azurecr.io/squaremarket-advertisements
+          image: squaremarketacr.azurecr.io/squaremarket-advertisements:v0.4
           imagePullPolicy: Always
-          resources:
-            requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              cpu: 100m
-              memory: 256Mi
+          # resources:
+          #   requests:
+          #     cpu: 250m
+          #     memory: 1Gi
+          #   limits:
+          #     cpu: 500m
+          #     memory: 1Gi
           readinessProbe:
             httpGet:
               path: /v1/health
@@ -42,6 +42,16 @@ spec:
               value: "80"
             - name: MQ_CONNECTION_STRING
               value: "amqp://guest:guest@message-queue:5672"
+            - name: AUTH_ISSUER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secrets
+                  key: AUTH_ISSUER_URL
+            - name: AUTH_AUDIENCE
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secrets
+                  key: AUTH_AUDIENCE
             - name: DATABASE_NAME
               valueFrom:
                 secretKeyRef:
@@ -62,6 +72,16 @@ spec:
                 secretKeyRef:
                   name: advertisement-service-secrets
                   key: DATABASE_HOST
+            - name: STORAGE_DRIVER
+              valueFrom:
+                secretKeyRef:
+                  name: advertisement-service-secrets
+                  key: STORAGE_DRIVER
+            - name: STORAGE_AZURE_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: advertisement-service-secrets
+                  key: STORAGE_AZURE_CONNECTION_STRING
           ports:
             - containerPort: 80
       restartPolicy: Always

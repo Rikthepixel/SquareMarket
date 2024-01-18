@@ -15,6 +15,7 @@ import {
   AspectRatio,
   ComboboxItem,
   Input,
+  Skeleton,
 } from '@mantine/core';
 import { Dropzone, FileWithPath, IMAGE_MIME_TYPE } from '@mantine/dropzone';
 import { Carousel } from '@mantine/carousel';
@@ -37,6 +38,7 @@ import ImageSlide from './components/ImageSlide';
 import { VALID_CURRENCIES } from '@/configs/advertisements';
 import { getImageUrl } from '@/apis/ads/images';
 import ArrayUtils from '@/helpers/Array';
+import SkeletonPage from './components/SkeletonPage';
 
 const CURRENCY_OPTIONS: ComboboxItem[] = [
   {
@@ -56,6 +58,8 @@ const CURRENCY_ICON_MAP = {
 const PARAMS_SCHEMA = z.object({
   uid: z.string(),
 });
+
+const resolver = zodResolver(editAdvertisementSchema);
 
 export default function EditAdPage() {
   const { uid } = useTypedParams(PARAMS_SCHEMA) ?? {};
@@ -78,9 +82,14 @@ export default function EditAdPage() {
     values,
     errors,
   } = useForm<EditAdvertisementSchema>({
-    validate: zodResolver(editAdvertisementSchema),
+    validate: resolver,
     validateInputOnChange: true,
     initialValues: {
+      title: '',
+      description: '',
+      category: undefined,
+      price: undefined,
+      currency: undefined,
       options: {},
       published: false,
       images: [],
@@ -118,9 +127,9 @@ export default function EditAdPage() {
       });
 
       setValues({
-        title: ad.title,
-        description: ad.description,
-        price: ad.price,
+        title: ad.title ?? '',
+        description: ad.description ?? '',
+        price: ad.price ?? undefined,
         currency: (ad.currency as 'EUR' | 'USD' | undefined) ?? 'none',
         category: ad.category?.uid ?? 'none',
         published: ad.published_at !== null,
@@ -352,7 +361,7 @@ export default function EditAdPage() {
                 .catch(
                   () => 'An error occurred while loading the categories...',
                 )
-                .pending(() => 'Loading categories...')
+                .pending(() => <Skeleton w="100%" h="2rem" />)
                 .unwrap()}
 
               {category
@@ -396,7 +405,7 @@ export default function EditAdPage() {
           </form>
         ))
         .catch((e) => e.message)
-        .loading(() => 'Loading advertisement...')
+        .loading(() => <SkeletonPage />)
         .unwrap()}
     </PageContainer>
   );

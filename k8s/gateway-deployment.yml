@@ -17,15 +17,15 @@ spec:
     spec:
       containers:
         - name: gateway-container
-          image: squaremarketacr.azurecr.io/squaremarket-gateway
+          image: squaremarketacr.azurecr.io/squaremarket-gateway:v0.4
           imagePullPolicy: Always
-          resources:
-            requests:
-              cpu: 100m
-              memory: 256Mi
-            limits:
-              cpu: 100m
-              memory: 256Mi
+          # resources:
+          #   requests:
+          #     cpu: 250m
+          #     memory: 1Gi
+          #   limits:
+          #     cpu: 500m
+          #     memory: 1Gi
           readinessProbe:
             httpGet:
               path: /services.json
@@ -40,10 +40,27 @@ spec:
               value: "Gateway"
             - name: SERVER_PORT
               value: "80"
+            - name: AUTH_ISSUER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secrets
+                  key: AUTH_ISSUER_URL
+            - name: AUTH_AUDIENCE
+              valueFrom:
+                secretKeyRef:
+                  name: auth-secrets
+                  key: AUTH_AUDIENCE
+            - name: ALLOWED_ORIGIN
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-secrets
+                  key: ALLOWED_ORIGIN
             - name: ACCOUNTS_SERVICE_URL
               value: http://accounts-service:8080
             - name: ADVERTISEMENTS_SERVICE_URL
               value: http://advertisements-service:8080
+            - name: MESSAGES_SERVICE_URL
+              value: http://messages-service:8080
           ports:
             - containerPort: 80
       restartPolicy: Always

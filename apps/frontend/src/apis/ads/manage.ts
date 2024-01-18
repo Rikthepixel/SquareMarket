@@ -7,7 +7,7 @@ import { GetPublishedAdvertisementsResponse } from '@/responses/ads/manage/GetPu
 
 export async function getAdvertisement(uid: string, signal?: AbortSignal) {
   return await backend
-    .get(`v1/ads/manage/${uid}`, { signal })
+    .get(`v1/posts/manage/${uid}`, { signal })
     .then(async (kyResponse) => {
       const response = await kyResponse.json<GetAdvertisementResponse>();
       response.draft = Boolean(response.draft);
@@ -18,7 +18,7 @@ export async function getAdvertisement(uid: string, signal?: AbortSignal) {
 export async function getPublishedAdvertisements(
   signal?: AbortSignal,
 ): Promise<GetPublishedAdvertisementsResponse> {
-  const ads = await backend.get('v1/ads/manage/published', { signal }).json();
+  const ads = await backend.get('v1/posts/manage/published', { signal }).json();
   if (!Array.isArray(ads)) throw Error('ResponseParseFailure');
   return ads.map((ad) => ({
     ...ad,
@@ -28,13 +28,13 @@ export async function getPublishedAdvertisements(
 
 export async function getDraftAdvertisements(signal?: AbortSignal) {
   return await backend
-    .get('v1/ads/manage/drafts', { signal })
+    .get('v1/posts/manage/drafts', { signal })
     .json<GetDraftAdvertisementsResponse>();
 }
 
 export async function createAdvertisement() {
   return await backend
-    .post('v1/ads/manage/create')
+    .post('v1/posts/manage/create')
     .json<CreateAdvertisementResponse>();
 }
 
@@ -42,7 +42,7 @@ export async function putAdvertisement(
   uid: string,
   request: PutAdvertisementRequest,
 ) {
-  return await backend.put(`v1/ads/manage/${uid}`, {
+  return await backend.put(`v1/posts/manage/${uid}`, {
     json: request,
   });
 }
@@ -54,16 +54,16 @@ export async function uploadAdvertisementImage(uid: string, images: File[]) {
   }
 
   return await backend
-    .post(`v1/ads/manage/${uid}/images`, {
+    .post(`v1/posts/manage/${uid}/images`, {
       body: request,
     })
     .json<string[]>();
 }
 
 export async function unpublishAdvertisement(uid: string) {
-  return await backend.delete(`v1/ads/manage/${uid}/unpublish`);
+  return await backend.delete(`v1/posts/manage/${uid}/unpublish`);
 }
 
 export async function deleteAdvertisement(uid: string) {
-  return await backend.delete(`v1/ads/manage/${uid}`);
+  return await backend.delete(`v1/posts/manage/${uid}`);
 }

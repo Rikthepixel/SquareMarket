@@ -1,7 +1,7 @@
 const path = require("node:path");
 const { config: configEnv } = require("dotenv");
 
-const environments = ["advertisements", "accounts"];
+const environments = ["advertisements", "accounts", "messages"];
 
 const config = Object.fromEntries(
   environments

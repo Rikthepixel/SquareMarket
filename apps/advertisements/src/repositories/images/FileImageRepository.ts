@@ -1,6 +1,6 @@
 import { Knex } from 'knex';
 import fs from 'fs/promises';
-import { ReadStream, createReadStream, existsSync } from 'fs';
+import { createReadStream, existsSync } from 'fs';
 import { UidOrId, castUidOrId, getType, isId } from '../../helpers/identifiers';
 import ImageRepository, { UploadableImage } from './ImageRepository';
 import path from 'path';
@@ -15,7 +15,8 @@ export default class FileImageRepository implements ImageRepository {
     advertisementId: number,
     images: UploadableImage[],
   ): Promise<void> {
-    this.db.transaction(async (trx) => {
+    if (images.length === 0) return;
+    await this.db.transaction(async (trx) => {
       await Promise.all([
         trx.table('images').insert(
           images.map((img) => ({
@@ -105,9 +106,7 @@ export default class FileImageRepository implements ImageRepository {
     });
   }
 
-  async getContent(
-    uidOrId: UidOrId,
-  ): Promise<{ content: ReadStream; mime: string } | null> {
+  async getContent(uidOrId: UidOrId) {
     const image = await this.db
       .table('images')
       .where(

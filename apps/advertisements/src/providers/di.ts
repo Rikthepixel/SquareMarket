@@ -2,6 +2,7 @@ import Knex from 'knex';
 import ConsoleLogger from '../loggers/ConsoleLogger';
 import IoCContainer from 'tioc';
 import { createBrokerAsPromised } from 'rascal';
+import { BlobServiceClient } from '@azure/storage-blob';
 import dbConfig from '../configs/db';
 import authConfig from '../configs/auth';
 import brokerConfig from '../configs/broker';
@@ -19,10 +20,20 @@ import FileImageRepository from '../repositories/images/FileImageRepository';
 import { mkdirSync } from 'fs';
 import path from 'path';
 import ImageService from '../services/ImageService';
+import AzureImageRepository from '../repositories/images/AzureImageRepository';
 
 const depenencyProvider = (c: IoCContainer) =>
   c
     .addSingleton('db', () => Knex(dbConfig))
+    .addScoped('blobStorage', () => {
+      const connectionString = process.env.STORAGE_AZURE_CONNECTION_STRING;
+      if (!connectionString) {
+        throw Error(
+          "STORAGE_DRIVER='azure' was selected, but no STORAGE_AZURE_CONNECTION_STRING was specified",
+        );
+      }
+      return BlobServiceClient.fromConnectionString(connectionString);
+    })
     .addSingleton(
       'broker',
       async () => await createBrokerAsPromised(brokerConfig),
@@ -50,9 +61,18 @@ const depenencyProvider = (c: IoCContainer) =>
       (c) => new KnexCategoryPropertyOptionValueRepository(c.resolve('db')),
     )
     .addScoped('ImageRepository', (c) => {
-      const basePath = path.join(process.cwd(), 'storage', 'images');
-      mkdirSync(basePath, { recursive: true });
-      return new FileImageRepository(c.resolve('db'), basePath);
+      if (process.env.STORAGE_DRIVER === 'azure') {
+        return new AzureImageRepository(
+          c.resolve('db'),
+          c.resolve('blobStorage').getContainerClient('advertisement-images'),
+        );
+      } else if (process.env.STORAGE_DRIVER === 'file') {
+        const basePath = path.join(process.cwd(), 'storage', 'images');
+        mkdirSync(basePath, { recursive: true });
+        return new FileImageRepository(c.resolve('db'), basePath);
+      } else {
+        throw new Error('Invalid STORAGE_DRIVER');
+      }
     })
     .addScoped(
       'UserService',

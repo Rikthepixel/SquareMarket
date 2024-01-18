@@ -2,7 +2,9 @@ import { getImageUrl } from '@/apis/ads/images';
 import PageContainer from '@/components/page/Container';
 import useCurrencyFormatter from '@/hooks/useCurrencyFormatter';
 import useTypedParams from '@/hooks/useTypedParams';
+import useAuth from '@/lib/auth/stores/useAuth';
 import useAdvertisements from '@/stores/useAdvertisements';
+import useChats from '@/stores/useChats';
 import { Carousel } from '@mantine/carousel';
 import {
   Image,
@@ -13,9 +15,12 @@ import {
   Stack,
   Group,
   SimpleGrid,
+  Skeleton,
+  Button,
 } from '@mantine/core';
 import { useEffect } from 'react';
-import { MdPerson } from 'react-icons/md';
+import { MdMessage, MdPerson } from 'react-icons/md';
+import { useLocation } from 'wouter';
 import { z } from 'zod';
 
 const PARAMS_SCHEMA = z.object({
@@ -25,6 +30,10 @@ const PARAMS_SCHEMA = z.object({
 export default function AdPage() {
   const { uid } = useTypedParams(PARAMS_SCHEMA) ?? {};
   const { advertisement, getAdvertisement } = useAdvertisements();
+  const { startChat } = useChats();
+  const { user } = useAuth();
+  const [, setLocation] = useLocation();
+
   const currencyFormatter = useCurrencyFormatter(
     advertisement.unwrapValue()?.currency ?? 'EUR',
   );
@@ -74,38 +83,102 @@ export default function AdPage() {
                 <MdPerson />
                 <Text>{advertisement.user.name}</Text>
               </Group>
+              {user && advertisement.user.uid !== user.providerId && (
+                <Button
+                  onClick={() =>
+                    startChat(advertisement.user.uid).then((uid) =>
+                      setLocation(`/messages/${uid}`),
+                    )
+                  }
+                >
+                  <Group gap="sm">
+                    <MdMessage />
+                    Contact seller
+                  </Group>
+                </Button>
+              )}
             </Stack>
             <Stack gap="sm">
               <Text fz="sm" fw={700}>
                 Description
               </Text>
-              <Text style={{ whiteSpace: 'pre' }}>
+              <Text style={{ whiteSpace: 'pre-wrap' }}>
                 {advertisement.description}
               </Text>
             </Stack>
-            <Stack gap="sm">
-              <Text fz="sm" fw={700}>
-                Properties
-              </Text>
-              <Paper style={{ overflow: 'hidden' }} radius="md" withBorder>
-                {advertisement.propertyValues.map((value, idx) => (
-                  <Paper
-                    key={idx}
-                    bg={idx % 2 === 1 ? 'transparent' : '#eeeeee'}
-                    radius={0}
-                    p="xs"
-                  >
-                    <SimpleGrid cols={2}>
-                      <Text fw={700}>{value.property_name}</Text>
-                      <Text>{value.option_name}</Text>
-                    </SimpleGrid>
+            {advertisement.propertyValues.length > 0 && (
+              <>
+                <Stack gap="sm">
+                  <Text fz="sm" fw={700}>
+                    Properties
+                  </Text>
+                  <Paper style={{ overflow: 'hidden' }} radius="md" withBorder>
+                    {advertisement.propertyValues.map((value, idx) => (
+                      <Paper
+                        key={idx}
+                        bg={idx % 2 === 1 ? 'transparent' : '#eeeeee'}
+                        radius={0}
+                        p="xs"
+                      >
+                        <SimpleGrid cols={2}>
+                          <Text
+                            style={{
+                              whiteSpace: 'break-spaces',
+                              wordBreak: 'break-word',
+                            }}
+                            fw={700}
+                          >
+                            {value.property_name}
+                          </Text>
+                          <Text
+                            style={{
+                              whiteSpace: 'break-spaces',
+                              wordBreak: 'break-word',
+                            }}
+                          >
+                            {value.option_name}
+                          </Text>
+                        </SimpleGrid>
+                      </Paper>
+                    ))}
                   </Paper>
+                </Stack>
+              </>
+            )}
+          </Stack>
+        ))
+        .pending(() => (
+          <Stack gap="md">
+            <Carousel
+              w="100%"
+              slideSize={{ base: '100%', sm: '50%' }}
+              slideGap={{ base: 0, sm: 'md' }}
+              align="start"
+            >
+              {Array(3)
+                .fill(true)
+                .map((_, idx) => (
+                  <Carousel.Slide key={idx}>
+                    <AspectRatio ratio={4 / 3}>
+                      <Skeleton height="100%" />
+                    </AspectRatio>
+                  </Carousel.Slide>
                 ))}
-              </Paper>
+            </Carousel>
+            <Stack gap="sm">
+              <Skeleton height="1.5em" />
+              <Skeleton width="15%" />
+            </Stack>
+            <Stack gap="sm">
+              <Skeleton width="15%" />
+              <Skeleton height="10rem" />
+            </Stack>
+            <Stack gap="sm">
+              <Skeleton width="15%" />
+              <Skeleton height="15rem" />
             </Stack>
           </Stack>
         ))
-        .pending(() => 'Loading advertisement...')
         .catch((err) => err.message)
         .unwrap()}
     </PageContainer>
