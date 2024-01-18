@@ -127,12 +127,10 @@ jobs:
 
       - name: "Set api ip-address"
         run: |
-          echo "AKS_IP=$(kubectl get ingress gateway-ingress -o json | jq -r .status.loadBalancer.ingress[0].ip)" >> "$GITHUB_ENV"
-
           az network front-door backend-pool backend update \
             -g squaremarket-group \
             -f squaremarket-frontdoor \
             --pool-name api \
             --index 1 \
-            --backend-host-header $AKS_IP \
-            --address $AKS_IP
+            --backend-host-header $(kubectl get ingress gateway-ingress -o json | jq -r .status.loadBalancer.ingress[0].ip) \
+            --address $(kubectl get ingress gateway-ingress -o json | jq -r .status.loadBalancer.ingress[0].ip)
