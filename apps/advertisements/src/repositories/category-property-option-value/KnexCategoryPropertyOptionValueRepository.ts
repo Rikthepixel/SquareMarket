@@ -31,12 +31,12 @@ export default class KnexCategoryPropertyOptionValueRepository
         values.length === 0
           ? null
           : await trx
-              .table('category_property_options as opts')
+              .table('category_property_options')
               .whereIn(
-                'opts.uid',
+                'uid',
                 values.map((val) => trx.fn.uuidToBin(val.option_uid)),
               )
-              .select<{ id: number; uid: Buffer }[]>('opts.id', 'opts.uid')
+              .select<{ id: number; uid: Buffer }[]>('id', 'uid')
               .then((opts) =>
                 opts.map((opt) => ({
                   id: opt.id,
@@ -45,8 +45,8 @@ export default class KnexCategoryPropertyOptionValueRepository
               );
 
       await trx
-        .table(this.table + ' as vals')
-        .where('vals.advertisement_id', advertisementId)
+        .table(this.table)
+        .where('advertisement_id', advertisementId)
         .delete();
 
       if (!options) return;
