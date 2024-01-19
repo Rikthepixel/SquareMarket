@@ -15,7 +15,8 @@ export default class AzureImageRepository implements ImageRepository {
     advertisementId: number,
     images: UploadableImage[],
   ): Promise<void> {
-    this.db.transaction(async (trx) => {
+    await this.db.transaction(async (trx) => {
+
       await Promise.all([
         trx.table('images').insert(
           images.map((img) => ({

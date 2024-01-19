@@ -78,6 +78,7 @@ export default class AdvertisementService {
 
     const images = files.map((img) => ({ ...img, uid: randomUUID() }));
     await this.imageRepository.upload(advertisementId, images);
+    console.log(await this.imageRepository.getByAdvertisement(advertisementId));
     return images.map((img) => img.uid);
   }
 
@@ -127,6 +128,11 @@ export default class AdvertisementService {
           throw new NotFoundException('category');
         })
       : null;
+
+    console.log({
+      adImages: advertisement.images,
+      changedImages: changes.images,
+    });
 
     const allRemainingImagesValid = changes.images.every((img) =>
       advertisement.images.includes(img),

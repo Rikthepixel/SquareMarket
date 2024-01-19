@@ -2,7 +2,7 @@ import {
   createAdvertisement,
   getAdvertisement,
   putAdvertisement,
-  uploadAdvertisementImage,
+  uploadAdvertisementImages,
 } from '@/apis/ads/manage';
 import Resource from '@/helpers/Resource';
 import { FileWithPath } from '@mantine/dropzone';
@@ -121,11 +121,13 @@ const useAdvertisementEditor = create<AdvertisementEditorState>((set, get) => ({
     const { imagesToUpload, images, ...edited } = state.edited;
     const uploadedImages =
       imagesToUpload.length > 0
-        ? await uploadAdvertisementImage(ad.uid, imagesToUpload).catch((e) => {
+        ? await uploadAdvertisementImages(ad.uid, imagesToUpload).catch((e) => {
             set({ isSaving: false });
             throw e;
           })
         : [];
+
+    console.log(uploadedImages)
 
     await putAdvertisement(ad.uid, {
       ...edited,

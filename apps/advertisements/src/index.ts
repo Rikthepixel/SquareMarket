@@ -1,5 +1,10 @@
 import { config as loadEnv } from 'dotenv';
+
 loadEnv();
+loadEnv({ path: '.env.local', override: true });
+if (process.env.NODE_ENV === 'production') {
+  loadEnv({ path: '.env.production', override: true });
+}
 
 import Koa from 'koa';
 

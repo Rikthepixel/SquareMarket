@@ -47,7 +47,7 @@ export async function putAdvertisement(
   });
 }
 
-export async function uploadAdvertisementImage(uid: string, images: File[]) {
+export async function uploadAdvertisementImages(uid: string, images: File[]) {
   const request = new FormData();
   for (const image of images) {
     request.append('image', image);

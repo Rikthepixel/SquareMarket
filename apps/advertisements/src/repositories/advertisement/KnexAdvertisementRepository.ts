@@ -90,14 +90,14 @@ export default class KnexAdvertisementRepository
 
       if (!ad) return null;
 
-      const images = await trx
-        .table('images as imgs')
-        .where('imgs.advertisement_id', ad.id)
-        .select<UidsToBuffers<Pick<Image, 'uid'>>[]>('imgs.uid')
+      const imagesTask = trx
+        .table('images')
+        .where('advertisement_id', ad.id)
+        .select<UidsToBuffers<Pick<Image, 'uid'>>[]>('uid')
         .orderBy('id', 'desc')
         .then((imgs) => imgs.map((img) => trx.fn.binToUuid(img.uid)));
 
-      const propertyValues = await trx
+      const propertyValuesTask = trx
         .table('category_property_option_values as vals')
         .where('vals.advertisement_id', ad.id)
         .join(
@@ -130,6 +130,8 @@ export default class KnexAdvertisementRepository
             ),
           })),
         );
+
+      const [images, propertyValues] = await Promise.all([imagesTask, propertyValuesTask])
 
       return {
         ...ad,

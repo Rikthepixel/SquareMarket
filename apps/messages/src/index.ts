@@ -1,5 +1,10 @@
 import { config as loadEnv } from 'dotenv';
+
 loadEnv();
+loadEnv({ path: '.env.local', override: true });
+if (process.env.NODE_ENV === 'production') {
+  loadEnv({ path: '.env.production', override: true });
+}
 
 import Koa from 'koa';
 
@@ -41,8 +46,7 @@ const server = app
     console.log(
       `Server "${process.env.SERVER_NAME}" started on localhost:${PORT}`,
     ),
-  )
-;
+  );
 server.requestTimeout = 0;
 server.headersTimeout = 0;
 
