@@ -114,6 +114,7 @@ jobs:
             k8s/gateway-deployment.yml
             k8s/account-deployment.yml
             k8s/advertisement-deployment.yml
+            k8s/messaging-deployment.yml
             k8s/message-queue-deployment.yml
           images: |
             ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-gateway:${{ github.event.release.tag_name }}
