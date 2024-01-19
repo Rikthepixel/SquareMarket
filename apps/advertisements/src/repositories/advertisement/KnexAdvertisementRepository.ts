@@ -131,7 +131,10 @@ export default class KnexAdvertisementRepository
           })),
         );
 
-      const [images, propertyValues] = await Promise.all([imagesTask, propertyValuesTask])
+      const [images, propertyValues] = await Promise.all([
+        imagesTask,
+        propertyValuesTask,
+      ]);
 
       return {
         ...ad,
@@ -474,11 +477,8 @@ export default class KnexAdvertisementRepository
 
   async delete(uidOrId: UidOrId): Promise<void> {
     await this.db
-      .table(this.table + ' as ads')
-      .where(
-        `ads.${getType(uidOrId)}`,
-        castUidOrId(uidOrId, this.db.fn.uuidToBin),
-      )
+      .table(this.table)
+      .where(`${getType(uidOrId)}`, castUidOrId(uidOrId, this.db.fn.uuidToBin))
       .delete();
   }
 }
