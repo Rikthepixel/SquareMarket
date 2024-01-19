@@ -86,10 +86,6 @@ resource "azurerm_dns_zone" "api" {
   resource_group_name = azurerm_resource_group.squaremarket-group.name
 }
 
-output "api_fqdn" {
-      value = azurerm_kubernetes_cluster.api.fqdn
-}
-
 resource "azurerm_frontdoor" "frontdoor" {
   name = "squaremarket-frontdoor"
   resource_group_name = azurerm_resource_group.squaremarket-group.name
