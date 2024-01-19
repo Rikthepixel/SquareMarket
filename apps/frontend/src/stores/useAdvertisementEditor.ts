@@ -127,8 +127,6 @@ const useAdvertisementEditor = create<AdvertisementEditorState>((set, get) => ({
           })
         : [];
 
-    console.log(uploadedImages)
-
     await putAdvertisement(ad.uid, {
       ...edited,
       images: [...uploadedImages, ...images],

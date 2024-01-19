@@ -467,11 +467,8 @@ export default class KnexAdvertisementRepository
 
   async update(uidOrId: UidOrId, ad: UpdatableAdvertisement): Promise<void> {
     await this.db
-      .table(this.table + ' as ads')
-      .where(
-        `ads.${getType(uidOrId)}`,
-        castUidOrId(uidOrId, this.db.fn.uuidToBin),
-      )
+      .table(this.table)
+      .where(getType(uidOrId), castUidOrId(uidOrId, this.db.fn.uuidToBin))
       .update(ad);
   }
 

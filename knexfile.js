@@ -52,6 +52,9 @@ const config = Object.fromEntries(
           database: localEnvVariables.DATABASE_NAME,
           user: localEnvVariables.DATABASE_USER,
           password: localEnvVariables.DATABASE_PASSWORD,
+          ssl: {
+            rejectUnauthorized: false,
+          },
         },
         migrations,
         seeds

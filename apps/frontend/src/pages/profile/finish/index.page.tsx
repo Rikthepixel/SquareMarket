@@ -22,6 +22,10 @@ export default function FinishProfilePage() {
   const { getInputProps, onSubmit } = useForm<FinishProfileRequest>({
     validate: zodResolver(finishProfileRequestSchema),
     validateInputOnChange: true,
+    initialValues: {
+      username: '',
+      default_currency: 'EUR',
+    },
   });
 
   if (status === 'complete') {
