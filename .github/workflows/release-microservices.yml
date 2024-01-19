@@ -120,6 +120,7 @@ jobs:
             ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-gateway:${{ github.event.release.tag_name }}
             ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-accounts:${{ github.event.release.tag_name }}
             ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-advertisements:${{ github.event.release.tag_name }}
+            ${{ vars.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ vars.AZURE_PROJECT_NAME }}-messages:${{ github.event.release.tag_name }}
           imagepullsecrets: |
             ${{ vars.PROJECT_NAME }}
 
